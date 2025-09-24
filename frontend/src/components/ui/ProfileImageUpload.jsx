@@ -5,7 +5,7 @@ import { Camera, Upload, X, User } from 'lucide-react';
 import { uploadAPI, authAPI } from '@/services/api';
 import { useAuth } from '@/contexts/AuthContext';
 
-const ProfileImageUpload = ({ currentImage, onImageUpdate, size = 'lg' }) => {
+const ProfileImageUpload = ({ currentImage, onImageUpdate, size = 'lg', showExtraButtons = true }) => {
   const { user, setUser } = useAuth();
   const [isUploading, setIsUploading] = useState(false);
   const [previewImage, setPreviewImage] = useState(null);
@@ -15,7 +15,7 @@ const ProfileImageUpload = ({ currentImage, onImageUpdate, size = 'lg' }) => {
     sm: 'w-16 h-16',
     md: 'w-24 h-24', 
     lg: 'w-32 h-32',
-    xl: 'w-40 h-40'
+    xl: 'w-48 h-48'
   };
 
   const iconSizes = {
@@ -29,7 +29,7 @@ const ProfileImageUpload = ({ currentImage, onImageUpdate, size = 'lg' }) => {
     sm: 'w-6 h-6',
     md: 'w-7 h-7',
     lg: 'w-8 h-8',
-    xl: 'w-10 h-10'
+    xl: 'w-12 h-12'
   };
 
   const handleFileSelect = (event) => {
@@ -178,7 +178,7 @@ const ProfileImageUpload = ({ currentImage, onImageUpdate, size = 'lg' }) => {
         </div>
       )}
 
-      {!previewImage && (
+      {!previewImage && showExtraButtons && (
         <Button
           variant="outline"
           size="sm"

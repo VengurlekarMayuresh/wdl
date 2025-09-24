@@ -90,8 +90,12 @@ const FindCarePage = () => {
             <Card key={doc._id} className="border-none shadow-soft">
               <CardContent className="p-6">
                 <div className="flex items-start gap-4">
-                  <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center">
-                    <UserCircle2 className="h-10 w-10 text-primary" />
+<div className="w-16 h-16 rounded-full overflow-hidden bg-primary/10 flex items-center justify-center">
+                    {doc?.userId?.profilePicture ? (
+                      <img src={doc.userId.profilePicture} alt={`${doc?.userId?.firstName} ${doc?.userId?.lastName}`} className="w-full h-full object-cover" />
+                    ) : (
+                      <UserCircle2 className="h-10 w-10 text-primary" />
+                    )}
                   </div>
                   <div className="flex-1">
                     <div className="flex items-center justify-between">

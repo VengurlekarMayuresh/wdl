@@ -326,6 +326,37 @@ const patientSchema = new mongoose.Schema({
     }
   },
   
+  // Custom/Additional Vitals (for metrics not in standard vital signs)
+  customVitals: {
+    bloodSugar: {
+      value: Number,
+      unit: {
+        type: String,
+        default: 'mg/dL'
+      },
+      lastUpdated: Date
+    },
+    cholesterol: {
+      total: Number,
+      hdl: Number,
+      ldl: Number,
+      triglycerides: Number,
+      unit: {
+        type: String,
+        default: 'mg/dL'
+      },
+      lastUpdated: Date
+    },
+    hba1c: {
+      value: Number,
+      unit: {
+        type: String,
+        default: '%'
+      },
+      lastUpdated: Date
+    }
+  },
+  
   // Healthcare Team
   healthcareTeam: [{
     doctorId: {

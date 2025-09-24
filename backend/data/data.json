@@ -1,0 +1,5157 @@
+{
+  "doctors": [
+    {
+      "firstName": "John",
+      "lastName": "Hernandez",
+      "email": "john.hernandez0@healthcenter.com",
+      "password": "doctor123",
+      "phone": "5551001010",
+      "dateOfBirth": "1970-01-01",
+      "gender": "male",
+      "address": {
+        "street": "100 Main St",
+        "city": "New York",
+        "state": "NY",
+        "zipCode": "90000",
+        "country": "USA"
+      },
+      "profilePicture": "https://randomuser.me/api/portraits/men/0.jpg",
+      "bio": "Experienced pulmonology specialist providing compassionate care.",
+      "doctorInfo": {
+        "medicalLicenseNumber": "MD100000",
+        "licenseState": "CA",
+        "licenseExpiryDate": "2026-12-31",
+        "primarySpecialty": "Pulmonology",
+        "secondarySpecialties": [
+          "Urology"
+        ],
+        "yearsOfExperience": 5,
+        "npiNumber": "1000000000",
+        "education": [
+          {
+            "institution": "State Medical University",
+            "degree": "MD",
+            "graduationYear": 2000
+          }
+        ],
+        "residency": [
+          {
+            "hospital": "General Hospital",
+            "specialty": "Pulmonology",
+            "startYear": 2001,
+            "endYear": 2004
+          }
+        ],
+        "hospitalAffiliations": [
+          {
+            "hospital": "Philadelphia Medical Center",
+            "position": "Attending Physician",
+            "department": "Pulmonology",
+            "isCurrentlyAffiliated": true
+          }
+        ],
+        "boardCertifications": [
+          {
+            "board": "American Board of Medical Specialties",
+            "specialty": "Pulmonology",
+            "certificationDate": "2010-06-01",
+            "status": "active"
+          }
+        ],
+        "languagesSpoken": [
+          {
+            "language": "English",
+            "proficiency": "native"
+          }
+        ],
+        "consultationFee": 150,
+        "acceptsInsurance": true,
+        "insurancesAccepted": [
+          "Aetna",
+          "Blue Cross Blue Shield",
+          "UnitedHealthcare"
+        ],
+        "isVerified": true,
+        "status": "approved",
+        "isAcceptingNewPatients": false,
+        "telemedicineEnabled": true
+      }
+    },
+    {
+      "firstName": "Emily",
+      "lastName": "Miller",
+      "email": "emily.miller1@healthcenter.com",
+      "password": "doctor123",
+      "phone": "5551011117",
+      "dateOfBirth": "1971-02-02",
+      "gender": "female",
+      "address": {
+        "street": "101 Main St",
+        "city": "Los Angeles",
+        "state": "CA",
+        "zipCode": "90001",
+        "country": "USA"
+      },
+      "profilePicture": "https://randomuser.me/api/portraits/women/1.jpg",
+      "bio": "Experienced radiology specialist providing compassionate care.",
+      "doctorInfo": {
+        "medicalLicenseNumber": "MD100001",
+        "licenseState": "CA",
+        "licenseExpiryDate": "2027-12-31",
+        "primarySpecialty": "Radiology",
+        "secondarySpecialties": [
+          "Gastroenterology"
+        ],
+        "yearsOfExperience": 6,
+        "npiNumber": "1000000001",
+        "education": [
+          {
+            "institution": "State Medical University",
+            "degree": "MD",
+            "graduationYear": 2001
+          }
+        ],
+        "residency": [
+          {
+            "hospital": "General Hospital",
+            "specialty": "Radiology",
+            "startYear": 2002,
+            "endYear": 2005
+          }
+        ],
+        "hospitalAffiliations": [
+          {
+            "hospital": "Chicago Medical Center",
+            "position": "Attending Physician",
+            "department": "Radiology",
+            "isCurrentlyAffiliated": true
+          }
+        ],
+        "boardCertifications": [
+          {
+            "board": "American Board of Medical Specialties",
+            "specialty": "Radiology",
+            "certificationDate": "2011-06-01",
+            "status": "active"
+          }
+        ],
+        "languagesSpoken": [
+          {
+            "language": "English",
+            "proficiency": "native"
+          }
+        ],
+        "consultationFee": 160,
+        "acceptsInsurance": true,
+        "insurancesAccepted": [
+          "Aetna",
+          "Blue Cross Blue Shield",
+          "UnitedHealthcare"
+        ],
+        "isVerified": true,
+        "status": "approved",
+        "isAcceptingNewPatients": true,
+        "telemedicineEnabled": false
+      }
+    },
+    {
+      "firstName": "Richard",
+      "lastName": "Taylor",
+      "email": "richard.taylor2@healthcenter.com",
+      "password": "doctor123",
+      "phone": "5551021224",
+      "dateOfBirth": "1972-03-03",
+      "gender": "male",
+      "address": {
+        "street": "102 Main St",
+        "city": "Chicago",
+        "state": "IL",
+        "zipCode": "90002",
+        "country": "USA"
+      },
+      "profilePicture": "https://randomuser.me/api/portraits/men/2.jpg",
+      "bio": "Experienced obstetrics specialist providing compassionate care.",
+      "doctorInfo": {
+        "medicalLicenseNumber": "MD100002",
+        "licenseState": "CA",
+        "licenseExpiryDate": "2028-12-31",
+        "primarySpecialty": "Obstetrics",
+        "secondarySpecialties": [
+          "Orthopedics"
+        ],
+        "yearsOfExperience": 7,
+        "npiNumber": "1000000002",
+        "education": [
+          {
+            "institution": "State Medical University",
+            "degree": "MD",
+            "graduationYear": 2002
+          }
+        ],
+        "residency": [
+          {
+            "hospital": "General Hospital",
+            "specialty": "Obstetrics",
+            "startYear": 2003,
+            "endYear": 2006
+          }
+        ],
+        "hospitalAffiliations": [
+          {
+            "hospital": "Los Angeles Medical Center",
+            "position": "Attending Physician",
+            "department": "Obstetrics",
+            "isCurrentlyAffiliated": true
+          }
+        ],
+        "boardCertifications": [
+          {
+            "board": "American Board of Medical Specialties",
+            "specialty": "Obstetrics",
+            "certificationDate": "2012-06-01",
+            "status": "active"
+          }
+        ],
+        "languagesSpoken": [
+          {
+            "language": "English",
+            "proficiency": "native"
+          }
+        ],
+        "consultationFee": 170,
+        "acceptsInsurance": true,
+        "insurancesAccepted": [
+          "Aetna",
+          "Blue Cross Blue Shield",
+          "UnitedHealthcare"
+        ],
+        "isVerified": true,
+        "status": "approved",
+        "isAcceptingNewPatients": true,
+        "telemedicineEnabled": true
+      }
+    },
+    {
+      "firstName": "Karen",
+      "lastName": "Williams",
+      "email": "karen.williams3@healthcenter.com",
+      "password": "doctor123",
+      "phone": "5551031331",
+      "dateOfBirth": "1973-04-04",
+      "gender": "female",
+      "address": {
+        "street": "103 Main St",
+        "city": "Houston",
+        "state": "TX",
+        "zipCode": "90003",
+        "country": "USA"
+      },
+      "profilePicture": "https://randomuser.me/api/portraits/women/3.jpg",
+      "bio": "Experienced family medicine specialist providing compassionate care.",
+      "doctorInfo": {
+        "medicalLicenseNumber": "MD100003",
+        "licenseState": "TX",
+        "licenseExpiryDate": "2026-12-31",
+        "primarySpecialty": "Family Medicine",
+        "secondarySpecialties": [
+          "Ophthalmology"
+        ],
+        "yearsOfExperience": 8,
+        "npiNumber": "1000000003",
+        "education": [
+          {
+            "institution": "State Medical University",
+            "degree": "MD",
+            "graduationYear": 2003
+          }
+        ],
+        "residency": [
+          {
+            "hospital": "General Hospital",
+            "specialty": "Family Medicine",
+            "startYear": 2004,
+            "endYear": 2007
+          }
+        ],
+        "hospitalAffiliations": [
+          {
+            "hospital": "Philadelphia Medical Center",
+            "position": "Attending Physician",
+            "department": "Family Medicine",
+            "isCurrentlyAffiliated": true
+          }
+        ],
+        "boardCertifications": [
+          {
+            "board": "American Board of Medical Specialties",
+            "specialty": "Family Medicine",
+            "certificationDate": "2013-06-01",
+            "status": "active"
+          }
+        ],
+        "languagesSpoken": [
+          {
+            "language": "English",
+            "proficiency": "native"
+          }
+        ],
+        "consultationFee": 180,
+        "acceptsInsurance": true,
+        "insurancesAccepted": [
+          "Aetna",
+          "Blue Cross Blue Shield",
+          "UnitedHealthcare"
+        ],
+        "isVerified": true,
+        "status": "approved",
+        "isAcceptingNewPatients": false,
+        "telemedicineEnabled": false
+      }
+    },
+    {
+      "firstName": "Robert",
+      "lastName": "Taylor",
+      "email": "robert.taylor4@healthcenter.com",
+      "password": "doctor123",
+      "phone": "5551041438",
+      "dateOfBirth": "1974-05-05",
+      "gender": "male",
+      "address": {
+        "street": "104 Main St",
+        "city": "Phoenix",
+        "state": "AZ",
+        "zipCode": "90004",
+        "country": "USA"
+      },
+      "profilePicture": "https://randomuser.me/api/portraits/men/4.jpg",
+      "bio": "Experienced gastroenterology specialist providing compassionate care.",
+      "doctorInfo": {
+        "medicalLicenseNumber": "MD100004",
+        "licenseState": "TX",
+        "licenseExpiryDate": "2027-12-31",
+        "primarySpecialty": "Gastroenterology",
+        "secondarySpecialties": [
+          "Rheumatology"
+        ],
+        "yearsOfExperience": 9,
+        "npiNumber": "1000000004",
+        "education": [
+          {
+            "institution": "State Medical University",
+            "degree": "MD",
+            "graduationYear": 2004
+          }
+        ],
+        "residency": [
+          {
+            "hospital": "General Hospital",
+            "specialty": "Gastroenterology",
+            "startYear": 2005,
+            "endYear": 2008
+          }
+        ],
+        "hospitalAffiliations": [
+          {
+            "hospital": "Philadelphia Medical Center",
+            "position": "Attending Physician",
+            "department": "Gastroenterology",
+            "isCurrentlyAffiliated": true
+          }
+        ],
+        "boardCertifications": [
+          {
+            "board": "American Board of Medical Specialties",
+            "specialty": "Gastroenterology",
+            "certificationDate": "2014-06-01",
+            "status": "active"
+          }
+        ],
+        "languagesSpoken": [
+          {
+            "language": "English",
+            "proficiency": "native"
+          }
+        ],
+        "consultationFee": 190,
+        "acceptsInsurance": true,
+        "insurancesAccepted": [
+          "Aetna",
+          "Blue Cross Blue Shield",
+          "UnitedHealthcare"
+        ],
+        "isVerified": true,
+        "status": "approved",
+        "isAcceptingNewPatients": true,
+        "telemedicineEnabled": true
+      }
+    },
+    {
+      "firstName": "Margaret",
+      "lastName": "Williams",
+      "email": "margaret.williams5@healthcenter.com",
+      "password": "doctor123",
+      "phone": "5551051545",
+      "dateOfBirth": "1975-06-06",
+      "gender": "female",
+      "address": {
+        "street": "105 Main St",
+        "city": "Philadelphia",
+        "state": "PA",
+        "zipCode": "90005",
+        "country": "USA"
+      },
+      "profilePicture": "https://randomuser.me/api/portraits/women/5.jpg",
+      "bio": "Experienced neurology specialist providing compassionate care.",
+      "doctorInfo": {
+        "medicalLicenseNumber": "MD100005",
+        "licenseState": "CA",
+        "licenseExpiryDate": "2028-12-31",
+        "primarySpecialty": "Neurology",
+        "secondarySpecialties": [
+          "Rheumatology"
+        ],
+        "yearsOfExperience": 10,
+        "npiNumber": "1000000005",
+        "education": [
+          {
+            "institution": "State Medical University",
+            "degree": "MD",
+            "graduationYear": 2005
+          }
+        ],
+        "residency": [
+          {
+            "hospital": "General Hospital",
+            "specialty": "Neurology",
+            "startYear": 2006,
+            "endYear": 2009
+          }
+        ],
+        "hospitalAffiliations": [
+          {
+            "hospital": "Phoenix Medical Center",
+            "position": "Attending Physician",
+            "department": "Neurology",
+            "isCurrentlyAffiliated": true
+          }
+        ],
+        "boardCertifications": [
+          {
+            "board": "American Board of Medical Specialties",
+            "specialty": "Neurology",
+            "certificationDate": "2015-06-01",
+            "status": "active"
+          }
+        ],
+        "languagesSpoken": [
+          {
+            "language": "English",
+            "proficiency": "native"
+          }
+        ],
+        "consultationFee": 200,
+        "acceptsInsurance": true,
+        "insurancesAccepted": [
+          "Aetna",
+          "Blue Cross Blue Shield",
+          "UnitedHealthcare"
+        ],
+        "isVerified": true,
+        "status": "approved",
+        "isAcceptingNewPatients": true,
+        "telemedicineEnabled": false
+      }
+    },
+    {
+      "firstName": "Michael",
+      "lastName": "Davis",
+      "email": "michael.davis6@healthcenter.com",
+      "password": "doctor123",
+      "phone": "5551061652",
+      "dateOfBirth": "1976-07-07",
+      "gender": "male",
+      "address": {
+        "street": "106 Main St",
+        "city": "San Antonio",
+        "state": "TX",
+        "zipCode": "90006",
+        "country": "USA"
+      },
+      "profilePicture": "https://randomuser.me/api/portraits/men/6.jpg",
+      "bio": "Experienced endocrinology specialist providing compassionate care.",
+      "doctorInfo": {
+        "medicalLicenseNumber": "MD100006",
+        "licenseState": "TX",
+        "licenseExpiryDate": "2026-12-31",
+        "primarySpecialty": "Endocrinology",
+        "secondarySpecialties": [
+          "Family Medicine"
+        ],
+        "yearsOfExperience": 11,
+        "npiNumber": "1000000006",
+        "education": [
+          {
+            "institution": "State Medical University",
+            "degree": "MD",
+            "graduationYear": 2006
+          }
+        ],
+        "residency": [
+          {
+            "hospital": "General Hospital",
+            "specialty": "Endocrinology",
+            "startYear": 2007,
+            "endYear": 2010
+          }
+        ],
+        "hospitalAffiliations": [
+          {
+            "hospital": "Chicago Medical Center",
+            "position": "Attending Physician",
+            "department": "Endocrinology",
+            "isCurrentlyAffiliated": true
+          }
+        ],
+        "boardCertifications": [
+          {
+            "board": "American Board of Medical Specialties",
+            "specialty": "Endocrinology",
+            "certificationDate": "2016-06-01",
+            "status": "active"
+          }
+        ],
+        "languagesSpoken": [
+          {
+            "language": "English",
+            "proficiency": "native"
+          }
+        ],
+        "consultationFee": 210,
+        "acceptsInsurance": true,
+        "insurancesAccepted": [
+          "Aetna",
+          "Blue Cross Blue Shield",
+          "UnitedHealthcare"
+        ],
+        "isVerified": true,
+        "status": "approved",
+        "isAcceptingNewPatients": false,
+        "telemedicineEnabled": true
+      }
+    },
+    {
+      "firstName": "Patricia",
+      "lastName": "Martin",
+      "email": "patricia.martin7@healthcenter.com",
+      "password": "doctor123",
+      "phone": "5551071759",
+      "dateOfBirth": "1977-08-08",
+      "gender": "female",
+      "address": {
+        "street": "107 Main St",
+        "city": "San Diego",
+        "state": "CA",
+        "zipCode": "90007",
+        "country": "USA"
+      },
+      "profilePicture": "https://randomuser.me/api/portraits/women/7.jpg",
+      "bio": "Experienced emergency medicine specialist providing compassionate care.",
+      "doctorInfo": {
+        "medicalLicenseNumber": "MD100007",
+        "licenseState": "IL",
+        "licenseExpiryDate": "2027-12-31",
+        "primarySpecialty": "Emergency Medicine",
+        "secondarySpecialties": [
+          "Neurosurgery"
+        ],
+        "yearsOfExperience": 12,
+        "npiNumber": "1000000007",
+        "education": [
+          {
+            "institution": "State Medical University",
+            "degree": "MD",
+            "graduationYear": 2007
+          }
+        ],
+        "residency": [
+          {
+            "hospital": "General Hospital",
+            "specialty": "Emergency Medicine",
+            "startYear": 2008,
+            "endYear": 2011
+          }
+        ],
+        "hospitalAffiliations": [
+          {
+            "hospital": "Houston Medical Center",
+            "position": "Attending Physician",
+            "department": "Emergency Medicine",
+            "isCurrentlyAffiliated": true
+          }
+        ],
+        "boardCertifications": [
+          {
+            "board": "American Board of Medical Specialties",
+            "specialty": "Emergency Medicine",
+            "certificationDate": "2017-06-01",
+            "status": "active"
+          }
+        ],
+        "languagesSpoken": [
+          {
+            "language": "English",
+            "proficiency": "native"
+          }
+        ],
+        "consultationFee": 220,
+        "acceptsInsurance": true,
+        "insurancesAccepted": [
+          "Aetna",
+          "Blue Cross Blue Shield",
+          "UnitedHealthcare"
+        ],
+        "isVerified": true,
+        "status": "approved",
+        "isAcceptingNewPatients": true,
+        "telemedicineEnabled": false
+      }
+    },
+    {
+      "firstName": "Robert",
+      "lastName": "Johnson",
+      "email": "robert.johnson8@healthcenter.com",
+      "password": "doctor123",
+      "phone": "5551081866",
+      "dateOfBirth": "1978-09-09",
+      "gender": "male",
+      "address": {
+        "street": "108 Main St",
+        "city": "Dallas",
+        "state": "TX",
+        "zipCode": "90008",
+        "country": "USA"
+      },
+      "profilePicture": "https://randomuser.me/api/portraits/men/8.jpg",
+      "bio": "Experienced rheumatology specialist providing compassionate care.",
+      "doctorInfo": {
+        "medicalLicenseNumber": "MD100008",
+        "licenseState": "NY",
+        "licenseExpiryDate": "2028-12-31",
+        "primarySpecialty": "Rheumatology",
+        "secondarySpecialties": [
+          "Gastroenterology"
+        ],
+        "yearsOfExperience": 13,
+        "npiNumber": "1000000008",
+        "education": [
+          {
+            "institution": "State Medical University",
+            "degree": "MD",
+            "graduationYear": 2008
+          }
+        ],
+        "residency": [
+          {
+            "hospital": "General Hospital",
+            "specialty": "Rheumatology",
+            "startYear": 2009,
+            "endYear": 2012
+          }
+        ],
+        "hospitalAffiliations": [
+          {
+            "hospital": "San Antonio Medical Center",
+            "position": "Attending Physician",
+            "department": "Rheumatology",
+            "isCurrentlyAffiliated": true
+          }
+        ],
+        "boardCertifications": [
+          {
+            "board": "American Board of Medical Specialties",
+            "specialty": "Rheumatology",
+            "certificationDate": "2018-06-01",
+            "status": "active"
+          }
+        ],
+        "languagesSpoken": [
+          {
+            "language": "English",
+            "proficiency": "native"
+          }
+        ],
+        "consultationFee": 230,
+        "acceptsInsurance": true,
+        "insurancesAccepted": [
+          "Aetna",
+          "Blue Cross Blue Shield",
+          "UnitedHealthcare"
+        ],
+        "isVerified": true,
+        "status": "approved",
+        "isAcceptingNewPatients": true,
+        "telemedicineEnabled": true
+      }
+    },
+    {
+      "firstName": "Mary",
+      "lastName": "Hernandez",
+      "email": "mary.hernandez9@healthcenter.com",
+      "password": "doctor123",
+      "phone": "5551091973",
+      "dateOfBirth": "1979-10-10",
+      "gender": "female",
+      "address": {
+        "street": "109 Main St",
+        "city": "San Jose",
+        "state": "CA",
+        "zipCode": "90009",
+        "country": "USA"
+      },
+      "profilePicture": "https://randomuser.me/api/portraits/women/9.jpg",
+      "bio": "Experienced family medicine specialist providing compassionate care.",
+      "doctorInfo": {
+        "medicalLicenseNumber": "MD100009",
+        "licenseState": "NY",
+        "licenseExpiryDate": "2026-12-31",
+        "primarySpecialty": "Family Medicine",
+        "secondarySpecialties": [
+          "Psychiatry"
+        ],
+        "yearsOfExperience": 14,
+        "npiNumber": "1000000009",
+        "education": [
+          {
+            "institution": "State Medical University",
+            "degree": "MD",
+            "graduationYear": 2009
+          }
+        ],
+        "residency": [
+          {
+            "hospital": "General Hospital",
+            "specialty": "Family Medicine",
+            "startYear": 2010,
+            "endYear": 2013
+          }
+        ],
+        "hospitalAffiliations": [
+          {
+            "hospital": "Philadelphia Medical Center",
+            "position": "Attending Physician",
+            "department": "Family Medicine",
+            "isCurrentlyAffiliated": true
+          }
+        ],
+        "boardCertifications": [
+          {
+            "board": "American Board of Medical Specialties",
+            "specialty": "Family Medicine",
+            "certificationDate": "2019-06-01",
+            "status": "active"
+          }
+        ],
+        "languagesSpoken": [
+          {
+            "language": "English",
+            "proficiency": "native"
+          }
+        ],
+        "consultationFee": 240,
+        "acceptsInsurance": true,
+        "insurancesAccepted": [
+          "Aetna",
+          "Blue Cross Blue Shield",
+          "UnitedHealthcare"
+        ],
+        "isVerified": true,
+        "status": "approved",
+        "isAcceptingNewPatients": false,
+        "telemedicineEnabled": false
+      }
+    },
+    {
+      "firstName": "Thomas",
+      "lastName": "Gonzalez",
+      "email": "thomas.gonzalez10@healthcenter.com",
+      "password": "doctor123",
+      "phone": "5551102080",
+      "dateOfBirth": "1980-11-11",
+      "gender": "male",
+      "address": {
+        "street": "110 Main St",
+        "city": "New York",
+        "state": "NY",
+        "zipCode": "90010",
+        "country": "USA"
+      },
+      "profilePicture": "https://randomuser.me/api/portraits/men/10.jpg",
+      "bio": "Experienced family medicine specialist providing compassionate care.",
+      "doctorInfo": {
+        "medicalLicenseNumber": "MD100010",
+        "licenseState": "TX",
+        "licenseExpiryDate": "2027-12-31",
+        "primarySpecialty": "Family Medicine",
+        "secondarySpecialties": [
+          "Pulmonology"
+        ],
+        "yearsOfExperience": 15,
+        "npiNumber": "1000000010",
+        "education": [
+          {
+            "institution": "State Medical University",
+            "degree": "MD",
+            "graduationYear": 2010
+          }
+        ],
+        "residency": [
+          {
+            "hospital": "General Hospital",
+            "specialty": "Family Medicine",
+            "startYear": 2011,
+            "endYear": 2014
+          }
+        ],
+        "hospitalAffiliations": [
+          {
+            "hospital": "San Jose Medical Center",
+            "position": "Attending Physician",
+            "department": "Family Medicine",
+            "isCurrentlyAffiliated": true
+          }
+        ],
+        "boardCertifications": [
+          {
+            "board": "American Board of Medical Specialties",
+            "specialty": "Family Medicine",
+            "certificationDate": "2010-06-01",
+            "status": "active"
+          }
+        ],
+        "languagesSpoken": [
+          {
+            "language": "English",
+            "proficiency": "native"
+          }
+        ],
+        "consultationFee": 150,
+        "acceptsInsurance": true,
+        "insurancesAccepted": [
+          "Aetna",
+          "Blue Cross Blue Shield",
+          "UnitedHealthcare"
+        ],
+        "isVerified": true,
+        "status": "approved",
+        "isAcceptingNewPatients": true,
+        "telemedicineEnabled": true
+      }
+    },
+    {
+      "firstName": "Linda",
+      "lastName": "Smith",
+      "email": "linda.smith11@healthcenter.com",
+      "password": "doctor123",
+      "phone": "5551112187",
+      "dateOfBirth": "1981-12-12",
+      "gender": "female",
+      "address": {
+        "street": "111 Main St",
+        "city": "Los Angeles",
+        "state": "CA",
+        "zipCode": "90011",
+        "country": "USA"
+      },
+      "profilePicture": "https://randomuser.me/api/portraits/women/11.jpg",
+      "bio": "Experienced hematology specialist providing compassionate care.",
+      "doctorInfo": {
+        "medicalLicenseNumber": "MD100011",
+        "licenseState": "CA",
+        "licenseExpiryDate": "2028-12-31",
+        "primarySpecialty": "Hematology",
+        "secondarySpecialties": [
+          "Ophthalmology"
+        ],
+        "yearsOfExperience": 16,
+        "npiNumber": "1000000011",
+        "education": [
+          {
+            "institution": "State Medical University",
+            "degree": "MD",
+            "graduationYear": 2011
+          }
+        ],
+        "residency": [
+          {
+            "hospital": "General Hospital",
+            "specialty": "Hematology",
+            "startYear": 2012,
+            "endYear": 2015
+          }
+        ],
+        "hospitalAffiliations": [
+          {
+            "hospital": "Dallas Medical Center",
+            "position": "Attending Physician",
+            "department": "Hematology",
+            "isCurrentlyAffiliated": true
+          }
+        ],
+        "boardCertifications": [
+          {
+            "board": "American Board of Medical Specialties",
+            "specialty": "Hematology",
+            "certificationDate": "2011-06-01",
+            "status": "active"
+          }
+        ],
+        "languagesSpoken": [
+          {
+            "language": "English",
+            "proficiency": "native"
+          }
+        ],
+        "consultationFee": 160,
+        "acceptsInsurance": true,
+        "insurancesAccepted": [
+          "Aetna",
+          "Blue Cross Blue Shield",
+          "UnitedHealthcare"
+        ],
+        "isVerified": true,
+        "status": "approved",
+        "isAcceptingNewPatients": true,
+        "telemedicineEnabled": false
+      }
+    },
+    {
+      "firstName": "Mark",
+      "lastName": "Martin",
+      "email": "mark.martin12@healthcenter.com",
+      "password": "doctor123",
+      "phone": "5551122294",
+      "dateOfBirth": "1982-01-13",
+      "gender": "male",
+      "address": {
+        "street": "112 Main St",
+        "city": "Chicago",
+        "state": "IL",
+        "zipCode": "90012",
+        "country": "USA"
+      },
+      "profilePicture": "https://randomuser.me/api/portraits/men/12.jpg",
+      "bio": "Experienced pediatrics specialist providing compassionate care.",
+      "doctorInfo": {
+        "medicalLicenseNumber": "MD100012",
+        "licenseState": "CA",
+        "licenseExpiryDate": "2026-12-31",
+        "primarySpecialty": "Pediatrics",
+        "secondarySpecialties": [
+          "Oncology"
+        ],
+        "yearsOfExperience": 17,
+        "npiNumber": "1000000012",
+        "education": [
+          {
+            "institution": "State Medical University",
+            "degree": "MD",
+            "graduationYear": 2012
+          }
+        ],
+        "residency": [
+          {
+            "hospital": "General Hospital",
+            "specialty": "Pediatrics",
+            "startYear": 2013,
+            "endYear": 2016
+          }
+        ],
+        "hospitalAffiliations": [
+          {
+            "hospital": "Phoenix Medical Center",
+            "position": "Attending Physician",
+            "department": "Pediatrics",
+            "isCurrentlyAffiliated": true
+          }
+        ],
+        "boardCertifications": [
+          {
+            "board": "American Board of Medical Specialties",
+            "specialty": "Pediatrics",
+            "certificationDate": "2012-06-01",
+            "status": "active"
+          }
+        ],
+        "languagesSpoken": [
+          {
+            "language": "English",
+            "proficiency": "native"
+          }
+        ],
+        "consultationFee": 170,
+        "acceptsInsurance": true,
+        "insurancesAccepted": [
+          "Aetna",
+          "Blue Cross Blue Shield",
+          "UnitedHealthcare"
+        ],
+        "isVerified": true,
+        "status": "approved",
+        "isAcceptingNewPatients": false,
+        "telemedicineEnabled": true
+      }
+    },
+    {
+      "firstName": "Lisa",
+      "lastName": "Wilson",
+      "email": "lisa.wilson13@healthcenter.com",
+      "password": "doctor123",
+      "phone": "5551132311",
+      "dateOfBirth": "1983-02-14",
+      "gender": "female",
+      "address": {
+        "street": "113 Main St",
+        "city": "Houston",
+        "state": "TX",
+        "zipCode": "90013",
+        "country": "USA"
+      },
+      "profilePicture": "https://randomuser.me/api/portraits/women/13.jpg",
+      "bio": "Experienced pulmonology specialist providing compassionate care.",
+      "doctorInfo": {
+        "medicalLicenseNumber": "MD100013",
+        "licenseState": "TX",
+        "licenseExpiryDate": "2027-12-31",
+        "primarySpecialty": "Pulmonology",
+        "secondarySpecialties": [
+          "Hematology"
+        ],
+        "yearsOfExperience": 18,
+        "npiNumber": "1000000013",
+        "education": [
+          {
+            "institution": "State Medical University",
+            "degree": "MD",
+            "graduationYear": 2013
+          }
+        ],
+        "residency": [
+          {
+            "hospital": "General Hospital",
+            "specialty": "Pulmonology",
+            "startYear": 2014,
+            "endYear": 2017
+          }
+        ],
+        "hospitalAffiliations": [
+          {
+            "hospital": "Chicago Medical Center",
+            "position": "Attending Physician",
+            "department": "Pulmonology",
+            "isCurrentlyAffiliated": true
+          }
+        ],
+        "boardCertifications": [
+          {
+            "board": "American Board of Medical Specialties",
+            "specialty": "Pulmonology",
+            "certificationDate": "2013-06-01",
+            "status": "active"
+          }
+        ],
+        "languagesSpoken": [
+          {
+            "language": "English",
+            "proficiency": "native"
+          }
+        ],
+        "consultationFee": 180,
+        "acceptsInsurance": true,
+        "insurancesAccepted": [
+          "Aetna",
+          "Blue Cross Blue Shield",
+          "UnitedHealthcare"
+        ],
+        "isVerified": true,
+        "status": "approved",
+        "isAcceptingNewPatients": true,
+        "telemedicineEnabled": false
+      }
+    },
+    {
+      "firstName": "Anthony",
+      "lastName": "Moore",
+      "email": "anthony.moore14@healthcenter.com",
+      "password": "doctor123",
+      "phone": "5551142418",
+      "dateOfBirth": "1984-03-15",
+      "gender": "male",
+      "address": {
+        "street": "114 Main St",
+        "city": "Phoenix",
+        "state": "AZ",
+        "zipCode": "90014",
+        "country": "USA"
+      },
+      "profilePicture": "https://randomuser.me/api/portraits/men/14.jpg",
+      "bio": "Experienced urology specialist providing compassionate care.",
+      "doctorInfo": {
+        "medicalLicenseNumber": "MD100014",
+        "licenseState": "IL",
+        "licenseExpiryDate": "2028-12-31",
+        "primarySpecialty": "Urology",
+        "secondarySpecialties": [
+          "Gynecology"
+        ],
+        "yearsOfExperience": 19,
+        "npiNumber": "1000000014",
+        "education": [
+          {
+            "institution": "State Medical University",
+            "degree": "MD",
+            "graduationYear": 2014
+          }
+        ],
+        "residency": [
+          {
+            "hospital": "General Hospital",
+            "specialty": "Urology",
+            "startYear": 2015,
+            "endYear": 2018
+          }
+        ],
+        "hospitalAffiliations": [
+          {
+            "hospital": "Phoenix Medical Center",
+            "position": "Attending Physician",
+            "department": "Urology",
+            "isCurrentlyAffiliated": true
+          }
+        ],
+        "boardCertifications": [
+          {
+            "board": "American Board of Medical Specialties",
+            "specialty": "Urology",
+            "certificationDate": "2014-06-01",
+            "status": "active"
+          }
+        ],
+        "languagesSpoken": [
+          {
+            "language": "English",
+            "proficiency": "native"
+          }
+        ],
+        "consultationFee": 190,
+        "acceptsInsurance": true,
+        "insurancesAccepted": [
+          "Aetna",
+          "Blue Cross Blue Shield",
+          "UnitedHealthcare"
+        ],
+        "isVerified": true,
+        "status": "approved",
+        "isAcceptingNewPatients": true,
+        "telemedicineEnabled": true
+      }
+    },
+    {
+      "firstName": "Barbara",
+      "lastName": "Jackson",
+      "email": "barbara.jackson15@healthcenter.com",
+      "password": "doctor123",
+      "phone": "5551152525",
+      "dateOfBirth": "1985-04-16",
+      "gender": "female",
+      "address": {
+        "street": "115 Main St",
+        "city": "Philadelphia",
+        "state": "PA",
+        "zipCode": "90015",
+        "country": "USA"
+      },
+      "profilePicture": "https://randomuser.me/api/portraits/women/15.jpg",
+      "bio": "Experienced pediatrics specialist providing compassionate care.",
+      "doctorInfo": {
+        "medicalLicenseNumber": "MD100015",
+        "licenseState": "PA",
+        "licenseExpiryDate": "2026-12-31",
+        "primarySpecialty": "Pediatrics",
+        "secondarySpecialties": [
+          "Neurosurgery"
+        ],
+        "yearsOfExperience": 20,
+        "npiNumber": "1000000015",
+        "education": [
+          {
+            "institution": "State Medical University",
+            "degree": "MD",
+            "graduationYear": 2015
+          }
+        ],
+        "residency": [
+          {
+            "hospital": "General Hospital",
+            "specialty": "Pediatrics",
+            "startYear": 2016,
+            "endYear": 2019
+          }
+        ],
+        "hospitalAffiliations": [
+          {
+            "hospital": "San Diego Medical Center",
+            "position": "Attending Physician",
+            "department": "Pediatrics",
+            "isCurrentlyAffiliated": true
+          }
+        ],
+        "boardCertifications": [
+          {
+            "board": "American Board of Medical Specialties",
+            "specialty": "Pediatrics",
+            "certificationDate": "2015-06-01",
+            "status": "active"
+          }
+        ],
+        "languagesSpoken": [
+          {
+            "language": "English",
+            "proficiency": "native"
+          }
+        ],
+        "consultationFee": 200,
+        "acceptsInsurance": true,
+        "insurancesAccepted": [
+          "Aetna",
+          "Blue Cross Blue Shield",
+          "UnitedHealthcare"
+        ],
+        "isVerified": true,
+        "status": "approved",
+        "isAcceptingNewPatients": false,
+        "telemedicineEnabled": false
+      }
+    },
+    {
+      "firstName": "Richard",
+      "lastName": "Davis",
+      "email": "richard.davis16@healthcenter.com",
+      "password": "doctor123",
+      "phone": "5551162632",
+      "dateOfBirth": "1986-05-17",
+      "gender": "male",
+      "address": {
+        "street": "116 Main St",
+        "city": "San Antonio",
+        "state": "TX",
+        "zipCode": "90016",
+        "country": "USA"
+      },
+      "profilePicture": "https://randomuser.me/api/portraits/men/16.jpg",
+      "bio": "Experienced urology specialist providing compassionate care.",
+      "doctorInfo": {
+        "medicalLicenseNumber": "MD100016",
+        "licenseState": "CA",
+        "licenseExpiryDate": "2027-12-31",
+        "primarySpecialty": "Urology",
+        "secondarySpecialties": [
+          "Dermatology"
+        ],
+        "yearsOfExperience": 21,
+        "npiNumber": "1000000016",
+        "education": [
+          {
+            "institution": "State Medical University",
+            "degree": "MD",
+            "graduationYear": 2016
+          }
+        ],
+        "residency": [
+          {
+            "hospital": "General Hospital",
+            "specialty": "Urology",
+            "startYear": 2017,
+            "endYear": 2020
+          }
+        ],
+        "hospitalAffiliations": [
+          {
+            "hospital": "Houston Medical Center",
+            "position": "Attending Physician",
+            "department": "Urology",
+            "isCurrentlyAffiliated": true
+          }
+        ],
+        "boardCertifications": [
+          {
+            "board": "American Board of Medical Specialties",
+            "specialty": "Urology",
+            "certificationDate": "2016-06-01",
+            "status": "active"
+          }
+        ],
+        "languagesSpoken": [
+          {
+            "language": "English",
+            "proficiency": "native"
+          }
+        ],
+        "consultationFee": 210,
+        "acceptsInsurance": true,
+        "insurancesAccepted": [
+          "Aetna",
+          "Blue Cross Blue Shield",
+          "UnitedHealthcare"
+        ],
+        "isVerified": true,
+        "status": "approved",
+        "isAcceptingNewPatients": true,
+        "telemedicineEnabled": true
+      }
+    },
+    {
+      "firstName": "Ashley",
+      "lastName": "Taylor",
+      "email": "ashley.taylor17@healthcenter.com",
+      "password": "doctor123",
+      "phone": "5551172739",
+      "dateOfBirth": "1987-06-18",
+      "gender": "female",
+      "address": {
+        "street": "117 Main St",
+        "city": "San Diego",
+        "state": "CA",
+        "zipCode": "90017",
+        "country": "USA"
+      },
+      "profilePicture": "https://randomuser.me/api/portraits/women/17.jpg",
+      "bio": "Experienced dermatology specialist providing compassionate care.",
+      "doctorInfo": {
+        "medicalLicenseNumber": "MD100017",
+        "licenseState": "CA",
+        "licenseExpiryDate": "2028-12-31",
+        "primarySpecialty": "Dermatology",
+        "secondarySpecialties": [
+          "Urology"
+        ],
+        "yearsOfExperience": 22,
+        "npiNumber": "1000000017",
+        "education": [
+          {
+            "institution": "State Medical University",
+            "degree": "MD",
+            "graduationYear": 2017
+          }
+        ],
+        "residency": [
+          {
+            "hospital": "General Hospital",
+            "specialty": "Dermatology",
+            "startYear": 2018,
+            "endYear": 2021
+          }
+        ],
+        "hospitalAffiliations": [
+          {
+            "hospital": "New York Medical Center",
+            "position": "Attending Physician",
+            "department": "Dermatology",
+            "isCurrentlyAffiliated": true
+          }
+        ],
+        "boardCertifications": [
+          {
+            "board": "American Board of Medical Specialties",
+            "specialty": "Dermatology",
+            "certificationDate": "2017-06-01",
+            "status": "active"
+          }
+        ],
+        "languagesSpoken": [
+          {
+            "language": "English",
+            "proficiency": "native"
+          }
+        ],
+        "consultationFee": 220,
+        "acceptsInsurance": true,
+        "insurancesAccepted": [
+          "Aetna",
+          "Blue Cross Blue Shield",
+          "UnitedHealthcare"
+        ],
+        "isVerified": true,
+        "status": "approved",
+        "isAcceptingNewPatients": true,
+        "telemedicineEnabled": false
+      }
+    },
+    {
+      "firstName": "Mark",
+      "lastName": "Thomas",
+      "email": "mark.thomas18@healthcenter.com",
+      "password": "doctor123",
+      "phone": "5551182846",
+      "dateOfBirth": "1988-07-19",
+      "gender": "male",
+      "address": {
+        "street": "118 Main St",
+        "city": "Dallas",
+        "state": "TX",
+        "zipCode": "90018",
+        "country": "USA"
+      },
+      "profilePicture": "https://randomuser.me/api/portraits/men/18.jpg",
+      "bio": "Experienced psychiatry specialist providing compassionate care.",
+      "doctorInfo": {
+        "medicalLicenseNumber": "MD100018",
+        "licenseState": "IL",
+        "licenseExpiryDate": "2026-12-31",
+        "primarySpecialty": "Psychiatry",
+        "secondarySpecialties": [
+          "Gastroenterology"
+        ],
+        "yearsOfExperience": 23,
+        "npiNumber": "1000000018",
+        "education": [
+          {
+            "institution": "State Medical University",
+            "degree": "MD",
+            "graduationYear": 2018
+          }
+        ],
+        "residency": [
+          {
+            "hospital": "General Hospital",
+            "specialty": "Psychiatry",
+            "startYear": 2001,
+            "endYear": 2004
+          }
+        ],
+        "hospitalAffiliations": [
+          {
+            "hospital": "San Diego Medical Center",
+            "position": "Attending Physician",
+            "department": "Psychiatry",
+            "isCurrentlyAffiliated": true
+          }
+        ],
+        "boardCertifications": [
+          {
+            "board": "American Board of Medical Specialties",
+            "specialty": "Psychiatry",
+            "certificationDate": "2018-06-01",
+            "status": "active"
+          }
+        ],
+        "languagesSpoken": [
+          {
+            "language": "English",
+            "proficiency": "native"
+          }
+        ],
+        "consultationFee": 230,
+        "acceptsInsurance": true,
+        "insurancesAccepted": [
+          "Aetna",
+          "Blue Cross Blue Shield",
+          "UnitedHealthcare"
+        ],
+        "isVerified": true,
+        "status": "approved",
+        "isAcceptingNewPatients": false,
+        "telemedicineEnabled": true
+      }
+    },
+    {
+      "firstName": "Linda",
+      "lastName": "Miller",
+      "email": "linda.miller19@healthcenter.com",
+      "password": "doctor123",
+      "phone": "5551192953",
+      "dateOfBirth": "1989-08-20",
+      "gender": "female",
+      "address": {
+        "street": "119 Main St",
+        "city": "San Jose",
+        "state": "CA",
+        "zipCode": "90019",
+        "country": "USA"
+      },
+      "profilePicture": "https://randomuser.me/api/portraits/women/19.jpg",
+      "bio": "Experienced cardiology specialist providing compassionate care.",
+      "doctorInfo": {
+        "medicalLicenseNumber": "MD100019",
+        "licenseState": "CA",
+        "licenseExpiryDate": "2027-12-31",
+        "primarySpecialty": "Cardiology",
+        "secondarySpecialties": [
+          "Endocrinology"
+        ],
+        "yearsOfExperience": 24,
+        "npiNumber": "1000000019",
+        "education": [
+          {
+            "institution": "State Medical University",
+            "degree": "MD",
+            "graduationYear": 2019
+          }
+        ],
+        "residency": [
+          {
+            "hospital": "General Hospital",
+            "specialty": "Cardiology",
+            "startYear": 2002,
+            "endYear": 2005
+          }
+        ],
+        "hospitalAffiliations": [
+          {
+            "hospital": "Chicago Medical Center",
+            "position": "Attending Physician",
+            "department": "Cardiology",
+            "isCurrentlyAffiliated": true
+          }
+        ],
+        "boardCertifications": [
+          {
+            "board": "American Board of Medical Specialties",
+            "specialty": "Cardiology",
+            "certificationDate": "2019-06-01",
+            "status": "active"
+          }
+        ],
+        "languagesSpoken": [
+          {
+            "language": "English",
+            "proficiency": "native"
+          }
+        ],
+        "consultationFee": 240,
+        "acceptsInsurance": true,
+        "insurancesAccepted": [
+          "Aetna",
+          "Blue Cross Blue Shield",
+          "UnitedHealthcare"
+        ],
+        "isVerified": true,
+        "status": "approved",
+        "isAcceptingNewPatients": true,
+        "telemedicineEnabled": false
+      }
+    },
+    {
+      "firstName": "Matthew",
+      "lastName": "Johnson",
+      "email": "matthew.johnson20@healthcenter.com",
+      "password": "doctor123",
+      "phone": "5551203060",
+      "dateOfBirth": "1990-09-21",
+      "gender": "male",
+      "address": {
+        "street": "120 Main St",
+        "city": "New York",
+        "state": "NY",
+        "zipCode": "90020",
+        "country": "USA"
+      },
+      "profilePicture": "https://randomuser.me/api/portraits/men/20.jpg",
+      "bio": "Experienced ophthalmology specialist providing compassionate care.",
+      "doctorInfo": {
+        "medicalLicenseNumber": "MD100020",
+        "licenseState": "CA",
+        "licenseExpiryDate": "2028-12-31",
+        "primarySpecialty": "Ophthalmology",
+        "secondarySpecialties": [
+          "Endocrinology"
+        ],
+        "yearsOfExperience": 25,
+        "npiNumber": "1000000020",
+        "education": [
+          {
+            "institution": "State Medical University",
+            "degree": "MD",
+            "graduationYear": 2000
+          }
+        ],
+        "residency": [
+          {
+            "hospital": "General Hospital",
+            "specialty": "Ophthalmology",
+            "startYear": 2003,
+            "endYear": 2006
+          }
+        ],
+        "hospitalAffiliations": [
+          {
+            "hospital": "New York Medical Center",
+            "position": "Attending Physician",
+            "department": "Ophthalmology",
+            "isCurrentlyAffiliated": true
+          }
+        ],
+        "boardCertifications": [
+          {
+            "board": "American Board of Medical Specialties",
+            "specialty": "Ophthalmology",
+            "certificationDate": "2010-06-01",
+            "status": "active"
+          }
+        ],
+        "languagesSpoken": [
+          {
+            "language": "English",
+            "proficiency": "native"
+          }
+        ],
+        "consultationFee": 150,
+        "acceptsInsurance": true,
+        "insurancesAccepted": [
+          "Aetna",
+          "Blue Cross Blue Shield",
+          "UnitedHealthcare"
+        ],
+        "isVerified": true,
+        "status": "approved",
+        "isAcceptingNewPatients": true,
+        "telemedicineEnabled": true
+      }
+    },
+    {
+      "firstName": "Jessica",
+      "lastName": "Taylor",
+      "email": "jessica.taylor21@healthcenter.com",
+      "password": "doctor123",
+      "phone": "5551213167",
+      "dateOfBirth": "1991-10-22",
+      "gender": "female",
+      "address": {
+        "street": "121 Main St",
+        "city": "Los Angeles",
+        "state": "CA",
+        "zipCode": "90021",
+        "country": "USA"
+      },
+      "profilePicture": "https://randomuser.me/api/portraits/women/21.jpg",
+      "bio": "Experienced neurology specialist providing compassionate care.",
+      "doctorInfo": {
+        "medicalLicenseNumber": "MD100021",
+        "licenseState": "AZ",
+        "licenseExpiryDate": "2026-12-31",
+        "primarySpecialty": "Neurology",
+        "secondarySpecialties": [
+          "Infectious Disease"
+        ],
+        "yearsOfExperience": 26,
+        "npiNumber": "1000000021",
+        "education": [
+          {
+            "institution": "State Medical University",
+            "degree": "MD",
+            "graduationYear": 2001
+          }
+        ],
+        "residency": [
+          {
+            "hospital": "General Hospital",
+            "specialty": "Neurology",
+            "startYear": 2004,
+            "endYear": 2007
+          }
+        ],
+        "hospitalAffiliations": [
+          {
+            "hospital": "Houston Medical Center",
+            "position": "Attending Physician",
+            "department": "Neurology",
+            "isCurrentlyAffiliated": true
+          }
+        ],
+        "boardCertifications": [
+          {
+            "board": "American Board of Medical Specialties",
+            "specialty": "Neurology",
+            "certificationDate": "2011-06-01",
+            "status": "active"
+          }
+        ],
+        "languagesSpoken": [
+          {
+            "language": "English",
+            "proficiency": "native"
+          }
+        ],
+        "consultationFee": 160,
+        "acceptsInsurance": true,
+        "insurancesAccepted": [
+          "Aetna",
+          "Blue Cross Blue Shield",
+          "UnitedHealthcare"
+        ],
+        "isVerified": true,
+        "status": "approved",
+        "isAcceptingNewPatients": false,
+        "telemedicineEnabled": false
+      }
+    },
+    {
+      "firstName": "Joseph",
+      "lastName": "Anderson",
+      "email": "joseph.anderson22@healthcenter.com",
+      "password": "doctor123",
+      "phone": "5551223274",
+      "dateOfBirth": "1992-11-23",
+      "gender": "male",
+      "address": {
+        "street": "122 Main St",
+        "city": "Chicago",
+        "state": "IL",
+        "zipCode": "90022",
+        "country": "USA"
+      },
+      "profilePicture": "https://randomuser.me/api/portraits/men/22.jpg",
+      "bio": "Experienced hematology specialist providing compassionate care.",
+      "doctorInfo": {
+        "medicalLicenseNumber": "MD100022",
+        "licenseState": "TX",
+        "licenseExpiryDate": "2027-12-31",
+        "primarySpecialty": "Hematology",
+        "secondarySpecialties": [
+          "Cardiology"
+        ],
+        "yearsOfExperience": 27,
+        "npiNumber": "1000000022",
+        "education": [
+          {
+            "institution": "State Medical University",
+            "degree": "MD",
+            "graduationYear": 2002
+          }
+        ],
+        "residency": [
+          {
+            "hospital": "General Hospital",
+            "specialty": "Hematology",
+            "startYear": 2005,
+            "endYear": 2008
+          }
+        ],
+        "hospitalAffiliations": [
+          {
+            "hospital": "San Diego Medical Center",
+            "position": "Attending Physician",
+            "department": "Hematology",
+            "isCurrentlyAffiliated": true
+          }
+        ],
+        "boardCertifications": [
+          {
+            "board": "American Board of Medical Specialties",
+            "specialty": "Hematology",
+            "certificationDate": "2012-06-01",
+            "status": "active"
+          }
+        ],
+        "languagesSpoken": [
+          {
+            "language": "English",
+            "proficiency": "native"
+          }
+        ],
+        "consultationFee": 170,
+        "acceptsInsurance": true,
+        "insurancesAccepted": [
+          "Aetna",
+          "Blue Cross Blue Shield",
+          "UnitedHealthcare"
+        ],
+        "isVerified": true,
+        "status": "approved",
+        "isAcceptingNewPatients": true,
+        "telemedicineEnabled": true
+      }
+    },
+    {
+      "firstName": "Sarah",
+      "lastName": "Jones",
+      "email": "sarah.jones23@healthcenter.com",
+      "password": "doctor123",
+      "phone": "5551233381",
+      "dateOfBirth": "1993-12-24",
+      "gender": "female",
+      "address": {
+        "street": "123 Main St",
+        "city": "Houston",
+        "state": "TX",
+        "zipCode": "90023",
+        "country": "USA"
+      },
+      "profilePicture": "https://randomuser.me/api/portraits/women/23.jpg",
+      "bio": "Experienced dermatology specialist providing compassionate care.",
+      "doctorInfo": {
+        "medicalLicenseNumber": "MD100023",
+        "licenseState": "AZ",
+        "licenseExpiryDate": "2028-12-31",
+        "primarySpecialty": "Dermatology",
+        "secondarySpecialties": [
+          "Internal Medicine"
+        ],
+        "yearsOfExperience": 28,
+        "npiNumber": "1000000023",
+        "education": [
+          {
+            "institution": "State Medical University",
+            "degree": "MD",
+            "graduationYear": 2003
+          }
+        ],
+        "residency": [
+          {
+            "hospital": "General Hospital",
+            "specialty": "Dermatology",
+            "startYear": 2006,
+            "endYear": 2009
+          }
+        ],
+        "hospitalAffiliations": [
+          {
+            "hospital": "San Jose Medical Center",
+            "position": "Attending Physician",
+            "department": "Dermatology",
+            "isCurrentlyAffiliated": true
+          }
+        ],
+        "boardCertifications": [
+          {
+            "board": "American Board of Medical Specialties",
+            "specialty": "Dermatology",
+            "certificationDate": "2013-06-01",
+            "status": "active"
+          }
+        ],
+        "languagesSpoken": [
+          {
+            "language": "English",
+            "proficiency": "native"
+          }
+        ],
+        "consultationFee": 180,
+        "acceptsInsurance": true,
+        "insurancesAccepted": [
+          "Aetna",
+          "Blue Cross Blue Shield",
+          "UnitedHealthcare"
+        ],
+        "isVerified": true,
+        "status": "approved",
+        "isAcceptingNewPatients": true,
+        "telemedicineEnabled": false
+      }
+    },
+    {
+      "firstName": "Anthony",
+      "lastName": "Thomas",
+      "email": "anthony.thomas24@healthcenter.com",
+      "password": "doctor123",
+      "phone": "5551243488",
+      "dateOfBirth": "1994-01-25",
+      "gender": "male",
+      "address": {
+        "street": "124 Main St",
+        "city": "Phoenix",
+        "state": "AZ",
+        "zipCode": "90024",
+        "country": "USA"
+      },
+      "profilePicture": "https://randomuser.me/api/portraits/men/24.jpg",
+      "bio": "Experienced emergency medicine specialist providing compassionate care.",
+      "doctorInfo": {
+        "medicalLicenseNumber": "MD100024",
+        "licenseState": "IL",
+        "licenseExpiryDate": "2026-12-31",
+        "primarySpecialty": "Emergency Medicine",
+        "secondarySpecialties": [
+          "Psychiatry"
+        ],
+        "yearsOfExperience": 29,
+        "npiNumber": "1000000024",
+        "education": [
+          {
+            "institution": "State Medical University",
+            "degree": "MD",
+            "graduationYear": 2004
+          }
+        ],
+        "residency": [
+          {
+            "hospital": "General Hospital",
+            "specialty": "Emergency Medicine",
+            "startYear": 2007,
+            "endYear": 2010
+          }
+        ],
+        "hospitalAffiliations": [
+          {
+            "hospital": "Philadelphia Medical Center",
+            "position": "Attending Physician",
+            "department": "Emergency Medicine",
+            "isCurrentlyAffiliated": true
+          }
+        ],
+        "boardCertifications": [
+          {
+            "board": "American Board of Medical Specialties",
+            "specialty": "Emergency Medicine",
+            "certificationDate": "2014-06-01",
+            "status": "active"
+          }
+        ],
+        "languagesSpoken": [
+          {
+            "language": "English",
+            "proficiency": "native"
+          }
+        ],
+        "consultationFee": 190,
+        "acceptsInsurance": true,
+        "insurancesAccepted": [
+          "Aetna",
+          "Blue Cross Blue Shield",
+          "UnitedHealthcare"
+        ],
+        "isVerified": true,
+        "status": "approved",
+        "isAcceptingNewPatients": false,
+        "telemedicineEnabled": true
+      }
+    },
+    {
+      "firstName": "Patricia",
+      "lastName": "Miller",
+      "email": "patricia.miller25@healthcenter.com",
+      "password": "doctor123",
+      "phone": "5551253595",
+      "dateOfBirth": "1970-02-26",
+      "gender": "female",
+      "address": {
+        "street": "125 Main St",
+        "city": "Philadelphia",
+        "state": "PA",
+        "zipCode": "90025",
+        "country": "USA"
+      },
+      "profilePicture": "https://randomuser.me/api/portraits/women/25.jpg",
+      "bio": "Experienced pulmonology specialist providing compassionate care.",
+      "doctorInfo": {
+        "medicalLicenseNumber": "MD100025",
+        "licenseState": "PA",
+        "licenseExpiryDate": "2027-12-31",
+        "primarySpecialty": "Pulmonology",
+        "secondarySpecialties": [
+          "Family Medicine"
+        ],
+        "yearsOfExperience": 5,
+        "npiNumber": "1000000025",
+        "education": [
+          {
+            "institution": "State Medical University",
+            "degree": "MD",
+            "graduationYear": 2005
+          }
+        ],
+        "residency": [
+          {
+            "hospital": "General Hospital",
+            "specialty": "Pulmonology",
+            "startYear": 2008,
+            "endYear": 2011
+          }
+        ],
+        "hospitalAffiliations": [
+          {
+            "hospital": "Philadelphia Medical Center",
+            "position": "Attending Physician",
+            "department": "Pulmonology",
+            "isCurrentlyAffiliated": true
+          }
+        ],
+        "boardCertifications": [
+          {
+            "board": "American Board of Medical Specialties",
+            "specialty": "Pulmonology",
+            "certificationDate": "2015-06-01",
+            "status": "active"
+          }
+        ],
+        "languagesSpoken": [
+          {
+            "language": "English",
+            "proficiency": "native"
+          }
+        ],
+        "consultationFee": 200,
+        "acceptsInsurance": true,
+        "insurancesAccepted": [
+          "Aetna",
+          "Blue Cross Blue Shield",
+          "UnitedHealthcare"
+        ],
+        "isVerified": true,
+        "status": "approved",
+        "isAcceptingNewPatients": true,
+        "telemedicineEnabled": false
+      }
+    },
+    {
+      "firstName": "Michael",
+      "lastName": "Anderson",
+      "email": "michael.anderson26@healthcenter.com",
+      "password": "doctor123",
+      "phone": "5551263612",
+      "dateOfBirth": "1971-03-27",
+      "gender": "male",
+      "address": {
+        "street": "126 Main St",
+        "city": "San Antonio",
+        "state": "TX",
+        "zipCode": "90026",
+        "country": "USA"
+      },
+      "profilePicture": "https://randomuser.me/api/portraits/men/26.jpg",
+      "bio": "Experienced orthopedics specialist providing compassionate care.",
+      "doctorInfo": {
+        "medicalLicenseNumber": "MD100026",
+        "licenseState": "TX",
+        "licenseExpiryDate": "2028-12-31",
+        "primarySpecialty": "Orthopedics",
+        "secondarySpecialties": [
+          "Obstetrics"
+        ],
+        "yearsOfExperience": 6,
+        "npiNumber": "1000000026",
+        "education": [
+          {
+            "institution": "State Medical University",
+            "degree": "MD",
+            "graduationYear": 2006
+          }
+        ],
+        "residency": [
+          {
+            "hospital": "General Hospital",
+            "specialty": "Orthopedics",
+            "startYear": 2009,
+            "endYear": 2012
+          }
+        ],
+        "hospitalAffiliations": [
+          {
+            "hospital": "San Antonio Medical Center",
+            "position": "Attending Physician",
+            "department": "Orthopedics",
+            "isCurrentlyAffiliated": true
+          }
+        ],
+        "boardCertifications": [
+          {
+            "board": "American Board of Medical Specialties",
+            "specialty": "Orthopedics",
+            "certificationDate": "2016-06-01",
+            "status": "active"
+          }
+        ],
+        "languagesSpoken": [
+          {
+            "language": "English",
+            "proficiency": "native"
+          }
+        ],
+        "consultationFee": 210,
+        "acceptsInsurance": true,
+        "insurancesAccepted": [
+          "Aetna",
+          "Blue Cross Blue Shield",
+          "UnitedHealthcare"
+        ],
+        "isVerified": true,
+        "status": "approved",
+        "isAcceptingNewPatients": true,
+        "telemedicineEnabled": true
+      }
+    },
+    {
+      "firstName": "Sandra",
+      "lastName": "Hernandez",
+      "email": "sandra.hernandez27@healthcenter.com",
+      "password": "doctor123",
+      "phone": "5551273719",
+      "dateOfBirth": "1972-04-28",
+      "gender": "female",
+      "address": {
+        "street": "127 Main St",
+        "city": "San Diego",
+        "state": "CA",
+        "zipCode": "90027",
+        "country": "USA"
+      },
+      "profilePicture": "https://randomuser.me/api/portraits/women/27.jpg",
+      "bio": "Experienced emergency medicine specialist providing compassionate care.",
+      "doctorInfo": {
+        "medicalLicenseNumber": "MD100027",
+        "licenseState": "TX",
+        "licenseExpiryDate": "2026-12-31",
+        "primarySpecialty": "Emergency Medicine",
+        "secondarySpecialties": [
+          "Oncology"
+        ],
+        "yearsOfExperience": 7,
+        "npiNumber": "1000000027",
+        "education": [
+          {
+            "institution": "State Medical University",
+            "degree": "MD",
+            "graduationYear": 2007
+          }
+        ],
+        "residency": [
+          {
+            "hospital": "General Hospital",
+            "specialty": "Emergency Medicine",
+            "startYear": 2010,
+            "endYear": 2013
+          }
+        ],
+        "hospitalAffiliations": [
+          {
+            "hospital": "Phoenix Medical Center",
+            "position": "Attending Physician",
+            "department": "Emergency Medicine",
+            "isCurrentlyAffiliated": true
+          }
+        ],
+        "boardCertifications": [
+          {
+            "board": "American Board of Medical Specialties",
+            "specialty": "Emergency Medicine",
+            "certificationDate": "2017-06-01",
+            "status": "active"
+          }
+        ],
+        "languagesSpoken": [
+          {
+            "language": "English",
+            "proficiency": "native"
+          }
+        ],
+        "consultationFee": 220,
+        "acceptsInsurance": true,
+        "insurancesAccepted": [
+          "Aetna",
+          "Blue Cross Blue Shield",
+          "UnitedHealthcare"
+        ],
+        "isVerified": true,
+        "status": "approved",
+        "isAcceptingNewPatients": false,
+        "telemedicineEnabled": false
+      }
+    },
+    {
+      "firstName": "Charles",
+      "lastName": "Martinez",
+      "email": "charles.martinez28@healthcenter.com",
+      "password": "doctor123",
+      "phone": "5551283826",
+      "dateOfBirth": "1973-05-01",
+      "gender": "male",
+      "address": {
+        "street": "128 Main St",
+        "city": "Dallas",
+        "state": "TX",
+        "zipCode": "90028",
+        "country": "USA"
+      },
+      "profilePicture": "https://randomuser.me/api/portraits/men/28.jpg",
+      "bio": "Experienced orthopedics specialist providing compassionate care.",
+      "doctorInfo": {
+        "medicalLicenseNumber": "MD100028",
+        "licenseState": "CA",
+        "licenseExpiryDate": "2027-12-31",
+        "primarySpecialty": "Orthopedics",
+        "secondarySpecialties": [
+          "Psychiatry"
+        ],
+        "yearsOfExperience": 8,
+        "npiNumber": "1000000028",
+        "education": [
+          {
+            "institution": "State Medical University",
+            "degree": "MD",
+            "graduationYear": 2008
+          }
+        ],
+        "residency": [
+          {
+            "hospital": "General Hospital",
+            "specialty": "Orthopedics",
+            "startYear": 2011,
+            "endYear": 2014
+          }
+        ],
+        "hospitalAffiliations": [
+          {
+            "hospital": "San Jose Medical Center",
+            "position": "Attending Physician",
+            "department": "Orthopedics",
+            "isCurrentlyAffiliated": true
+          }
+        ],
+        "boardCertifications": [
+          {
+            "board": "American Board of Medical Specialties",
+            "specialty": "Orthopedics",
+            "certificationDate": "2018-06-01",
+            "status": "active"
+          }
+        ],
+        "languagesSpoken": [
+          {
+            "language": "English",
+            "proficiency": "native"
+          }
+        ],
+        "consultationFee": 230,
+        "acceptsInsurance": true,
+        "insurancesAccepted": [
+          "Aetna",
+          "Blue Cross Blue Shield",
+          "UnitedHealthcare"
+        ],
+        "isVerified": true,
+        "status": "approved",
+        "isAcceptingNewPatients": true,
+        "telemedicineEnabled": true
+      }
+    },
+    {
+      "firstName": "Nancy",
+      "lastName": "Gonzalez",
+      "email": "nancy.gonzalez29@healthcenter.com",
+      "password": "doctor123",
+      "phone": "5551293933",
+      "dateOfBirth": "1974-06-02",
+      "gender": "female",
+      "address": {
+        "street": "129 Main St",
+        "city": "San Jose",
+        "state": "CA",
+        "zipCode": "90029",
+        "country": "USA"
+      },
+      "profilePicture": "https://randomuser.me/api/portraits/women/29.jpg",
+      "bio": "Experienced radiology specialist providing compassionate care.",
+      "doctorInfo": {
+        "medicalLicenseNumber": "MD100029",
+        "licenseState": "TX",
+        "licenseExpiryDate": "2028-12-31",
+        "primarySpecialty": "Radiology",
+        "secondarySpecialties": [
+          "Neurosurgery"
+        ],
+        "yearsOfExperience": 9,
+        "npiNumber": "1000000029",
+        "education": [
+          {
+            "institution": "State Medical University",
+            "degree": "MD",
+            "graduationYear": 2009
+          }
+        ],
+        "residency": [
+          {
+            "hospital": "General Hospital",
+            "specialty": "Radiology",
+            "startYear": 2012,
+            "endYear": 2015
+          }
+        ],
+        "hospitalAffiliations": [
+          {
+            "hospital": "Dallas Medical Center",
+            "position": "Attending Physician",
+            "department": "Radiology",
+            "isCurrentlyAffiliated": true
+          }
+        ],
+        "boardCertifications": [
+          {
+            "board": "American Board of Medical Specialties",
+            "specialty": "Radiology",
+            "certificationDate": "2019-06-01",
+            "status": "active"
+          }
+        ],
+        "languagesSpoken": [
+          {
+            "language": "English",
+            "proficiency": "native"
+          }
+        ],
+        "consultationFee": 240,
+        "acceptsInsurance": true,
+        "insurancesAccepted": [
+          "Aetna",
+          "Blue Cross Blue Shield",
+          "UnitedHealthcare"
+        ],
+        "isVerified": true,
+        "status": "approved",
+        "isAcceptingNewPatients": true,
+        "telemedicineEnabled": false
+      }
+    },
+    {
+      "firstName": "Robert",
+      "lastName": "Brown",
+      "email": "robert.brown30@healthcenter.com",
+      "password": "doctor123",
+      "phone": "5551304040",
+      "dateOfBirth": "1975-07-03",
+      "gender": "male",
+      "address": {
+        "street": "130 Main St",
+        "city": "New York",
+        "state": "NY",
+        "zipCode": "90030",
+        "country": "USA"
+      },
+      "profilePicture": "https://randomuser.me/api/portraits/men/30.jpg",
+      "bio": "Experienced gynecology specialist providing compassionate care.",
+      "doctorInfo": {
+        "medicalLicenseNumber": "MD100030",
+        "licenseState": "IL",
+        "licenseExpiryDate": "2026-12-31",
+        "primarySpecialty": "Gynecology",
+        "secondarySpecialties": [
+          "Gynecology"
+        ],
+        "yearsOfExperience": 10,
+        "npiNumber": "1000000030",
+        "education": [
+          {
+            "institution": "State Medical University",
+            "degree": "MD",
+            "graduationYear": 2010
+          }
+        ],
+        "residency": [
+          {
+            "hospital": "General Hospital",
+            "specialty": "Gynecology",
+            "startYear": 2013,
+            "endYear": 2016
+          }
+        ],
+        "hospitalAffiliations": [
+          {
+            "hospital": "San Jose Medical Center",
+            "position": "Attending Physician",
+            "department": "Gynecology",
+            "isCurrentlyAffiliated": true
+          }
+        ],
+        "boardCertifications": [
+          {
+            "board": "American Board of Medical Specialties",
+            "specialty": "Gynecology",
+            "certificationDate": "2010-06-01",
+            "status": "active"
+          }
+        ],
+        "languagesSpoken": [
+          {
+            "language": "English",
+            "proficiency": "native"
+          }
+        ],
+        "consultationFee": 150,
+        "acceptsInsurance": true,
+        "insurancesAccepted": [
+          "Aetna",
+          "Blue Cross Blue Shield",
+          "UnitedHealthcare"
+        ],
+        "isVerified": true,
+        "status": "approved",
+        "isAcceptingNewPatients": false,
+        "telemedicineEnabled": true
+      }
+    },
+    {
+      "firstName": "Michelle",
+      "lastName": "Garcia",
+      "email": "michelle.garcia31@healthcenter.com",
+      "password": "doctor123",
+      "phone": "5551314147",
+      "dateOfBirth": "1976-08-04",
+      "gender": "female",
+      "address": {
+        "street": "131 Main St",
+        "city": "Los Angeles",
+        "state": "CA",
+        "zipCode": "90031",
+        "country": "USA"
+      },
+      "profilePicture": "https://randomuser.me/api/portraits/women/31.jpg",
+      "bio": "Experienced general surgery specialist providing compassionate care.",
+      "doctorInfo": {
+        "medicalLicenseNumber": "MD100031",
+        "licenseState": "IL",
+        "licenseExpiryDate": "2027-12-31",
+        "primarySpecialty": "General Surgery",
+        "secondarySpecialties": [
+          "Radiology"
+        ],
+        "yearsOfExperience": 11,
+        "npiNumber": "1000000031",
+        "education": [
+          {
+            "institution": "State Medical University",
+            "degree": "MD",
+            "graduationYear": 2011
+          }
+        ],
+        "residency": [
+          {
+            "hospital": "General Hospital",
+            "specialty": "General Surgery",
+            "startYear": 2014,
+            "endYear": 2017
+          }
+        ],
+        "hospitalAffiliations": [
+          {
+            "hospital": "Los Angeles Medical Center",
+            "position": "Attending Physician",
+            "department": "General Surgery",
+            "isCurrentlyAffiliated": true
+          }
+        ],
+        "boardCertifications": [
+          {
+            "board": "American Board of Medical Specialties",
+            "specialty": "General Surgery",
+            "certificationDate": "2011-06-01",
+            "status": "active"
+          }
+        ],
+        "languagesSpoken": [
+          {
+            "language": "English",
+            "proficiency": "native"
+          }
+        ],
+        "consultationFee": 160,
+        "acceptsInsurance": true,
+        "insurancesAccepted": [
+          "Aetna",
+          "Blue Cross Blue Shield",
+          "UnitedHealthcare"
+        ],
+        "isVerified": true,
+        "status": "approved",
+        "isAcceptingNewPatients": true,
+        "telemedicineEnabled": false
+      }
+    },
+    {
+      "firstName": "Thomas",
+      "lastName": "Johnson",
+      "email": "thomas.johnson32@healthcenter.com",
+      "password": "doctor123",
+      "phone": "5551324254",
+      "dateOfBirth": "1977-09-05",
+      "gender": "male",
+      "address": {
+        "street": "132 Main St",
+        "city": "Chicago",
+        "state": "IL",
+        "zipCode": "90032",
+        "country": "USA"
+      },
+      "profilePicture": "https://randomuser.me/api/portraits/men/32.jpg",
+      "bio": "Experienced otolaryngology specialist providing compassionate care.",
+      "doctorInfo": {
+        "medicalLicenseNumber": "MD100032",
+        "licenseState": "TX",
+        "licenseExpiryDate": "2028-12-31",
+        "primarySpecialty": "Otolaryngology",
+        "secondarySpecialties": [
+          "Gastroenterology"
+        ],
+        "yearsOfExperience": 12,
+        "npiNumber": "1000000032",
+        "education": [
+          {
+            "institution": "State Medical University",
+            "degree": "MD",
+            "graduationYear": 2012
+          }
+        ],
+        "residency": [
+          {
+            "hospital": "General Hospital",
+            "specialty": "Otolaryngology",
+            "startYear": 2015,
+            "endYear": 2018
+          }
+        ],
+        "hospitalAffiliations": [
+          {
+            "hospital": "Dallas Medical Center",
+            "position": "Attending Physician",
+            "department": "Otolaryngology",
+            "isCurrentlyAffiliated": true
+          }
+        ],
+        "boardCertifications": [
+          {
+            "board": "American Board of Medical Specialties",
+            "specialty": "Otolaryngology",
+            "certificationDate": "2012-06-01",
+            "status": "active"
+          }
+        ],
+        "languagesSpoken": [
+          {
+            "language": "English",
+            "proficiency": "native"
+          }
+        ],
+        "consultationFee": 170,
+        "acceptsInsurance": true,
+        "insurancesAccepted": [
+          "Aetna",
+          "Blue Cross Blue Shield",
+          "UnitedHealthcare"
+        ],
+        "isVerified": true,
+        "status": "approved",
+        "isAcceptingNewPatients": true,
+        "telemedicineEnabled": true
+      }
+    },
+    {
+      "firstName": "Karen",
+      "lastName": "Taylor",
+      "email": "karen.taylor33@healthcenter.com",
+      "password": "doctor123",
+      "phone": "5551334361",
+      "dateOfBirth": "1978-10-06",
+      "gender": "female",
+      "address": {
+        "street": "133 Main St",
+        "city": "Houston",
+        "state": "TX",
+        "zipCode": "90033",
+        "country": "USA"
+      },
+      "profilePicture": "https://randomuser.me/api/portraits/women/33.jpg",
+      "bio": "Experienced general surgery specialist providing compassionate care.",
+      "doctorInfo": {
+        "medicalLicenseNumber": "MD100033",
+        "licenseState": "TX",
+        "licenseExpiryDate": "2026-12-31",
+        "primarySpecialty": "General Surgery",
+        "secondarySpecialties": [
+          "Oncology"
+        ],
+        "yearsOfExperience": 13,
+        "npiNumber": "1000000033",
+        "education": [
+          {
+            "institution": "State Medical University",
+            "degree": "MD",
+            "graduationYear": 2013
+          }
+        ],
+        "residency": [
+          {
+            "hospital": "General Hospital",
+            "specialty": "General Surgery",
+            "startYear": 2016,
+            "endYear": 2019
+          }
+        ],
+        "hospitalAffiliations": [
+          {
+            "hospital": "Philadelphia Medical Center",
+            "position": "Attending Physician",
+            "department": "General Surgery",
+            "isCurrentlyAffiliated": true
+          }
+        ],
+        "boardCertifications": [
+          {
+            "board": "American Board of Medical Specialties",
+            "specialty": "General Surgery",
+            "certificationDate": "2013-06-01",
+            "status": "active"
+          }
+        ],
+        "languagesSpoken": [
+          {
+            "language": "English",
+            "proficiency": "native"
+          }
+        ],
+        "consultationFee": 180,
+        "acceptsInsurance": true,
+        "insurancesAccepted": [
+          "Aetna",
+          "Blue Cross Blue Shield",
+          "UnitedHealthcare"
+        ],
+        "isVerified": true,
+        "status": "approved",
+        "isAcceptingNewPatients": false,
+        "telemedicineEnabled": false
+      }
+    },
+    {
+      "firstName": "Thomas",
+      "lastName": "Wilson",
+      "email": "thomas.wilson34@healthcenter.com",
+      "password": "doctor123",
+      "phone": "5551344468",
+      "dateOfBirth": "1979-11-07",
+      "gender": "male",
+      "address": {
+        "street": "134 Main St",
+        "city": "Phoenix",
+        "state": "AZ",
+        "zipCode": "90034",
+        "country": "USA"
+      },
+      "profilePicture": "https://randomuser.me/api/portraits/men/34.jpg",
+      "bio": "Experienced family medicine specialist providing compassionate care.",
+      "doctorInfo": {
+        "medicalLicenseNumber": "MD100034",
+        "licenseState": "TX",
+        "licenseExpiryDate": "2027-12-31",
+        "primarySpecialty": "Family Medicine",
+        "secondarySpecialties": [
+          "Hematology"
+        ],
+        "yearsOfExperience": 14,
+        "npiNumber": "1000000034",
+        "education": [
+          {
+            "institution": "State Medical University",
+            "degree": "MD",
+            "graduationYear": 2014
+          }
+        ],
+        "residency": [
+          {
+            "hospital": "General Hospital",
+            "specialty": "Family Medicine",
+            "startYear": 2017,
+            "endYear": 2020
+          }
+        ],
+        "hospitalAffiliations": [
+          {
+            "hospital": "Philadelphia Medical Center",
+            "position": "Attending Physician",
+            "department": "Family Medicine",
+            "isCurrentlyAffiliated": true
+          }
+        ],
+        "boardCertifications": [
+          {
+            "board": "American Board of Medical Specialties",
+            "specialty": "Family Medicine",
+            "certificationDate": "2014-06-01",
+            "status": "active"
+          }
+        ],
+        "languagesSpoken": [
+          {
+            "language": "English",
+            "proficiency": "native"
+          }
+        ],
+        "consultationFee": 190,
+        "acceptsInsurance": true,
+        "insurancesAccepted": [
+          "Aetna",
+          "Blue Cross Blue Shield",
+          "UnitedHealthcare"
+        ],
+        "isVerified": true,
+        "status": "approved",
+        "isAcceptingNewPatients": true,
+        "telemedicineEnabled": true
+      }
+    },
+    {
+      "firstName": "Mary",
+      "lastName": "Rodriguez",
+      "email": "mary.rodriguez35@healthcenter.com",
+      "password": "doctor123",
+      "phone": "5551354575",
+      "dateOfBirth": "1980-12-08",
+      "gender": "female",
+      "address": {
+        "street": "135 Main St",
+        "city": "Philadelphia",
+        "state": "PA",
+        "zipCode": "90035",
+        "country": "USA"
+      },
+      "profilePicture": "https://randomuser.me/api/portraits/women/35.jpg",
+      "bio": "Experienced oncology specialist providing compassionate care.",
+      "doctorInfo": {
+        "medicalLicenseNumber": "MD100035",
+        "licenseState": "IL",
+        "licenseExpiryDate": "2028-12-31",
+        "primarySpecialty": "Oncology",
+        "secondarySpecialties": [
+          "Cardiology"
+        ],
+        "yearsOfExperience": 15,
+        "npiNumber": "1000000035",
+        "education": [
+          {
+            "institution": "State Medical University",
+            "degree": "MD",
+            "graduationYear": 2015
+          }
+        ],
+        "residency": [
+          {
+            "hospital": "General Hospital",
+            "specialty": "Oncology",
+            "startYear": 2018,
+            "endYear": 2021
+          }
+        ],
+        "hospitalAffiliations": [
+          {
+            "hospital": "San Jose Medical Center",
+            "position": "Attending Physician",
+            "department": "Oncology",
+            "isCurrentlyAffiliated": true
+          }
+        ],
+        "boardCertifications": [
+          {
+            "board": "American Board of Medical Specialties",
+            "specialty": "Oncology",
+            "certificationDate": "2015-06-01",
+            "status": "active"
+          }
+        ],
+        "languagesSpoken": [
+          {
+            "language": "English",
+            "proficiency": "native"
+          }
+        ],
+        "consultationFee": 200,
+        "acceptsInsurance": true,
+        "insurancesAccepted": [
+          "Aetna",
+          "Blue Cross Blue Shield",
+          "UnitedHealthcare"
+        ],
+        "isVerified": true,
+        "status": "approved",
+        "isAcceptingNewPatients": true,
+        "telemedicineEnabled": false
+      }
+    },
+    {
+      "firstName": "Steven",
+      "lastName": "Jones",
+      "email": "steven.jones36@healthcenter.com",
+      "password": "doctor123",
+      "phone": "5551364682",
+      "dateOfBirth": "1981-01-09",
+      "gender": "male",
+      "address": {
+        "street": "136 Main St",
+        "city": "San Antonio",
+        "state": "TX",
+        "zipCode": "90036",
+        "country": "USA"
+      },
+      "profilePicture": "https://randomuser.me/api/portraits/men/36.jpg",
+      "bio": "Experienced gynecology specialist providing compassionate care.",
+      "doctorInfo": {
+        "medicalLicenseNumber": "MD100036",
+        "licenseState": "TX",
+        "licenseExpiryDate": "2026-12-31",
+        "primarySpecialty": "Gynecology",
+        "secondarySpecialties": [
+          "Emergency Medicine"
+        ],
+        "yearsOfExperience": 16,
+        "npiNumber": "1000000036",
+        "education": [
+          {
+            "institution": "State Medical University",
+            "degree": "MD",
+            "graduationYear": 2016
+          }
+        ],
+        "residency": [
+          {
+            "hospital": "General Hospital",
+            "specialty": "Gynecology",
+            "startYear": 2001,
+            "endYear": 2004
+          }
+        ],
+        "hospitalAffiliations": [
+          {
+            "hospital": "Dallas Medical Center",
+            "position": "Attending Physician",
+            "department": "Gynecology",
+            "isCurrentlyAffiliated": true
+          }
+        ],
+        "boardCertifications": [
+          {
+            "board": "American Board of Medical Specialties",
+            "specialty": "Gynecology",
+            "certificationDate": "2016-06-01",
+            "status": "active"
+          }
+        ],
+        "languagesSpoken": [
+          {
+            "language": "English",
+            "proficiency": "native"
+          }
+        ],
+        "consultationFee": 210,
+        "acceptsInsurance": true,
+        "insurancesAccepted": [
+          "Aetna",
+          "Blue Cross Blue Shield",
+          "UnitedHealthcare"
+        ],
+        "isVerified": true,
+        "status": "approved",
+        "isAcceptingNewPatients": false,
+        "telemedicineEnabled": true
+      }
+    },
+    {
+      "firstName": "Lisa",
+      "lastName": "Martin",
+      "email": "lisa.martin37@healthcenter.com",
+      "password": "doctor123",
+      "phone": "5551374789",
+      "dateOfBirth": "1982-02-10",
+      "gender": "female",
+      "address": {
+        "street": "137 Main St",
+        "city": "San Diego",
+        "state": "CA",
+        "zipCode": "90037",
+        "country": "USA"
+      },
+      "profilePicture": "https://randomuser.me/api/portraits/women/37.jpg",
+      "bio": "Experienced internal medicine specialist providing compassionate care.",
+      "doctorInfo": {
+        "medicalLicenseNumber": "MD100037",
+        "licenseState": "TX",
+        "licenseExpiryDate": "2027-12-31",
+        "primarySpecialty": "Internal Medicine",
+        "secondarySpecialties": [
+          "Pediatrics"
+        ],
+        "yearsOfExperience": 17,
+        "npiNumber": "1000000037",
+        "education": [
+          {
+            "institution": "State Medical University",
+            "degree": "MD",
+            "graduationYear": 2017
+          }
+        ],
+        "residency": [
+          {
+            "hospital": "General Hospital",
+            "specialty": "Internal Medicine",
+            "startYear": 2002,
+            "endYear": 2005
+          }
+        ],
+        "hospitalAffiliations": [
+          {
+            "hospital": "San Antonio Medical Center",
+            "position": "Attending Physician",
+            "department": "Internal Medicine",
+            "isCurrentlyAffiliated": true
+          }
+        ],
+        "boardCertifications": [
+          {
+            "board": "American Board of Medical Specialties",
+            "specialty": "Internal Medicine",
+            "certificationDate": "2017-06-01",
+            "status": "active"
+          }
+        ],
+        "languagesSpoken": [
+          {
+            "language": "English",
+            "proficiency": "native"
+          }
+        ],
+        "consultationFee": 220,
+        "acceptsInsurance": true,
+        "insurancesAccepted": [
+          "Aetna",
+          "Blue Cross Blue Shield",
+          "UnitedHealthcare"
+        ],
+        "isVerified": true,
+        "status": "approved",
+        "isAcceptingNewPatients": true,
+        "telemedicineEnabled": false
+      }
+    },
+    {
+      "firstName": "David",
+      "lastName": "Brown",
+      "email": "david.brown38@healthcenter.com",
+      "password": "doctor123",
+      "phone": "5551384896",
+      "dateOfBirth": "1983-03-11",
+      "gender": "male",
+      "address": {
+        "street": "138 Main St",
+        "city": "Dallas",
+        "state": "TX",
+        "zipCode": "90038",
+        "country": "USA"
+      },
+      "profilePicture": "https://randomuser.me/api/portraits/men/38.jpg",
+      "bio": "Experienced gynecology specialist providing compassionate care.",
+      "doctorInfo": {
+        "medicalLicenseNumber": "MD100038",
+        "licenseState": "TX",
+        "licenseExpiryDate": "2028-12-31",
+        "primarySpecialty": "Gynecology",
+        "secondarySpecialties": [
+          "Internal Medicine"
+        ],
+        "yearsOfExperience": 18,
+        "npiNumber": "1000000038",
+        "education": [
+          {
+            "institution": "State Medical University",
+            "degree": "MD",
+            "graduationYear": 2018
+          }
+        ],
+        "residency": [
+          {
+            "hospital": "General Hospital",
+            "specialty": "Gynecology",
+            "startYear": 2003,
+            "endYear": 2006
+          }
+        ],
+        "hospitalAffiliations": [
+          {
+            "hospital": "Houston Medical Center",
+            "position": "Attending Physician",
+            "department": "Gynecology",
+            "isCurrentlyAffiliated": true
+          }
+        ],
+        "boardCertifications": [
+          {
+            "board": "American Board of Medical Specialties",
+            "specialty": "Gynecology",
+            "certificationDate": "2018-06-01",
+            "status": "active"
+          }
+        ],
+        "languagesSpoken": [
+          {
+            "language": "English",
+            "proficiency": "native"
+          }
+        ],
+        "consultationFee": 230,
+        "acceptsInsurance": true,
+        "insurancesAccepted": [
+          "Aetna",
+          "Blue Cross Blue Shield",
+          "UnitedHealthcare"
+        ],
+        "isVerified": true,
+        "status": "approved",
+        "isAcceptingNewPatients": true,
+        "telemedicineEnabled": true
+      }
+    },
+    {
+      "firstName": "Ashley",
+      "lastName": "Smith",
+      "email": "ashley.smith39@healthcenter.com",
+      "password": "doctor123",
+      "phone": "5551394913",
+      "dateOfBirth": "1984-04-12",
+      "gender": "female",
+      "address": {
+        "street": "139 Main St",
+        "city": "San Jose",
+        "state": "CA",
+        "zipCode": "90039",
+        "country": "USA"
+      },
+      "profilePicture": "https://randomuser.me/api/portraits/women/39.jpg",
+      "bio": "Experienced rheumatology specialist providing compassionate care.",
+      "doctorInfo": {
+        "medicalLicenseNumber": "MD100039",
+        "licenseState": "TX",
+        "licenseExpiryDate": "2026-12-31",
+        "primarySpecialty": "Rheumatology",
+        "secondarySpecialties": [
+          "Cardiology"
+        ],
+        "yearsOfExperience": 19,
+        "npiNumber": "1000000039",
+        "education": [
+          {
+            "institution": "State Medical University",
+            "degree": "MD",
+            "graduationYear": 2019
+          }
+        ],
+        "residency": [
+          {
+            "hospital": "General Hospital",
+            "specialty": "Rheumatology",
+            "startYear": 2004,
+            "endYear": 2007
+          }
+        ],
+        "hospitalAffiliations": [
+          {
+            "hospital": "San Antonio Medical Center",
+            "position": "Attending Physician",
+            "department": "Rheumatology",
+            "isCurrentlyAffiliated": true
+          }
+        ],
+        "boardCertifications": [
+          {
+            "board": "American Board of Medical Specialties",
+            "specialty": "Rheumatology",
+            "certificationDate": "2019-06-01",
+            "status": "active"
+          }
+        ],
+        "languagesSpoken": [
+          {
+            "language": "English",
+            "proficiency": "native"
+          }
+        ],
+        "consultationFee": 240,
+        "acceptsInsurance": true,
+        "insurancesAccepted": [
+          "Aetna",
+          "Blue Cross Blue Shield",
+          "UnitedHealthcare"
+        ],
+        "isVerified": true,
+        "status": "approved",
+        "isAcceptingNewPatients": false,
+        "telemedicineEnabled": false
+      }
+    },
+    {
+      "firstName": "Andrew",
+      "lastName": "Williams",
+      "email": "andrew.williams40@healthcenter.com",
+      "password": "doctor123",
+      "phone": "5551405020",
+      "dateOfBirth": "1985-05-13",
+      "gender": "male",
+      "address": {
+        "street": "140 Main St",
+        "city": "New York",
+        "state": "NY",
+        "zipCode": "90040",
+        "country": "USA"
+      },
+      "profilePicture": "https://randomuser.me/api/portraits/men/40.jpg",
+      "bio": "Experienced neurosurgery specialist providing compassionate care.",
+      "doctorInfo": {
+        "medicalLicenseNumber": "MD100040",
+        "licenseState": "PA",
+        "licenseExpiryDate": "2027-12-31",
+        "primarySpecialty": "Neurosurgery",
+        "secondarySpecialties": [
+          "Pulmonology"
+        ],
+        "yearsOfExperience": 20,
+        "npiNumber": "1000000040",
+        "education": [
+          {
+            "institution": "State Medical University",
+            "degree": "MD",
+            "graduationYear": 2000
+          }
+        ],
+        "residency": [
+          {
+            "hospital": "General Hospital",
+            "specialty": "Neurosurgery",
+            "startYear": 2005,
+            "endYear": 2008
+          }
+        ],
+        "hospitalAffiliations": [
+          {
+            "hospital": "San Diego Medical Center",
+            "position": "Attending Physician",
+            "department": "Neurosurgery",
+            "isCurrentlyAffiliated": true
+          }
+        ],
+        "boardCertifications": [
+          {
+            "board": "American Board of Medical Specialties",
+            "specialty": "Neurosurgery",
+            "certificationDate": "2010-06-01",
+            "status": "active"
+          }
+        ],
+        "languagesSpoken": [
+          {
+            "language": "English",
+            "proficiency": "native"
+          }
+        ],
+        "consultationFee": 150,
+        "acceptsInsurance": true,
+        "insurancesAccepted": [
+          "Aetna",
+          "Blue Cross Blue Shield",
+          "UnitedHealthcare"
+        ],
+        "isVerified": true,
+        "status": "approved",
+        "isAcceptingNewPatients": true,
+        "telemedicineEnabled": true
+      }
+    },
+    {
+      "firstName": "Kimberly",
+      "lastName": "Johnson",
+      "email": "kimberly.johnson41@healthcenter.com",
+      "password": "doctor123",
+      "phone": "5551415127",
+      "dateOfBirth": "1986-06-14",
+      "gender": "female",
+      "address": {
+        "street": "141 Main St",
+        "city": "Los Angeles",
+        "state": "CA",
+        "zipCode": "90041",
+        "country": "USA"
+      },
+      "profilePicture": "https://randomuser.me/api/portraits/women/41.jpg",
+      "bio": "Experienced urology specialist providing compassionate care.",
+      "doctorInfo": {
+        "medicalLicenseNumber": "MD100041",
+        "licenseState": "TX",
+        "licenseExpiryDate": "2028-12-31",
+        "primarySpecialty": "Urology",
+        "secondarySpecialties": [
+          "Hematology"
+        ],
+        "yearsOfExperience": 21,
+        "npiNumber": "1000000041",
+        "education": [
+          {
+            "institution": "State Medical University",
+            "degree": "MD",
+            "graduationYear": 2001
+          }
+        ],
+        "residency": [
+          {
+            "hospital": "General Hospital",
+            "specialty": "Urology",
+            "startYear": 2006,
+            "endYear": 2009
+          }
+        ],
+        "hospitalAffiliations": [
+          {
+            "hospital": "San Diego Medical Center",
+            "position": "Attending Physician",
+            "department": "Urology",
+            "isCurrentlyAffiliated": true
+          }
+        ],
+        "boardCertifications": [
+          {
+            "board": "American Board of Medical Specialties",
+            "specialty": "Urology",
+            "certificationDate": "2011-06-01",
+            "status": "active"
+          }
+        ],
+        "languagesSpoken": [
+          {
+            "language": "English",
+            "proficiency": "native"
+          }
+        ],
+        "consultationFee": 160,
+        "acceptsInsurance": true,
+        "insurancesAccepted": [
+          "Aetna",
+          "Blue Cross Blue Shield",
+          "UnitedHealthcare"
+        ],
+        "isVerified": true,
+        "status": "approved",
+        "isAcceptingNewPatients": true,
+        "telemedicineEnabled": false
+      }
+    },
+    {
+      "firstName": "Anthony",
+      "lastName": "Taylor",
+      "email": "anthony.taylor42@healthcenter.com",
+      "password": "doctor123",
+      "phone": "5551425234",
+      "dateOfBirth": "1987-07-15",
+      "gender": "male",
+      "address": {
+        "street": "142 Main St",
+        "city": "Chicago",
+        "state": "IL",
+        "zipCode": "90042",
+        "country": "USA"
+      },
+      "profilePicture": "https://randomuser.me/api/portraits/men/42.jpg",
+      "bio": "Experienced neurology specialist providing compassionate care.",
+      "doctorInfo": {
+        "medicalLicenseNumber": "MD100042",
+        "licenseState": "TX",
+        "licenseExpiryDate": "2026-12-31",
+        "primarySpecialty": "Neurology",
+        "secondarySpecialties": [
+          "Radiology"
+        ],
+        "yearsOfExperience": 22,
+        "npiNumber": "1000000042",
+        "education": [
+          {
+            "institution": "State Medical University",
+            "degree": "MD",
+            "graduationYear": 2002
+          }
+        ],
+        "residency": [
+          {
+            "hospital": "General Hospital",
+            "specialty": "Neurology",
+            "startYear": 2007,
+            "endYear": 2010
+          }
+        ],
+        "hospitalAffiliations": [
+          {
+            "hospital": "Phoenix Medical Center",
+            "position": "Attending Physician",
+            "department": "Neurology",
+            "isCurrentlyAffiliated": true
+          }
+        ],
+        "boardCertifications": [
+          {
+            "board": "American Board of Medical Specialties",
+            "specialty": "Neurology",
+            "certificationDate": "2012-06-01",
+            "status": "active"
+          }
+        ],
+        "languagesSpoken": [
+          {
+            "language": "English",
+            "proficiency": "native"
+          }
+        ],
+        "consultationFee": 170,
+        "acceptsInsurance": true,
+        "insurancesAccepted": [
+          "Aetna",
+          "Blue Cross Blue Shield",
+          "UnitedHealthcare"
+        ],
+        "isVerified": true,
+        "status": "approved",
+        "isAcceptingNewPatients": false,
+        "telemedicineEnabled": true
+      }
+    },
+    {
+      "firstName": "Margaret",
+      "lastName": "Rodriguez",
+      "email": "margaret.rodriguez43@healthcenter.com",
+      "password": "doctor123",
+      "phone": "5551435341",
+      "dateOfBirth": "1988-08-16",
+      "gender": "female",
+      "address": {
+        "street": "143 Main St",
+        "city": "Houston",
+        "state": "TX",
+        "zipCode": "90043",
+        "country": "USA"
+      },
+      "profilePicture": "https://randomuser.me/api/portraits/women/43.jpg",
+      "bio": "Experienced emergency medicine specialist providing compassionate care.",
+      "doctorInfo": {
+        "medicalLicenseNumber": "MD100043",
+        "licenseState": "TX",
+        "licenseExpiryDate": "2027-12-31",
+        "primarySpecialty": "Emergency Medicine",
+        "secondarySpecialties": [
+          "Rheumatology"
+        ],
+        "yearsOfExperience": 23,
+        "npiNumber": "1000000043",
+        "education": [
+          {
+            "institution": "State Medical University",
+            "degree": "MD",
+            "graduationYear": 2003
+          }
+        ],
+        "residency": [
+          {
+            "hospital": "General Hospital",
+            "specialty": "Emergency Medicine",
+            "startYear": 2008,
+            "endYear": 2011
+          }
+        ],
+        "hospitalAffiliations": [
+          {
+            "hospital": "Los Angeles Medical Center",
+            "position": "Attending Physician",
+            "department": "Emergency Medicine",
+            "isCurrentlyAffiliated": true
+          }
+        ],
+        "boardCertifications": [
+          {
+            "board": "American Board of Medical Specialties",
+            "specialty": "Emergency Medicine",
+            "certificationDate": "2013-06-01",
+            "status": "active"
+          }
+        ],
+        "languagesSpoken": [
+          {
+            "language": "English",
+            "proficiency": "native"
+          }
+        ],
+        "consultationFee": 180,
+        "acceptsInsurance": true,
+        "insurancesAccepted": [
+          "Aetna",
+          "Blue Cross Blue Shield",
+          "UnitedHealthcare"
+        ],
+        "isVerified": true,
+        "status": "approved",
+        "isAcceptingNewPatients": true,
+        "telemedicineEnabled": false
+      }
+    },
+    {
+      "firstName": "Joseph",
+      "lastName": "Jackson",
+      "email": "joseph.jackson44@healthcenter.com",
+      "password": "doctor123",
+      "phone": "5551445448",
+      "dateOfBirth": "1989-09-17",
+      "gender": "male",
+      "address": {
+        "street": "144 Main St",
+        "city": "Phoenix",
+        "state": "AZ",
+        "zipCode": "90044",
+        "country": "USA"
+      },
+      "profilePicture": "https://randomuser.me/api/portraits/men/44.jpg",
+      "bio": "Experienced cardiology specialist providing compassionate care.",
+      "doctorInfo": {
+        "medicalLicenseNumber": "MD100044",
+        "licenseState": "PA",
+        "licenseExpiryDate": "2028-12-31",
+        "primarySpecialty": "Cardiology",
+        "secondarySpecialties": [
+          "Neurosurgery"
+        ],
+        "yearsOfExperience": 24,
+        "npiNumber": "1000000044",
+        "education": [
+          {
+            "institution": "State Medical University",
+            "degree": "MD",
+            "graduationYear": 2004
+          }
+        ],
+        "residency": [
+          {
+            "hospital": "General Hospital",
+            "specialty": "Cardiology",
+            "startYear": 2009,
+            "endYear": 2012
+          }
+        ],
+        "hospitalAffiliations": [
+          {
+            "hospital": "Dallas Medical Center",
+            "position": "Attending Physician",
+            "department": "Cardiology",
+            "isCurrentlyAffiliated": true
+          }
+        ],
+        "boardCertifications": [
+          {
+            "board": "American Board of Medical Specialties",
+            "specialty": "Cardiology",
+            "certificationDate": "2014-06-01",
+            "status": "active"
+          }
+        ],
+        "languagesSpoken": [
+          {
+            "language": "English",
+            "proficiency": "native"
+          }
+        ],
+        "consultationFee": 190,
+        "acceptsInsurance": true,
+        "insurancesAccepted": [
+          "Aetna",
+          "Blue Cross Blue Shield",
+          "UnitedHealthcare"
+        ],
+        "isVerified": true,
+        "status": "approved",
+        "isAcceptingNewPatients": true,
+        "telemedicineEnabled": true
+      }
+    },
+    {
+      "firstName": "Kimberly",
+      "lastName": "Jackson",
+      "email": "kimberly.jackson45@healthcenter.com",
+      "password": "doctor123",
+      "phone": "5551455555",
+      "dateOfBirth": "1990-10-18",
+      "gender": "female",
+      "address": {
+        "street": "145 Main St",
+        "city": "Philadelphia",
+        "state": "PA",
+        "zipCode": "90045",
+        "country": "USA"
+      },
+      "profilePicture": "https://randomuser.me/api/portraits/women/45.jpg",
+      "bio": "Experienced endocrinology specialist providing compassionate care.",
+      "doctorInfo": {
+        "medicalLicenseNumber": "MD100045",
+        "licenseState": "CA",
+        "licenseExpiryDate": "2026-12-31",
+        "primarySpecialty": "Endocrinology",
+        "secondarySpecialties": [
+          "Otolaryngology"
+        ],
+        "yearsOfExperience": 25,
+        "npiNumber": "1000000045",
+        "education": [
+          {
+            "institution": "State Medical University",
+            "degree": "MD",
+            "graduationYear": 2005
+          }
+        ],
+        "residency": [
+          {
+            "hospital": "General Hospital",
+            "specialty": "Endocrinology",
+            "startYear": 2010,
+            "endYear": 2013
+          }
+        ],
+        "hospitalAffiliations": [
+          {
+            "hospital": "New York Medical Center",
+            "position": "Attending Physician",
+            "department": "Endocrinology",
+            "isCurrentlyAffiliated": true
+          }
+        ],
+        "boardCertifications": [
+          {
+            "board": "American Board of Medical Specialties",
+            "specialty": "Endocrinology",
+            "certificationDate": "2015-06-01",
+            "status": "active"
+          }
+        ],
+        "languagesSpoken": [
+          {
+            "language": "English",
+            "proficiency": "native"
+          }
+        ],
+        "consultationFee": 200,
+        "acceptsInsurance": true,
+        "insurancesAccepted": [
+          "Aetna",
+          "Blue Cross Blue Shield",
+          "UnitedHealthcare"
+        ],
+        "isVerified": true,
+        "status": "approved",
+        "isAcceptingNewPatients": false,
+        "telemedicineEnabled": false
+      }
+    },
+    {
+      "firstName": "Joshua",
+      "lastName": "Anderson",
+      "email": "joshua.anderson46@healthcenter.com",
+      "password": "doctor123",
+      "phone": "5551465662",
+      "dateOfBirth": "1991-11-19",
+      "gender": "male",
+      "address": {
+        "street": "146 Main St",
+        "city": "San Antonio",
+        "state": "TX",
+        "zipCode": "90046",
+        "country": "USA"
+      },
+      "profilePicture": "https://randomuser.me/api/portraits/men/46.jpg",
+      "bio": "Experienced endocrinology specialist providing compassionate care.",
+      "doctorInfo": {
+        "medicalLicenseNumber": "MD100046",
+        "licenseState": "PA",
+        "licenseExpiryDate": "2027-12-31",
+        "primarySpecialty": "Endocrinology",
+        "secondarySpecialties": [
+          "Neurology"
+        ],
+        "yearsOfExperience": 26,
+        "npiNumber": "1000000046",
+        "education": [
+          {
+            "institution": "State Medical University",
+            "degree": "MD",
+            "graduationYear": 2006
+          }
+        ],
+        "residency": [
+          {
+            "hospital": "General Hospital",
+            "specialty": "Endocrinology",
+            "startYear": 2011,
+            "endYear": 2014
+          }
+        ],
+        "hospitalAffiliations": [
+          {
+            "hospital": "Dallas Medical Center",
+            "position": "Attending Physician",
+            "department": "Endocrinology",
+            "isCurrentlyAffiliated": true
+          }
+        ],
+        "boardCertifications": [
+          {
+            "board": "American Board of Medical Specialties",
+            "specialty": "Endocrinology",
+            "certificationDate": "2016-06-01",
+            "status": "active"
+          }
+        ],
+        "languagesSpoken": [
+          {
+            "language": "English",
+            "proficiency": "native"
+          }
+        ],
+        "consultationFee": 210,
+        "acceptsInsurance": true,
+        "insurancesAccepted": [
+          "Aetna",
+          "Blue Cross Blue Shield",
+          "UnitedHealthcare"
+        ],
+        "isVerified": true,
+        "status": "approved",
+        "isAcceptingNewPatients": true,
+        "telemedicineEnabled": true
+      }
+    },
+    {
+      "firstName": "Karen",
+      "lastName": "Smith",
+      "email": "karen.smith47@healthcenter.com",
+      "password": "doctor123",
+      "phone": "5551475769",
+      "dateOfBirth": "1992-12-20",
+      "gender": "female",
+      "address": {
+        "street": "147 Main St",
+        "city": "San Diego",
+        "state": "CA",
+        "zipCode": "90047",
+        "country": "USA"
+      },
+      "profilePicture": "https://randomuser.me/api/portraits/women/47.jpg",
+      "bio": "Experienced infectious disease specialist providing compassionate care.",
+      "doctorInfo": {
+        "medicalLicenseNumber": "MD100047",
+        "licenseState": "AZ",
+        "licenseExpiryDate": "2028-12-31",
+        "primarySpecialty": "Infectious Disease",
+        "secondarySpecialties": [
+          "Rheumatology"
+        ],
+        "yearsOfExperience": 27,
+        "npiNumber": "1000000047",
+        "education": [
+          {
+            "institution": "State Medical University",
+            "degree": "MD",
+            "graduationYear": 2007
+          }
+        ],
+        "residency": [
+          {
+            "hospital": "General Hospital",
+            "specialty": "Infectious Disease",
+            "startYear": 2012,
+            "endYear": 2015
+          }
+        ],
+        "hospitalAffiliations": [
+          {
+            "hospital": "San Jose Medical Center",
+            "position": "Attending Physician",
+            "department": "Infectious Disease",
+            "isCurrentlyAffiliated": true
+          }
+        ],
+        "boardCertifications": [
+          {
+            "board": "American Board of Medical Specialties",
+            "specialty": "Infectious Disease",
+            "certificationDate": "2017-06-01",
+            "status": "active"
+          }
+        ],
+        "languagesSpoken": [
+          {
+            "language": "English",
+            "proficiency": "native"
+          }
+        ],
+        "consultationFee": 220,
+        "acceptsInsurance": true,
+        "insurancesAccepted": [
+          "Aetna",
+          "Blue Cross Blue Shield",
+          "UnitedHealthcare"
+        ],
+        "isVerified": true,
+        "status": "approved",
+        "isAcceptingNewPatients": true,
+        "telemedicineEnabled": false
+      }
+    },
+    {
+      "firstName": "William",
+      "lastName": "Smith",
+      "email": "william.smith48@healthcenter.com",
+      "password": "doctor123",
+      "phone": "5551485876",
+      "dateOfBirth": "1993-01-21",
+      "gender": "male",
+      "address": {
+        "street": "148 Main St",
+        "city": "Dallas",
+        "state": "TX",
+        "zipCode": "90048",
+        "country": "USA"
+      },
+      "profilePicture": "https://randomuser.me/api/portraits/men/48.jpg",
+      "bio": "Experienced neurology specialist providing compassionate care.",
+      "doctorInfo": {
+        "medicalLicenseNumber": "MD100048",
+        "licenseState": "PA",
+        "licenseExpiryDate": "2026-12-31",
+        "primarySpecialty": "Neurology",
+        "secondarySpecialties": [
+          "Pediatrics"
+        ],
+        "yearsOfExperience": 28,
+        "npiNumber": "1000000048",
+        "education": [
+          {
+            "institution": "State Medical University",
+            "degree": "MD",
+            "graduationYear": 2008
+          }
+        ],
+        "residency": [
+          {
+            "hospital": "General Hospital",
+            "specialty": "Neurology",
+            "startYear": 2013,
+            "endYear": 2016
+          }
+        ],
+        "hospitalAffiliations": [
+          {
+            "hospital": "Philadelphia Medical Center",
+            "position": "Attending Physician",
+            "department": "Neurology",
+            "isCurrentlyAffiliated": true
+          }
+        ],
+        "boardCertifications": [
+          {
+            "board": "American Board of Medical Specialties",
+            "specialty": "Neurology",
+            "certificationDate": "2018-06-01",
+            "status": "active"
+          }
+        ],
+        "languagesSpoken": [
+          {
+            "language": "English",
+            "proficiency": "native"
+          }
+        ],
+        "consultationFee": 230,
+        "acceptsInsurance": true,
+        "insurancesAccepted": [
+          "Aetna",
+          "Blue Cross Blue Shield",
+          "UnitedHealthcare"
+        ],
+        "isVerified": true,
+        "status": "approved",
+        "isAcceptingNewPatients": false,
+        "telemedicineEnabled": true
+      }
+    },
+    {
+      "firstName": "Jessica",
+      "lastName": "Moore",
+      "email": "jessica.moore49@healthcenter.com",
+      "password": "doctor123",
+      "phone": "5551495983",
+      "dateOfBirth": "1994-02-22",
+      "gender": "female",
+      "address": {
+        "street": "149 Main St",
+        "city": "San Jose",
+        "state": "CA",
+        "zipCode": "90049",
+        "country": "USA"
+      },
+      "profilePicture": "https://randomuser.me/api/portraits/women/49.jpg",
+      "bio": "Experienced orthopedics specialist providing compassionate care.",
+      "doctorInfo": {
+        "medicalLicenseNumber": "MD100049",
+        "licenseState": "NY",
+        "licenseExpiryDate": "2027-12-31",
+        "primarySpecialty": "Orthopedics",
+        "secondarySpecialties": [
+          "Radiology"
+        ],
+        "yearsOfExperience": 29,
+        "npiNumber": "1000000049",
+        "education": [
+          {
+            "institution": "State Medical University",
+            "degree": "MD",
+            "graduationYear": 2009
+          }
+        ],
+        "residency": [
+          {
+            "hospital": "General Hospital",
+            "specialty": "Orthopedics",
+            "startYear": 2014,
+            "endYear": 2017
+          }
+        ],
+        "hospitalAffiliations": [
+          {
+            "hospital": "Philadelphia Medical Center",
+            "position": "Attending Physician",
+            "department": "Orthopedics",
+            "isCurrentlyAffiliated": true
+          }
+        ],
+        "boardCertifications": [
+          {
+            "board": "American Board of Medical Specialties",
+            "specialty": "Orthopedics",
+            "certificationDate": "2019-06-01",
+            "status": "active"
+          }
+        ],
+        "languagesSpoken": [
+          {
+            "language": "English",
+            "proficiency": "native"
+          }
+        ],
+        "consultationFee": 240,
+        "acceptsInsurance": true,
+        "insurancesAccepted": [
+          "Aetna",
+          "Blue Cross Blue Shield",
+          "UnitedHealthcare"
+        ],
+        "isVerified": true,
+        "status": "approved",
+        "isAcceptingNewPatients": true,
+        "telemedicineEnabled": false
+      }
+    }
+  ],
+  "patients": [
+    {
+      "firstName": "Michelle",
+      "lastName": "Jackson",
+      "email": "michelle.jackson0@email.com",
+      "password": "patient123",
+      "phone": "5552002080",
+      "dateOfBirth": "1980-01-01",
+      "gender": "female",
+      "address": {
+        "street": "1100 Main St",
+        "city": "New York",
+        "state": "NY",
+        "zipCode": "91000",
+        "country": "USA"
+      },
+      "profilePicture": "https://randomuser.me/api/portraits/women/50.jpg",
+      "bio": "Patient focused on wellness and preventive care.",
+      "patientInfo": {
+        "emergencyContact": {
+          "name": "John Doe",
+          "relationship": "Spouse",
+          "phone": "5553003060",
+          "email": "john0@email.com"
+        }
+      }
+    },
+    {
+      "firstName": "Donald",
+      "lastName": "Martin",
+      "email": "donald.martin1@email.com",
+      "password": "patient123",
+      "phone": "5552012187",
+      "dateOfBirth": "1981-02-02",
+      "gender": "male",
+      "address": {
+        "street": "1101 Main St",
+        "city": "Los Angeles",
+        "state": "CA",
+        "zipCode": "91001",
+        "country": "USA"
+      },
+      "profilePicture": "https://randomuser.me/api/portraits/men/51.jpg",
+      "bio": "Patient focused on wellness and preventive care.",
+      "patientInfo": {
+        "emergencyContact": {
+          "name": "Jane Doe",
+          "relationship": "Spouse",
+          "phone": "5553013167",
+          "email": "jane1@email.com"
+        }
+      }
+    },
+    {
+      "firstName": "Sandra",
+      "lastName": "Smith",
+      "email": "sandra.smith2@email.com",
+      "password": "patient123",
+      "phone": "5552022294",
+      "dateOfBirth": "1982-03-03",
+      "gender": "female",
+      "address": {
+        "street": "1102 Main St",
+        "city": "Chicago",
+        "state": "IL",
+        "zipCode": "91002",
+        "country": "USA"
+      },
+      "profilePicture": "https://randomuser.me/api/portraits/women/52.jpg",
+      "bio": "Patient focused on wellness and preventive care.",
+      "patientInfo": {
+        "emergencyContact": {
+          "name": "John Doe",
+          "relationship": "Spouse",
+          "phone": "5553023274",
+          "email": "john2@email.com"
+        }
+      }
+    },
+    {
+      "firstName": "Matthew",
+      "lastName": "Hernandez",
+      "email": "matthew.hernandez3@email.com",
+      "password": "patient123",
+      "phone": "5552032311",
+      "dateOfBirth": "1983-04-04",
+      "gender": "male",
+      "address": {
+        "street": "1103 Main St",
+        "city": "Houston",
+        "state": "TX",
+        "zipCode": "91003",
+        "country": "USA"
+      },
+      "profilePicture": "https://randomuser.me/api/portraits/men/53.jpg",
+      "bio": "Patient focused on wellness and preventive care.",
+      "patientInfo": {
+        "emergencyContact": {
+          "name": "Jane Doe",
+          "relationship": "Spouse",
+          "phone": "5553033381",
+          "email": "jane3@email.com"
+        }
+      }
+    },
+    {
+      "firstName": "Emily",
+      "lastName": "Johnson",
+      "email": "emily.johnson4@email.com",
+      "password": "patient123",
+      "phone": "5552042418",
+      "dateOfBirth": "1984-05-05",
+      "gender": "female",
+      "address": {
+        "street": "1104 Main St",
+        "city": "Phoenix",
+        "state": "AZ",
+        "zipCode": "91004",
+        "country": "USA"
+      },
+      "profilePicture": "https://randomuser.me/api/portraits/women/54.jpg",
+      "bio": "Patient focused on wellness and preventive care.",
+      "patientInfo": {
+        "emergencyContact": {
+          "name": "John Doe",
+          "relationship": "Spouse",
+          "phone": "5553043488",
+          "email": "john4@email.com"
+        }
+      }
+    },
+    {
+      "firstName": "Robert",
+      "lastName": "Brown",
+      "email": "robert.brown5@email.com",
+      "password": "patient123",
+      "phone": "5552052525",
+      "dateOfBirth": "1985-06-06",
+      "gender": "male",
+      "address": {
+        "street": "1105 Main St",
+        "city": "Philadelphia",
+        "state": "PA",
+        "zipCode": "91005",
+        "country": "USA"
+      },
+      "profilePicture": "https://randomuser.me/api/portraits/men/55.jpg",
+      "bio": "Patient focused on wellness and preventive care.",
+      "patientInfo": {
+        "emergencyContact": {
+          "name": "Jane Doe",
+          "relationship": "Spouse",
+          "phone": "5553053595",
+          "email": "jane5@email.com"
+        }
+      }
+    },
+    {
+      "firstName": "Susan",
+      "lastName": "Wilson",
+      "email": "susan.wilson6@email.com",
+      "password": "patient123",
+      "phone": "5552062632",
+      "dateOfBirth": "1986-07-07",
+      "gender": "female",
+      "address": {
+        "street": "1106 Main St",
+        "city": "San Antonio",
+        "state": "TX",
+        "zipCode": "91006",
+        "country": "USA"
+      },
+      "profilePicture": "https://randomuser.me/api/portraits/women/56.jpg",
+      "bio": "Patient focused on wellness and preventive care.",
+      "patientInfo": {
+        "emergencyContact": {
+          "name": "John Doe",
+          "relationship": "Spouse",
+          "phone": "5553063612",
+          "email": "john6@email.com"
+        }
+      }
+    },
+    {
+      "firstName": "Charles",
+      "lastName": "Rodriguez",
+      "email": "charles.rodriguez7@email.com",
+      "password": "patient123",
+      "phone": "5552072739",
+      "dateOfBirth": "1987-08-08",
+      "gender": "male",
+      "address": {
+        "street": "1107 Main St",
+        "city": "San Diego",
+        "state": "CA",
+        "zipCode": "91007",
+        "country": "USA"
+      },
+      "profilePicture": "https://randomuser.me/api/portraits/men/57.jpg",
+      "bio": "Patient focused on wellness and preventive care.",
+      "patientInfo": {
+        "emergencyContact": {
+          "name": "Jane Doe",
+          "relationship": "Spouse",
+          "phone": "5553073719",
+          "email": "jane7@email.com"
+        }
+      }
+    },
+    {
+      "firstName": "Karen",
+      "lastName": "Brown",
+      "email": "karen.brown8@email.com",
+      "password": "patient123",
+      "phone": "5552082846",
+      "dateOfBirth": "1988-09-09",
+      "gender": "female",
+      "address": {
+        "street": "1108 Main St",
+        "city": "Dallas",
+        "state": "TX",
+        "zipCode": "91008",
+        "country": "USA"
+      },
+      "profilePicture": "https://randomuser.me/api/portraits/women/58.jpg",
+      "bio": "Patient focused on wellness and preventive care.",
+      "patientInfo": {
+        "emergencyContact": {
+          "name": "John Doe",
+          "relationship": "Spouse",
+          "phone": "5553083826",
+          "email": "john8@email.com"
+        }
+      }
+    },
+    {
+      "firstName": "Michael",
+      "lastName": "Martin",
+      "email": "michael.martin9@email.com",
+      "password": "patient123",
+      "phone": "5552092953",
+      "dateOfBirth": "1989-10-10",
+      "gender": "male",
+      "address": {
+        "street": "1109 Main St",
+        "city": "San Jose",
+        "state": "CA",
+        "zipCode": "91009",
+        "country": "USA"
+      },
+      "profilePicture": "https://randomuser.me/api/portraits/men/59.jpg",
+      "bio": "Patient focused on wellness and preventive care.",
+      "patientInfo": {
+        "emergencyContact": {
+          "name": "Jane Doe",
+          "relationship": "Spouse",
+          "phone": "5553093933",
+          "email": "jane9@email.com"
+        }
+      }
+    },
+    {
+      "firstName": "Emily",
+      "lastName": "Brown",
+      "email": "emily.brown10@email.com",
+      "password": "patient123",
+      "phone": "5552103060",
+      "dateOfBirth": "1990-11-11",
+      "gender": "female",
+      "address": {
+        "street": "1110 Main St",
+        "city": "New York",
+        "state": "NY",
+        "zipCode": "91010",
+        "country": "USA"
+      },
+      "profilePicture": "https://randomuser.me/api/portraits/women/60.jpg",
+      "bio": "Patient focused on wellness and preventive care.",
+      "patientInfo": {
+        "emergencyContact": {
+          "name": "John Doe",
+          "relationship": "Spouse",
+          "phone": "5553104040",
+          "email": "john10@email.com"
+        }
+      }
+    },
+    {
+      "firstName": "Richard",
+      "lastName": "Jones",
+      "email": "richard.jones11@email.com",
+      "password": "patient123",
+      "phone": "5552113167",
+      "dateOfBirth": "1991-12-12",
+      "gender": "male",
+      "address": {
+        "street": "1111 Main St",
+        "city": "Los Angeles",
+        "state": "CA",
+        "zipCode": "91011",
+        "country": "USA"
+      },
+      "profilePicture": "https://randomuser.me/api/portraits/men/61.jpg",
+      "bio": "Patient focused on wellness and preventive care.",
+      "patientInfo": {
+        "emergencyContact": {
+          "name": "Jane Doe",
+          "relationship": "Spouse",
+          "phone": "5553114147",
+          "email": "jane11@email.com"
+        }
+      }
+    },
+    {
+      "firstName": "Ashley",
+      "lastName": "Williams",
+      "email": "ashley.williams12@email.com",
+      "password": "patient123",
+      "phone": "5552123274",
+      "dateOfBirth": "1992-01-13",
+      "gender": "female",
+      "address": {
+        "street": "1112 Main St",
+        "city": "Chicago",
+        "state": "IL",
+        "zipCode": "91012",
+        "country": "USA"
+      },
+      "profilePicture": "https://randomuser.me/api/portraits/women/62.jpg",
+      "bio": "Patient focused on wellness and preventive care.",
+      "patientInfo": {
+        "emergencyContact": {
+          "name": "John Doe",
+          "relationship": "Spouse",
+          "phone": "5553124254",
+          "email": "john12@email.com"
+        }
+      }
+    },
+    {
+      "firstName": "Mark",
+      "lastName": "Jones",
+      "email": "mark.jones13@email.com",
+      "password": "patient123",
+      "phone": "5552133381",
+      "dateOfBirth": "1993-02-14",
+      "gender": "male",
+      "address": {
+        "street": "1113 Main St",
+        "city": "Houston",
+        "state": "TX",
+        "zipCode": "91013",
+        "country": "USA"
+      },
+      "profilePicture": "https://randomuser.me/api/portraits/men/63.jpg",
+      "bio": "Patient focused on wellness and preventive care.",
+      "patientInfo": {
+        "emergencyContact": {
+          "name": "Jane Doe",
+          "relationship": "Spouse",
+          "phone": "5553134361",
+          "email": "jane13@email.com"
+        }
+      }
+    },
+    {
+      "firstName": "Sarah",
+      "lastName": "Davis",
+      "email": "sarah.davis14@email.com",
+      "password": "patient123",
+      "phone": "5552143488",
+      "dateOfBirth": "1994-03-15",
+      "gender": "female",
+      "address": {
+        "street": "1114 Main St",
+        "city": "Phoenix",
+        "state": "AZ",
+        "zipCode": "91014",
+        "country": "USA"
+      },
+      "profilePicture": "https://randomuser.me/api/portraits/women/64.jpg",
+      "bio": "Patient focused on wellness and preventive care.",
+      "patientInfo": {
+        "emergencyContact": {
+          "name": "John Doe",
+          "relationship": "Spouse",
+          "phone": "5553144468",
+          "email": "john14@email.com"
+        }
+      }
+    },
+    {
+      "firstName": "Joseph",
+      "lastName": "Williams",
+      "email": "joseph.williams15@email.com",
+      "password": "patient123",
+      "phone": "5552153595",
+      "dateOfBirth": "1995-04-16",
+      "gender": "male",
+      "address": {
+        "street": "1115 Main St",
+        "city": "Philadelphia",
+        "state": "PA",
+        "zipCode": "91015",
+        "country": "USA"
+      },
+      "profilePicture": "https://randomuser.me/api/portraits/men/65.jpg",
+      "bio": "Patient focused on wellness and preventive care.",
+      "patientInfo": {
+        "emergencyContact": {
+          "name": "Jane Doe",
+          "relationship": "Spouse",
+          "phone": "5553154575",
+          "email": "jane15@email.com"
+        }
+      }
+    },
+    {
+      "firstName": "Nancy",
+      "lastName": "Thomas",
+      "email": "nancy.thomas16@email.com",
+      "password": "patient123",
+      "phone": "5552163612",
+      "dateOfBirth": "1996-05-17",
+      "gender": "female",
+      "address": {
+        "street": "1116 Main St",
+        "city": "San Antonio",
+        "state": "TX",
+        "zipCode": "91016",
+        "country": "USA"
+      },
+      "profilePicture": "https://randomuser.me/api/portraits/women/66.jpg",
+      "bio": "Patient focused on wellness and preventive care.",
+      "patientInfo": {
+        "emergencyContact": {
+          "name": "John Doe",
+          "relationship": "Spouse",
+          "phone": "5553164682",
+          "email": "john16@email.com"
+        }
+      }
+    },
+    {
+      "firstName": "Joshua",
+      "lastName": "Brown",
+      "email": "joshua.brown17@email.com",
+      "password": "patient123",
+      "phone": "5552173719",
+      "dateOfBirth": "1997-06-18",
+      "gender": "male",
+      "address": {
+        "street": "1117 Main St",
+        "city": "San Diego",
+        "state": "CA",
+        "zipCode": "91017",
+        "country": "USA"
+      },
+      "profilePicture": "https://randomuser.me/api/portraits/men/67.jpg",
+      "bio": "Patient focused on wellness and preventive care.",
+      "patientInfo": {
+        "emergencyContact": {
+          "name": "Jane Doe",
+          "relationship": "Spouse",
+          "phone": "5553174789",
+          "email": "jane17@email.com"
+        }
+      }
+    },
+    {
+      "firstName": "Betty",
+      "lastName": "Miller",
+      "email": "betty.miller18@email.com",
+      "password": "patient123",
+      "phone": "5552183826",
+      "dateOfBirth": "1998-07-19",
+      "gender": "female",
+      "address": {
+        "street": "1118 Main St",
+        "city": "Dallas",
+        "state": "TX",
+        "zipCode": "91018",
+        "country": "USA"
+      },
+      "profilePicture": "https://randomuser.me/api/portraits/women/68.jpg",
+      "bio": "Patient focused on wellness and preventive care.",
+      "patientInfo": {
+        "emergencyContact": {
+          "name": "John Doe",
+          "relationship": "Spouse",
+          "phone": "5553184896",
+          "email": "john18@email.com"
+        }
+      }
+    },
+    {
+      "firstName": "William",
+      "lastName": "Martin",
+      "email": "william.martin19@email.com",
+      "password": "patient123",
+      "phone": "5552193933",
+      "dateOfBirth": "1999-08-20",
+      "gender": "male",
+      "address": {
+        "street": "1119 Main St",
+        "city": "San Jose",
+        "state": "CA",
+        "zipCode": "91019",
+        "country": "USA"
+      },
+      "profilePicture": "https://randomuser.me/api/portraits/men/69.jpg",
+      "bio": "Patient focused on wellness and preventive care.",
+      "patientInfo": {
+        "emergencyContact": {
+          "name": "Jane Doe",
+          "relationship": "Spouse",
+          "phone": "5553194913",
+          "email": "jane19@email.com"
+        }
+      }
+    },
+    {
+      "firstName": "Emily",
+      "lastName": "Williams",
+      "email": "emily.williams20@email.com",
+      "password": "patient123",
+      "phone": "5552204040",
+      "dateOfBirth": "2000-09-21",
+      "gender": "female",
+      "address": {
+        "street": "1120 Main St",
+        "city": "New York",
+        "state": "NY",
+        "zipCode": "91020",
+        "country": "USA"
+      },
+      "profilePicture": "https://randomuser.me/api/portraits/women/70.jpg",
+      "bio": "Patient focused on wellness and preventive care.",
+      "patientInfo": {
+        "emergencyContact": {
+          "name": "John Doe",
+          "relationship": "Spouse",
+          "phone": "5553205020",
+          "email": "john20@email.com"
+        }
+      }
+    },
+    {
+      "firstName": "Paul",
+      "lastName": "Martin",
+      "email": "paul.martin21@email.com",
+      "password": "patient123",
+      "phone": "5552214147",
+      "dateOfBirth": "2001-10-22",
+      "gender": "male",
+      "address": {
+        "street": "1121 Main St",
+        "city": "Los Angeles",
+        "state": "CA",
+        "zipCode": "91021",
+        "country": "USA"
+      },
+      "profilePicture": "https://randomuser.me/api/portraits/men/71.jpg",
+      "bio": "Patient focused on wellness and preventive care.",
+      "patientInfo": {
+        "emergencyContact": {
+          "name": "Jane Doe",
+          "relationship": "Spouse",
+          "phone": "5553215127",
+          "email": "jane21@email.com"
+        }
+      }
+    },
+    {
+      "firstName": "Susan",
+      "lastName": "Smith",
+      "email": "susan.smith22@email.com",
+      "password": "patient123",
+      "phone": "5552224254",
+      "dateOfBirth": "2002-11-23",
+      "gender": "female",
+      "address": {
+        "street": "1122 Main St",
+        "city": "Chicago",
+        "state": "IL",
+        "zipCode": "91022",
+        "country": "USA"
+      },
+      "profilePicture": "https://randomuser.me/api/portraits/women/72.jpg",
+      "bio": "Patient focused on wellness and preventive care.",
+      "patientInfo": {
+        "emergencyContact": {
+          "name": "John Doe",
+          "relationship": "Spouse",
+          "phone": "5553225234",
+          "email": "john22@email.com"
+        }
+      }
+    },
+    {
+      "firstName": "Daniel",
+      "lastName": "Thomas",
+      "email": "daniel.thomas23@email.com",
+      "password": "patient123",
+      "phone": "5552234361",
+      "dateOfBirth": "2003-12-24",
+      "gender": "male",
+      "address": {
+        "street": "1123 Main St",
+        "city": "Houston",
+        "state": "TX",
+        "zipCode": "91023",
+        "country": "USA"
+      },
+      "profilePicture": "https://randomuser.me/api/portraits/men/73.jpg",
+      "bio": "Patient focused on wellness and preventive care.",
+      "patientInfo": {
+        "emergencyContact": {
+          "name": "Jane Doe",
+          "relationship": "Spouse",
+          "phone": "5553235341",
+          "email": "jane23@email.com"
+        }
+      }
+    },
+    {
+      "firstName": "Jessica",
+      "lastName": "Taylor",
+      "email": "jessica.taylor24@email.com",
+      "password": "patient123",
+      "phone": "5552244468",
+      "dateOfBirth": "2004-01-25",
+      "gender": "female",
+      "address": {
+        "street": "1124 Main St",
+        "city": "Phoenix",
+        "state": "AZ",
+        "zipCode": "91024",
+        "country": "USA"
+      },
+      "profilePicture": "https://randomuser.me/api/portraits/women/74.jpg",
+      "bio": "Patient focused on wellness and preventive care.",
+      "patientInfo": {
+        "emergencyContact": {
+          "name": "John Doe",
+          "relationship": "Spouse",
+          "phone": "5553245448",
+          "email": "john24@email.com"
+        }
+      }
+    },
+    {
+      "firstName": "Kenneth",
+      "lastName": "Hernandez",
+      "email": "kenneth.hernandez25@email.com",
+      "password": "patient123",
+      "phone": "5552254575",
+      "dateOfBirth": "2005-02-26",
+      "gender": "male",
+      "address": {
+        "street": "1125 Main St",
+        "city": "Philadelphia",
+        "state": "PA",
+        "zipCode": "91025",
+        "country": "USA"
+      },
+      "profilePicture": "https://randomuser.me/api/portraits/men/75.jpg",
+      "bio": "Patient focused on wellness and preventive care.",
+      "patientInfo": {
+        "emergencyContact": {
+          "name": "Jane Doe",
+          "relationship": "Spouse",
+          "phone": "5553255555",
+          "email": "jane25@email.com"
+        }
+      }
+    },
+    {
+      "firstName": "Michelle",
+      "lastName": "Anderson",
+      "email": "michelle.anderson26@email.com",
+      "password": "patient123",
+      "phone": "5552264682",
+      "dateOfBirth": "2006-03-27",
+      "gender": "female",
+      "address": {
+        "street": "1126 Main St",
+        "city": "San Antonio",
+        "state": "TX",
+        "zipCode": "91026",
+        "country": "USA"
+      },
+      "profilePicture": "https://randomuser.me/api/portraits/women/76.jpg",
+      "bio": "Patient focused on wellness and preventive care.",
+      "patientInfo": {
+        "emergencyContact": {
+          "name": "John Doe",
+          "relationship": "Spouse",
+          "phone": "5553265662",
+          "email": "john26@email.com"
+        }
+      }
+    },
+    {
+      "firstName": "Paul",
+      "lastName": "Jones",
+      "email": "paul.jones27@email.com",
+      "password": "patient123",
+      "phone": "5552274789",
+      "dateOfBirth": "2007-04-28",
+      "gender": "male",
+      "address": {
+        "street": "1127 Main St",
+        "city": "San Diego",
+        "state": "CA",
+        "zipCode": "91027",
+        "country": "USA"
+      },
+      "profilePicture": "https://randomuser.me/api/portraits/men/77.jpg",
+      "bio": "Patient focused on wellness and preventive care.",
+      "patientInfo": {
+        "emergencyContact": {
+          "name": "Jane Doe",
+          "relationship": "Spouse",
+          "phone": "5553275769",
+          "email": "jane27@email.com"
+        }
+      }
+    },
+    {
+      "firstName": "Patricia",
+      "lastName": "Anderson",
+      "email": "patricia.anderson28@email.com",
+      "password": "patient123",
+      "phone": "5552284896",
+      "dateOfBirth": "2008-05-01",
+      "gender": "female",
+      "address": {
+        "street": "1128 Main St",
+        "city": "Dallas",
+        "state": "TX",
+        "zipCode": "91028",
+        "country": "USA"
+      },
+      "profilePicture": "https://randomuser.me/api/portraits/women/78.jpg",
+      "bio": "Patient focused on wellness and preventive care.",
+      "patientInfo": {
+        "emergencyContact": {
+          "name": "John Doe",
+          "relationship": "Spouse",
+          "phone": "5553285876",
+          "email": "john28@email.com"
+        }
+      }
+    },
+    {
+      "firstName": "Joseph",
+      "lastName": "Martinez",
+      "email": "joseph.martinez29@email.com",
+      "password": "patient123",
+      "phone": "5552294913",
+      "dateOfBirth": "2009-06-02",
+      "gender": "male",
+      "address": {
+        "street": "1129 Main St",
+        "city": "San Jose",
+        "state": "CA",
+        "zipCode": "91029",
+        "country": "USA"
+      },
+      "profilePicture": "https://randomuser.me/api/portraits/men/79.jpg",
+      "bio": "Patient focused on wellness and preventive care.",
+      "patientInfo": {
+        "emergencyContact": {
+          "name": "Jane Doe",
+          "relationship": "Spouse",
+          "phone": "5553295983",
+          "email": "jane29@email.com"
+        }
+      }
+    },
+    {
+      "firstName": "Sandra",
+      "lastName": "Garcia",
+      "email": "sandra.garcia30@email.com",
+      "password": "patient123",
+      "phone": "5552305020",
+      "dateOfBirth": "1980-07-03",
+      "gender": "female",
+      "address": {
+        "street": "1130 Main St",
+        "city": "New York",
+        "state": "NY",
+        "zipCode": "91030",
+        "country": "USA"
+      },
+      "profilePicture": "https://randomuser.me/api/portraits/women/80.jpg",
+      "bio": "Patient focused on wellness and preventive care.",
+      "patientInfo": {
+        "emergencyContact": {
+          "name": "John Doe",
+          "relationship": "Spouse",
+          "phone": "5553306090",
+          "email": "john30@email.com"
+        }
+      }
+    },
+    {
+      "firstName": "Anthony",
+      "lastName": "Jones",
+      "email": "anthony.jones31@email.com",
+      "password": "patient123",
+      "phone": "5552315127",
+      "dateOfBirth": "1981-08-04",
+      "gender": "male",
+      "address": {
+        "street": "1131 Main St",
+        "city": "Los Angeles",
+        "state": "CA",
+        "zipCode": "91031",
+        "country": "USA"
+      },
+      "profilePicture": "https://randomuser.me/api/portraits/men/81.jpg",
+      "bio": "Patient focused on wellness and preventive care.",
+      "patientInfo": {
+        "emergencyContact": {
+          "name": "Jane Doe",
+          "relationship": "Spouse",
+          "phone": "5553316197",
+          "email": "jane31@email.com"
+        }
+      }
+    },
+    {
+      "firstName": "Ashley",
+      "lastName": "Anderson",
+      "email": "ashley.anderson32@email.com",
+      "password": "patient123",
+      "phone": "5552325234",
+      "dateOfBirth": "1982-09-05",
+      "gender": "female",
+      "address": {
+        "street": "1132 Main St",
+        "city": "Chicago",
+        "state": "IL",
+        "zipCode": "91032",
+        "country": "USA"
+      },
+      "profilePicture": "https://randomuser.me/api/portraits/women/82.jpg",
+      "bio": "Patient focused on wellness and preventive care.",
+      "patientInfo": {
+        "emergencyContact": {
+          "name": "John Doe",
+          "relationship": "Spouse",
+          "phone": "5553326214",
+          "email": "john32@email.com"
+        }
+      }
+    },
+    {
+      "firstName": "Daniel",
+      "lastName": "Moore",
+      "email": "daniel.moore33@email.com",
+      "password": "patient123",
+      "phone": "5552335341",
+      "dateOfBirth": "1983-10-06",
+      "gender": "male",
+      "address": {
+        "street": "1133 Main St",
+        "city": "Houston",
+        "state": "TX",
+        "zipCode": "91033",
+        "country": "USA"
+      },
+      "profilePicture": "https://randomuser.me/api/portraits/men/83.jpg",
+      "bio": "Patient focused on wellness and preventive care.",
+      "patientInfo": {
+        "emergencyContact": {
+          "name": "Jane Doe",
+          "relationship": "Spouse",
+          "phone": "5553336321",
+          "email": "jane33@email.com"
+        }
+      }
+    },
+    {
+      "firstName": "Karen",
+      "lastName": "Brown",
+      "email": "karen.brown34@email.com",
+      "password": "patient123",
+      "phone": "5552345448",
+      "dateOfBirth": "1984-11-07",
+      "gender": "female",
+      "address": {
+        "street": "1134 Main St",
+        "city": "Phoenix",
+        "state": "AZ",
+        "zipCode": "91034",
+        "country": "USA"
+      },
+      "profilePicture": "https://randomuser.me/api/portraits/women/84.jpg",
+      "bio": "Patient focused on wellness and preventive care.",
+      "patientInfo": {
+        "emergencyContact": {
+          "name": "John Doe",
+          "relationship": "Spouse",
+          "phone": "5553346428",
+          "email": "john34@email.com"
+        }
+      }
+    },
+    {
+      "firstName": "Andrew",
+      "lastName": "Martin",
+      "email": "andrew.martin35@email.com",
+      "password": "patient123",
+      "phone": "5552355555",
+      "dateOfBirth": "1985-12-08",
+      "gender": "male",
+      "address": {
+        "street": "1135 Main St",
+        "city": "Philadelphia",
+        "state": "PA",
+        "zipCode": "91035",
+        "country": "USA"
+      },
+      "profilePicture": "https://randomuser.me/api/portraits/men/85.jpg",
+      "bio": "Patient focused on wellness and preventive care.",
+      "patientInfo": {
+        "emergencyContact": {
+          "name": "Jane Doe",
+          "relationship": "Spouse",
+          "phone": "5553356535",
+          "email": "jane35@email.com"
+        }
+      }
+    },
+    {
+      "firstName": "Barbara",
+      "lastName": "Jones",
+      "email": "barbara.jones36@email.com",
+      "password": "patient123",
+      "phone": "5552365662",
+      "dateOfBirth": "1986-01-09",
+      "gender": "female",
+      "address": {
+        "street": "1136 Main St",
+        "city": "San Antonio",
+        "state": "TX",
+        "zipCode": "91036",
+        "country": "USA"
+      },
+      "profilePicture": "https://randomuser.me/api/portraits/women/86.jpg",
+      "bio": "Patient focused on wellness and preventive care.",
+      "patientInfo": {
+        "emergencyContact": {
+          "name": "John Doe",
+          "relationship": "Spouse",
+          "phone": "5553366642",
+          "email": "john36@email.com"
+        }
+      }
+    },
+    {
+      "firstName": "Matthew",
+      "lastName": "Hernandez",
+      "email": "matthew.hernandez37@email.com",
+      "password": "patient123",
+      "phone": "5552375769",
+      "dateOfBirth": "1987-02-10",
+      "gender": "male",
+      "address": {
+        "street": "1137 Main St",
+        "city": "San Diego",
+        "state": "CA",
+        "zipCode": "91037",
+        "country": "USA"
+      },
+      "profilePicture": "https://randomuser.me/api/portraits/men/87.jpg",
+      "bio": "Patient focused on wellness and preventive care.",
+      "patientInfo": {
+        "emergencyContact": {
+          "name": "Jane Doe",
+          "relationship": "Spouse",
+          "phone": "5553376749",
+          "email": "jane37@email.com"
+        }
+      }
+    },
+    {
+      "firstName": "Jennifer",
+      "lastName": "Johnson",
+      "email": "jennifer.johnson38@email.com",
+      "password": "patient123",
+      "phone": "5552385876",
+      "dateOfBirth": "1988-03-11",
+      "gender": "female",
+      "address": {
+        "street": "1138 Main St",
+        "city": "Dallas",
+        "state": "TX",
+        "zipCode": "91038",
+        "country": "USA"
+      },
+      "profilePicture": "https://randomuser.me/api/portraits/women/88.jpg",
+      "bio": "Patient focused on wellness and preventive care.",
+      "patientInfo": {
+        "emergencyContact": {
+          "name": "John Doe",
+          "relationship": "Spouse",
+          "phone": "5553386856",
+          "email": "john38@email.com"
+        }
+      }
+    },
+    {
+      "firstName": "Thomas",
+      "lastName": "Taylor",
+      "email": "thomas.taylor39@email.com",
+      "password": "patient123",
+      "phone": "5552395983",
+      "dateOfBirth": "1989-04-12",
+      "gender": "male",
+      "address": {
+        "street": "1139 Main St",
+        "city": "San Jose",
+        "state": "CA",
+        "zipCode": "91039",
+        "country": "USA"
+      },
+      "profilePicture": "https://randomuser.me/api/portraits/men/89.jpg",
+      "bio": "Patient focused on wellness and preventive care.",
+      "patientInfo": {
+        "emergencyContact": {
+          "name": "Jane Doe",
+          "relationship": "Spouse",
+          "phone": "5553396963",
+          "email": "jane39@email.com"
+        }
+      }
+    },
+    {
+      "firstName": "Jessica",
+      "lastName": "Moore",
+      "email": "jessica.moore40@email.com",
+      "password": "patient123",
+      "phone": "5552406090",
+      "dateOfBirth": "1990-05-13",
+      "gender": "female",
+      "address": {
+        "street": "1140 Main St",
+        "city": "New York",
+        "state": "NY",
+        "zipCode": "91040",
+        "country": "USA"
+      },
+      "profilePicture": "https://randomuser.me/api/portraits/women/90.jpg",
+      "bio": "Patient focused on wellness and preventive care.",
+      "patientInfo": {
+        "emergencyContact": {
+          "name": "John Doe",
+          "relationship": "Spouse",
+          "phone": "5553407070",
+          "email": "john40@email.com"
+        }
+      }
+    },
+    {
+      "firstName": "Steven",
+      "lastName": "Jones",
+      "email": "steven.jones41@email.com",
+      "password": "patient123",
+      "phone": "5552416197",
+      "dateOfBirth": "1991-06-14",
+      "gender": "male",
+      "address": {
+        "street": "1141 Main St",
+        "city": "Los Angeles",
+        "state": "CA",
+        "zipCode": "91041",
+        "country": "USA"
+      },
+      "profilePicture": "https://randomuser.me/api/portraits/men/91.jpg",
+      "bio": "Patient focused on wellness and preventive care.",
+      "patientInfo": {
+        "emergencyContact": {
+          "name": "Jane Doe",
+          "relationship": "Spouse",
+          "phone": "5553417177",
+          "email": "jane41@email.com"
+        }
+      }
+    },
+    {
+      "firstName": "Susan",
+      "lastName": "Davis",
+      "email": "susan.davis42@email.com",
+      "password": "patient123",
+      "phone": "5552426214",
+      "dateOfBirth": "1992-07-15",
+      "gender": "female",
+      "address": {
+        "street": "1142 Main St",
+        "city": "Chicago",
+        "state": "IL",
+        "zipCode": "91042",
+        "country": "USA"
+      },
+      "profilePicture": "https://randomuser.me/api/portraits/women/92.jpg",
+      "bio": "Patient focused on wellness and preventive care.",
+      "patientInfo": {
+        "emergencyContact": {
+          "name": "John Doe",
+          "relationship": "Spouse",
+          "phone": "5553427284",
+          "email": "john42@email.com"
+        }
+      }
+    },
+    {
+      "firstName": "Joshua",
+      "lastName": "Jones",
+      "email": "joshua.jones43@email.com",
+      "password": "patient123",
+      "phone": "5552436321",
+      "dateOfBirth": "1993-08-16",
+      "gender": "male",
+      "address": {
+        "street": "1143 Main St",
+        "city": "Houston",
+        "state": "TX",
+        "zipCode": "91043",
+        "country": "USA"
+      },
+      "profilePicture": "https://randomuser.me/api/portraits/men/93.jpg",
+      "bio": "Patient focused on wellness and preventive care.",
+      "patientInfo": {
+        "emergencyContact": {
+          "name": "Jane Doe",
+          "relationship": "Spouse",
+          "phone": "5553437391",
+          "email": "jane43@email.com"
+        }
+      }
+    },
+    {
+      "firstName": "Betty",
+      "lastName": "Johnson",
+      "email": "betty.johnson44@email.com",
+      "password": "patient123",
+      "phone": "5552446428",
+      "dateOfBirth": "1994-09-17",
+      "gender": "female",
+      "address": {
+        "street": "1144 Main St",
+        "city": "Phoenix",
+        "state": "AZ",
+        "zipCode": "91044",
+        "country": "USA"
+      },
+      "profilePicture": "https://randomuser.me/api/portraits/women/94.jpg",
+      "bio": "Patient focused on wellness and preventive care.",
+      "patientInfo": {
+        "emergencyContact": {
+          "name": "John Doe",
+          "relationship": "Spouse",
+          "phone": "5553447498",
+          "email": "john44@email.com"
+        }
+      }
+    },
+    {
+      "firstName": "Mark",
+      "lastName": "Moore",
+      "email": "mark.moore45@email.com",
+      "password": "patient123",
+      "phone": "5552456535",
+      "dateOfBirth": "1995-10-18",
+      "gender": "male",
+      "address": {
+        "street": "1145 Main St",
+        "city": "Philadelphia",
+        "state": "PA",
+        "zipCode": "91045",
+        "country": "USA"
+      },
+      "profilePicture": "https://randomuser.me/api/portraits/men/95.jpg",
+      "bio": "Patient focused on wellness and preventive care.",
+      "patientInfo": {
+        "emergencyContact": {
+          "name": "Jane Doe",
+          "relationship": "Spouse",
+          "phone": "5553457515",
+          "email": "jane45@email.com"
+        }
+      }
+    },
+    {
+      "firstName": "Donna",
+      "lastName": "Gonzalez",
+      "email": "donna.gonzalez46@email.com",
+      "password": "patient123",
+      "phone": "5552466642",
+      "dateOfBirth": "1996-11-19",
+      "gender": "female",
+      "address": {
+        "street": "1146 Main St",
+        "city": "San Antonio",
+        "state": "TX",
+        "zipCode": "91046",
+        "country": "USA"
+      },
+      "profilePicture": "https://randomuser.me/api/portraits/women/96.jpg",
+      "bio": "Patient focused on wellness and preventive care.",
+      "patientInfo": {
+        "emergencyContact": {
+          "name": "John Doe",
+          "relationship": "Spouse",
+          "phone": "5553467622",
+          "email": "john46@email.com"
+        }
+      }
+    },
+    {
+      "firstName": "Donald",
+      "lastName": "Martinez",
+      "email": "donald.martinez47@email.com",
+      "password": "patient123",
+      "phone": "5552476749",
+      "dateOfBirth": "1997-12-20",
+      "gender": "male",
+      "address": {
+        "street": "1147 Main St",
+        "city": "San Diego",
+        "state": "CA",
+        "zipCode": "91047",
+        "country": "USA"
+      },
+      "profilePicture": "https://randomuser.me/api/portraits/men/97.jpg",
+      "bio": "Patient focused on wellness and preventive care.",
+      "patientInfo": {
+        "emergencyContact": {
+          "name": "Jane Doe",
+          "relationship": "Spouse",
+          "phone": "5553477729",
+          "email": "jane47@email.com"
+        }
+      }
+    },
+    {
+      "firstName": "Margaret",
+      "lastName": "Moore",
+      "email": "margaret.moore48@email.com",
+      "password": "patient123",
+      "phone": "5552486856",
+      "dateOfBirth": "1998-01-21",
+      "gender": "female",
+      "address": {
+        "street": "1148 Main St",
+        "city": "Dallas",
+        "state": "TX",
+        "zipCode": "91048",
+        "country": "USA"
+      },
+      "profilePicture": "https://randomuser.me/api/portraits/women/98.jpg",
+      "bio": "Patient focused on wellness and preventive care.",
+      "patientInfo": {
+        "emergencyContact": {
+          "name": "John Doe",
+          "relationship": "Spouse",
+          "phone": "5553487836",
+          "email": "john48@email.com"
+        }
+      }
+    },
+    {
+      "firstName": "Andrew",
+      "lastName": "Jackson",
+      "email": "andrew.jackson49@email.com",
+      "password": "patient123",
+      "phone": "5552496963",
+      "dateOfBirth": "1999-02-22",
+      "gender": "male",
+      "address": {
+        "street": "1149 Main St",
+        "city": "San Jose",
+        "state": "CA",
+        "zipCode": "91049",
+        "country": "USA"
+      },
+      "profilePicture": "https://randomuser.me/api/portraits/men/99.jpg",
+      "bio": "Patient focused on wellness and preventive care.",
+      "patientInfo": {
+        "emergencyContact": {
+          "name": "Jane Doe",
+          "relationship": "Spouse",
+          "phone": "5553497943",
+          "email": "jane49@email.com"
+        }
+      }
+    }
+  ],
+  "careProviders": []
+}

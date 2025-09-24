@@ -46,8 +46,12 @@ const DoctorProfilePage = () => {
             <Card className="border-none shadow-soft">
               <CardContent className="p-6">
                 <div className="flex gap-6">
-                  <div className="w-20 h-20 rounded-full bg-primary/10 flex items-center justify-center text-primary text-2xl font-bold">
-                    {doctor?.userId?.firstName?.[0]?.toUpperCase()}
+<div className="w-20 h-20 rounded-full overflow-hidden bg-primary/10 flex items-center justify-center text-primary text-2xl font-bold">
+                    {doctor?.userId?.profilePicture ? (
+                      <img src={doctor.userId.profilePicture} alt={`${doctor?.userId?.firstName} ${doctor?.userId?.lastName}`} className="w-full h-full object-cover" />
+                    ) : (
+                      doctor?.userId?.firstName?.[0]?.toUpperCase()
+                    )}
                   </div>
                   <div className="flex-1">
                     <div className="flex items-center justify-between">

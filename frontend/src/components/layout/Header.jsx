@@ -1,4 +1,4 @@
-﻿import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { 
@@ -26,6 +26,7 @@ export const Header = ({
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
   const location = useLocation();
+  const navigate = useNavigate();
 
   // Close mobile menu when route changes
   useEffect(() => {
@@ -113,19 +114,19 @@ export const Header = ({
                     {userInitial}
                   </Button>
                   
-                  {isUserMenuOpen && (
+{isUserMenuOpen && (
                     <div className="absolute right-0 top-12 bg-white rounded-lg shadow-strong min-w-48 py-2 text-foreground">
-                      <Link to={userType === 'doctor' ? '/doctor-dashboard' : '/profile'} className="flex items-center gap-3 px-4 py-2 hover:bg-accent transition-colors">
+                      <Link to="/profile" className="flex items-center gap-3 px-4 py-2 hover:bg-accent transition-colors">
                         <User className="h-4 w-4" />
-                        My {userType === 'doctor' ? 'Dashboard' : 'Profile'}
+                        My Profile
                       </Link>
                       <Link to="/appointments" className="flex items-center gap-3 px-4 py-2 hover:bg-accent transition-colors">
                         <Stethoscope className="h-4 w-4" />
                         Appointments
                       </Link>
                       <hr className="my-2" />
-                      <button 
-                        onClick={onLogout}
+<button 
+                        onClick={() => { onLogout?.(); setIsUserMenuOpen(false); navigate('/'); }}
                         className="flex items-center gap-3 px-4 py-2 hover:bg-accent transition-colors w-full text-left text-destructive"
                       >
                         <LogIn className="h-4 w-4" />
