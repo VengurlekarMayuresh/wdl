@@ -1,0 +1,364 @@
+[
+  {
+    "firstName": "Sarah",
+    "lastName": "Johnson",
+    "email": "sarah.johnson@healthcenter.com",
+    "password": "doctor123",
+    "phone": "(555) 123-4567",
+    "dateOfBirth": "1980-05-15",
+    "gender": "female",
+    "address": {
+      "street": "123 Medical Plaza",
+      "city": "New York",
+      "state": "NY",
+      "zipCode": "10001",
+      "country": "USA"
+    },
+    "profilePicture": "https://images.unsplash.com/photo-1559839734-2b71ea197ec2?w=300&h=300&fit=crop&crop=face",
+    "bio": "Board-certified cardiologist with 15 years of experience in interventional cardiology.",
+    "doctorInfo": {
+      "medicalLicenseNumber": "MD123456",
+      "licenseState": "NY",
+      "licenseExpiryDate": "2026-12-31",
+      "primarySpecialty": "Cardiology",
+      "secondarySpecialties": ["Internal Medicine"],
+      "yearsOfExperience": 15,
+      "npiNumber": "1234567890",
+      "education": [
+        {
+          "institution": "Harvard Medical School",
+          "degree": "MD",
+          "graduationYear": 2008,
+          "honors": "Magna Cum Laude"
+        }
+      ],
+      "residency": [
+        {
+          "hospital": "Massachusetts General Hospital",
+          "specialty": "Internal Medicine",
+          "startYear": 2008,
+          "endYear": 2011
+        }
+      ],
+      "fellowship": [
+        {
+          "hospital": "Mayo Clinic",
+          "specialty": "Interventional Cardiology",
+          "startYear": 2011,
+          "endYear": 2013
+        }
+      ],
+      "hospitalAffiliations": [
+        {
+          "hospital": "New York Presbyterian Hospital",
+          "position": "Senior Cardiologist",
+          "department": "Cardiology",
+          "isCurrentlyAffiliated": true
+        }
+      ],
+      "boardCertifications": [
+        {
+          "board": "American Board of Internal Medicine",
+          "specialty": "Cardiology",
+          "certificationDate": "2013-01-15",
+          "status": "active"
+        }
+      ],
+      "languagesSpoken": [
+        {"language": "English", "proficiency": "native"},
+        {"language": "Spanish", "proficiency": "fluent"}
+      ],
+      "consultationFee": 350,
+      "acceptsInsurance": true,
+      "insurancesAccepted": ["Aetna", "Blue Cross Blue Shield", "UnitedHealthcare"],
+      "isVerified": true,
+      "status": "approved",
+      "isAcceptingNewPatients": true,
+      "telemedicineEnabled": true
+    }
+  },
+  {
+    "firstName": "Michael",
+    "lastName": "Chen",
+    "email": "michael.chen@medcenter.com",
+    "password": "doctor123",
+    "phone": "(555) 234-5678",
+    "dateOfBirth": "1975-11-22",
+    "gender": "male",
+    "address": {
+      "street": "456 Health Avenue",
+      "city": "Los Angeles",
+      "state": "CA",
+      "zipCode": "90210",
+      "country": "USA"
+    },
+    "profilePicture": "https://images.unsplash.com/photo-1612349317150-e413f6a5b16d?w=300&h=300&fit=crop&crop=face",
+    "bio": "Pediatric surgeon specializing in minimally invasive procedures for children.",
+    "doctorInfo": {
+      "medicalLicenseNumber": "MD789012",
+      "licenseState": "CA",
+      "licenseExpiryDate": "2026-08-15",
+      "primarySpecialty": "Pediatrics",
+      "secondarySpecialties": ["General Surgery"],
+      "yearsOfExperience": 18,
+      "npiNumber": "2345678901",
+      "education": [
+        {
+          "institution": "Stanford University School of Medicine",
+          "degree": "MD",
+          "graduationYear": 2005
+        }
+      ],
+      "residency": [
+        {
+          "hospital": "Children's Hospital Los Angeles",
+          "specialty": "Pediatric Surgery",
+          "startYear": 2005,
+          "endYear": 2010
+        }
+      ],
+      "hospitalAffiliations": [
+        {
+          "hospital": "UCLA Medical Center",
+          "position": "Chief of Pediatric Surgery",
+          "department": "Surgery",
+          "isCurrentlyAffiliated": true
+        }
+      ],
+      "boardCertifications": [
+        {
+          "board": "American Board of Surgery",
+          "specialty": "Pediatric Surgery",
+          "certificationDate": "2010-06-01",
+          "status": "active"
+        }
+      ],
+      "languagesSpoken": [
+        {"language": "English", "proficiency": "native"},
+        {"language": "Mandarin", "proficiency": "native"}
+      ],
+      "consultationFee": 400,
+      "acceptsInsurance": true,
+      "insurancesAccepted": ["Kaiser Permanente", "Cigna", "Aetna"],
+      "isVerified": true,
+      "status": "approved",
+      "isAcceptingNewPatients": true,
+      "telemedicineEnabled": false
+    }
+  },
+  {
+    "firstName": "Emily",
+    "lastName": "Rodriguez",
+    "email": "emily.rodriguez@familymed.com",
+    "password": "doctor123",
+    "phone": "(555) 345-6789",
+    "dateOfBirth": "1982-03-08",
+    "gender": "female",
+    "address": {
+      "street": "789 Wellness Drive",
+      "city": "Chicago",
+      "state": "IL",
+      "zipCode": "60601",
+      "country": "USA"
+    },
+    "profilePicture": "https://images.unsplash.com/photo-1594824272460-1fade3045d77?w=300&h=300&fit=crop&crop=face",
+    "bio": "Family medicine physician committed to comprehensive primary care for all ages.",
+    "doctorInfo": {
+      "medicalLicenseNumber": "MD345678",
+      "licenseState": "IL",
+      "licenseExpiryDate": "2025-12-31",
+      "primarySpecialty": "Family Medicine",
+      "secondarySpecialties": [],
+      "yearsOfExperience": 12,
+      "npiNumber": "3456789012",
+      "education": [
+        {
+          "institution": "University of Chicago Pritzker School of Medicine",
+          "degree": "MD",
+          "graduationYear": 2011
+        }
+      ],
+      "residency": [
+        {
+          "hospital": "Rush University Medical Center",
+          "specialty": "Family Medicine",
+          "startYear": 2011,
+          "endYear": 2014
+        }
+      ],
+      "hospitalAffiliations": [
+        {
+          "hospital": "Northwestern Memorial Hospital",
+          "position": "Attending Physician",
+          "department": "Family Medicine",
+          "isCurrentlyAffiliated": true
+        }
+      ],
+      "boardCertifications": [
+        {
+          "board": "American Board of Family Medicine",
+          "specialty": "Family Medicine",
+          "certificationDate": "2014-07-01",
+          "status": "active"
+        }
+      ],
+      "languagesSpoken": [
+        {"language": "English", "proficiency": "native"},
+        {"language": "Spanish", "proficiency": "fluent"}
+      ],
+      "consultationFee": 250,
+      "acceptsInsurance": true,
+      "insurancesAccepted": ["Blue Cross Blue Shield", "Humana", "Medicare"],
+      "isVerified": true,
+      "status": "approved",
+      "isAcceptingNewPatients": true,
+      "telemedicineEnabled": true
+    }
+  },
+  {
+    "firstName": "David",
+    "lastName": "Thompson",
+    "email": "david.thompson@neuromed.com",
+    "password": "doctor123",
+    "phone": "(555) 456-7890",
+    "dateOfBirth": "1978-09-14",
+    "gender": "male",
+    "address": {
+      "street": "321 Brain Institute Blvd",
+      "city": "Boston",
+      "state": "MA",
+      "zipCode": "02101",
+      "country": "USA"
+    },
+    "profilePicture": "https://images.unsplash.com/photo-1582750433449-648ed127bb54?w=300&h=300&fit=crop&crop=face",
+    "bio": "Neurosurgeon specializing in brain tumor removal and spinal cord surgery.",
+    "doctorInfo": {
+      "medicalLicenseNumber": "MD567890",
+      "licenseState": "MA",
+      "licenseExpiryDate": "2026-03-15",
+      "primarySpecialty": "Neurosurgery",
+      "secondarySpecialties": ["Neurology"],
+      "yearsOfExperience": 16,
+      "npiNumber": "4567890123",
+      "education": [
+        {
+          "institution": "Johns Hopkins School of Medicine",
+          "degree": "MD",
+          "graduationYear": 2007,
+          "honors": "Summa Cum Laude"
+        }
+      ],
+      "residency": [
+        {
+          "hospital": "Johns Hopkins Hospital",
+          "specialty": "Neurosurgery",
+          "startYear": 2007,
+          "endYear": 2014
+        }
+      ],
+      "fellowship": [
+        {
+          "hospital": "Cleveland Clinic",
+          "specialty": "Spine Surgery",
+          "startYear": 2014,
+          "endYear": 2015
+        }
+      ],
+      "hospitalAffiliations": [
+        {
+          "hospital": "Massachusetts General Hospital",
+          "position": "Senior Neurosurgeon",
+          "department": "Neurosurgery",
+          "isCurrentlyAffiliated": true
+        }
+      ],
+      "boardCertifications": [
+        {
+          "board": "American Board of Neurological Surgery",
+          "specialty": "Neurosurgery",
+          "certificationDate": "2015-01-01",
+          "status": "active"
+        }
+      ],
+      "languagesSpoken": [
+        {"language": "English", "proficiency": "native"}
+      ],
+      "consultationFee": 500,
+      "acceptsInsurance": true,
+      "insurancesAccepted": ["Aetna", "Blue Cross Blue Shield", "Cigna"],
+      "isVerified": true,
+      "status": "approved",
+      "isAcceptingNewPatients": false,
+      "telemedicineEnabled": false
+    }
+  },
+  {
+    "firstName": "Lisa",
+    "lastName": "Park",
+    "email": "lisa.park@dermclinic.com",
+    "password": "doctor123",
+    "phone": "(555) 567-8901",
+    "dateOfBirth": "1985-07-03",
+    "gender": "female",
+    "address": {
+      "street": "567 Skin Care Center",
+      "city": "Miami",
+      "state": "FL",
+      "zipCode": "33101",
+      "country": "USA"
+    },
+    "profilePicture": "https://images.unsplash.com/photo-1551601651-2a8555f1a136?w=300&h=300&fit=crop&crop=face",
+    "bio": "Dermatologist specializing in cosmetic procedures and skin cancer treatment.",
+    "doctorInfo": {
+      "medicalLicenseNumber": "MD678901",
+      "licenseState": "FL",
+      "licenseExpiryDate": "2025-09-30",
+      "primarySpecialty": "Dermatology",
+      "secondarySpecialties": [],
+      "yearsOfExperience": 8,
+      "npiNumber": "5678901234",
+      "education": [
+        {
+          "institution": "University of Miami Miller School of Medicine",
+          "degree": "MD",
+          "graduationYear": 2015
+        }
+      ],
+      "residency": [
+        {
+          "hospital": "University of Miami Hospital",
+          "specialty": "Dermatology",
+          "startYear": 2015,
+          "endYear": 2019
+        }
+      ],
+      "hospitalAffiliations": [
+        {
+          "hospital": "Jackson Memorial Hospital",
+          "position": "Dermatologist",
+          "department": "Dermatology",
+          "isCurrentlyAffiliated": true
+        }
+      ],
+      "boardCertifications": [
+        {
+          "board": "American Board of Dermatology",
+          "specialty": "Dermatology",
+          "certificationDate": "2019-06-01",
+          "status": "active"
+        }
+      ],
+      "languagesSpoken": [
+        {"language": "English", "proficiency": "native"},
+        {"language": "Korean", "proficiency": "fluent"}
+      ],
+      "consultationFee": 300,
+      "acceptsInsurance": true,
+      "insurancesAccepted": ["UnitedHealthcare", "Humana", "Cigna"],
+      "isVerified": true,
+      "status": "approved",
+      "isAcceptingNewPatients": true,
+      "telemedicineEnabled": true
+    }
+  }
+]
