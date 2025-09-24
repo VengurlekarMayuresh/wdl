@@ -225,6 +225,33 @@ export const doctorAPI = {
     
     throw new Error(response.message || 'Failed to add education entry');
   },
+
+  // Update education entry
+  async updateEducation(educationId, education) {
+    const response = await apiRequest(`/doctors/profile/education/${educationId}`, {
+      method: 'PUT',
+      body: JSON.stringify(education),
+    });
+    
+    if (response.success && response.data) {
+      return response.data.education;
+    }
+    
+    throw new Error(response.message || 'Failed to update education entry');
+  },
+
+  // Delete education entry
+  async deleteEducation(educationId) {
+    const response = await apiRequest(`/doctors/profile/education/${educationId}`, {
+      method: 'DELETE',
+    });
+    
+    if (response.success) {
+      return true;
+    }
+    
+    throw new Error(response.message || 'Failed to delete education entry');
+  },
 };
 
 // Patient-specific API
@@ -248,6 +275,18 @@ export const patientAPI = {
       return response.data.patient;
     }
     throw new Error(response.message || 'Failed to update patient profile');
+  },
+
+  // Update health overview/vital signs (private)
+  async updateHealthOverview(healthData) {
+    const response = await apiRequest('/patients/profile/health-overview', {
+      method: 'PUT',
+      body: JSON.stringify(healthData),
+    });
+    if (response.success && response.data) {
+      return response.data;
+    }
+    throw new Error(response.message || 'Failed to update health overview');
   },
 };
 

@@ -162,6 +162,18 @@ const doctorSchema = new mongoose.Schema({
     maxLength: [100, 'Subspecialty name cannot exceed 100 characters']
   }],
   
+  // Areas of specialization/expertise
+  areasOfExpertise: [{
+    type: String,
+    maxLength: [100, 'Area of expertise cannot exceed 100 characters']
+  }],
+  
+  // Additional certifications (text list)
+  certificationsList: [{
+    type: String,
+    maxLength: [200, 'Certification cannot exceed 200 characters']
+  }],
+  
   // Professional Details
   npiNumber: {
     type: String,
@@ -248,6 +260,44 @@ const doctorSchema = new mongoose.Schema({
       default: 'conversational'
     }
   }],
+  
+  // Working Hours
+  workingHours: {
+    monday: {
+      type: String,
+      default: 'Closed'
+    },
+    tuesday: {
+      type: String,
+      default: 'Closed'
+    },
+    wednesday: {
+      type: String,
+      default: 'Closed'
+    },
+    thursday: {
+      type: String,
+      default: 'Closed'
+    },
+    friday: {
+      type: String,
+      default: 'Closed'
+    },
+    saturday: {
+      type: String,
+      default: 'Closed'
+    },
+    sunday: {
+      type: String,
+      default: 'Closed'
+    }
+  },
+  
+  // Bio/About section
+  bio: {
+    type: String,
+    maxLength: [1000, 'Bio cannot exceed 1000 characters']
+  },
   
   // Availability and Schedule
   consultationFee: {

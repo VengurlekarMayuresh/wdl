@@ -11,8 +11,18 @@ const router = express.Router();
 router.get('/profile/me', authenticate, authorize('patient'), async (req, res) => {
   try {
     const patient = await Patient.findOne({ userId: req.user._id })
-      .populate('userId')
-      .populate('healthcareTeam.doctorId', 'userId primarySpecialty');
+      .populate({
+        path: 'userId',
+        select: 'firstName lastName email phone dateOfBirth gender address profilePicture profilePictureCloudinaryId bio'
+      })
+      .populate({
+        path: 'healthcareTeam.doctorId',
+        select: 'userId primarySpecialty',
+        populate: {
+          path: 'userId',
+          select: 'firstName lastName'
+        }
+      });
 
     if (!patient) {
       return res.status(404).json({
@@ -65,7 +75,10 @@ router.put('/profile/me', authenticate, authorize('patient'), async (req, res) =
       { userId: req.user._id },
       updates,
       { new: true, runValidators: true }
-    ).populate('userId');
+    ).populate({
+      path: 'userId',
+      select: 'firstName lastName email phone dateOfBirth gender address profilePicture profilePictureCloudinaryId bio'
+    });
 
     if (!patient) {
       return res.status(404).json({
@@ -461,6 +474,81 @@ router.post('/profile/allergy', authenticate, authorize('patient'), async (req, 
   }
 });
 
+// @route   PUT /api/patients/profile/health-overview
+// @desc    Update health overview including vital signs and basic health metrics
+// @access  Private (Patient only)
+router.put('/profile/health-overview', authenticate, authorize('patient'), async (req, res) => {
+  try {
+    const patient = await Patient.findOne({ userId: req.user._id });
+    if (!patient) {
+      return res.status(404).json({
+        success: false,
+        message: 'Patient profile not found'
+      });
+    }
+
+    const allowedFields = ['bloodPressureSystolic', 'bloodPressureDiastolic', 'heartRate', 'weight', 'bloodSugar'];
+    const currentTime = new Date();
+
+    // Update vital signs based on the provided health overview data
+    if (req.body.bloodPressureSystolic && req.body.bloodPressureDiastolic) {
+      patient.vitalSigns.bloodPressure = {
+        systolic: parseInt(req.body.bloodPressureSystolic),
+        diastolic: parseInt(req.body.bloodPressureDiastolic),
+        lastUpdated: currentTime
+      };
+    }
+
+    if (req.body.heartRate) {
+      patient.vitalSigns.heartRate = {
+        value: parseInt(req.body.heartRate),
+        lastUpdated: currentTime
+      };
+    }
+
+    if (req.body.weight) {
+      patient.vitalSigns.weight = {
+        value: parseFloat(req.body.weight),
+        unit: 'lbs', // Can be made configurable
+        lastUpdated: currentTime
+      };
+    }
+
+    // For blood sugar, we'll add it as a custom field or use a generic vital sign
+    // For now, let's add it as a custom field in the patient document
+    if (req.body.bloodSugar) {
+      if (!patient.customVitals) {
+        patient.customVitals = {};
+      }
+      patient.customVitals.bloodSugar = {
+        value: parseFloat(req.body.bloodSugar),
+        unit: 'mg/dL',
+        lastUpdated: currentTime
+      };
+    }
+
+    await patient.save();
+
+    res.json({
+      success: true,
+      message: 'Health overview updated successfully',
+      data: { 
+        vitalSigns: patient.vitalSigns, 
+        customVitals: patient.customVitals,
+        bmi: patient.bmi, 
+        bmiCategory: patient.bmiCategory 
+      }
+    });
+
+  } catch (error) {
+    console.error('Update health overview error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Server error updating health overview'
+    });
+  }
+});
+
 // @route   PUT /api/patients/profile/vital-signs
 // @desc    Update vital signs
 // @access  Private (Patient only)
@@ -529,8 +617,17 @@ router.get('/profile/summary', authenticate, async (req, res) => {
     }
 
     const patient = await Patient.findOne({ userId: req.user._id })
-      .populate('userId', 'firstName lastName dateOfBirth gender')
-      .populate('healthcareTeam.doctorId');
+      .populate({
+        path: 'userId',
+        select: 'firstName lastName dateOfBirth gender email phone address profilePicture'
+      })
+      .populate({
+        path: 'healthcareTeam.doctorId',
+        populate: {
+          path: 'userId',
+          select: 'firstName lastName'
+        }
+      });
 
     if (!patient) {
       return res.status(404).json({

@@ -27,17 +27,18 @@ router.post('/profile-picture', authenticate, uploadProfilePictureMiddleware, as
     const result = await uploadProfilePicture(req.file.buffer);
     
     // Update user profile picture
-    await User.findByIdAndUpdate(req.user._id, {
+    const updatedUser = await User.findByIdAndUpdate(req.user._id, {
       profilePicture: result.secure_url,
       profilePictureCloudinaryId: result.public_id
-    });
+    }, { new: true, select: 'firstName lastName email profilePicture profilePictureCloudinaryId userType' });
 
     res.json({
       success: true,
       message: 'Profile picture uploaded successfully',
       data: {
         url: result.secure_url,
-        publicId: result.public_id
+        publicId: result.public_id,
+        user: updatedUser
       }
     });
 

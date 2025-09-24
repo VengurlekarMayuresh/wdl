@@ -18,13 +18,21 @@ console.log('🚀 Starting complete data loader...');
 console.log(`Current directory: ${__dirname}`);
 console.log(`MongoDB URI: ${process.env.MONGODB_URI ? 'Found' : 'Not found'}`);
 
-// Load static data files
+// Load static data files (prefer combined data.json if present)
 let doctorsData, patientsData, careProvidersData;
 try {
   console.log('📂 Loading data files...');
-  doctorsData = JSON.parse(fs.readFileSync(path.join(__dirname, 'data/doctors.json'), 'utf8'));
-  patientsData = JSON.parse(fs.readFileSync(path.join(__dirname, 'data/patients.json'), 'utf8'));
-  careProvidersData = JSON.parse(fs.readFileSync(path.join(__dirname, 'data/careProviders.json'), 'utf8'));
+  const combinedPath = path.join(__dirname, 'data/data.json');
+  if (fs.existsSync(combinedPath)) {
+    const combined = JSON.parse(fs.readFileSync(combinedPath, 'utf8'));
+    doctorsData = combined.doctors || [];
+    patientsData = combined.patients || [];
+    careProvidersData = combined.careProviders || [];
+  } else {
+    doctorsData = JSON.parse(fs.readFileSync(path.join(__dirname, 'data/doctors.json'), 'utf8'));
+    patientsData = JSON.parse(fs.readFileSync(path.join(__dirname, 'data/patients.json'), 'utf8'));
+    careProvidersData = JSON.parse(fs.readFileSync(path.join(__dirname, 'data/careProviders.json'), 'utf8'));
+  }
   console.log(`✅ Loaded ${doctorsData.length} doctors, ${patientsData.length} patients, ${careProvidersData.length} care providers`);
 } catch (error) {
   console.error('❌ Error loading data files:', error);

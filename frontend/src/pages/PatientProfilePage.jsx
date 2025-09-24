@@ -1,4 +1,4 @@
-﻿import { useState } from "react";
+﻿import { useEffect, useMemo, useState } from "react";
 import { Header } from "@/components/layout/Header";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -25,37 +25,135 @@ import {
 } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import ProfileImageUpload from "@/components/ui/ProfileImageUpload";
+import { patientAPI, authAPI } from "@/services/api";
 
 const PatientProfilePage = () => {
-  const { user, isAuthenticated, logout } = useAuth();
+  const { user, isAuthenticated, logout, refreshUser } = useAuth();
   const [isEditing, setIsEditing] = useState(false);
+  const [isEditingHealth, setIsEditingHealth] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+  const [patient, setPatient] = useState(null);
+  const [emergencyEdit, setEmergencyEdit] = useState({ name: '', relationship: '', phone: '' });
+  const [contactEdit, setContactEdit] = useState({ phone: '', street: '', city: '' });
+  const [healthEdit, setHealthEdit] = useState({
+    bloodPressureSystolic: '',
+    bloodPressureDiastolic: '',
+    heartRate: '',
+    weight: '',
+    bloodSugar: ''
+  });
 
-  // Mock patient data (structure from your TSX). You can wire real API later.
-  const patient = {
-    id: 1,
-    firstName: user?.firstName || "John",
-    lastName: user?.lastName || "Doe", 
-    email: user?.email || "john.doe@email.com",
-    phone: user?.phone || "+1 (555) 123-4567",
-    dateOfBirth: user?.dateOfBirth || "1985-06-15",
-    address: user?.address?.street || "123 Main Street, Downtown District",
-    emergencyContact: {
-      name: "Jane Doe",
-      relationship: "Spouse",
-      phone: "+1 (555) 987-6543"
-    },
-    medicalInfo: {
-      bloodType: "O+",
-      height: "5'10\"",
-      weight: "165 lbs",
-      allergies: ["Penicillin", "Shellfish"],
-      chronicConditions: ["Hypertension", "Type 2 Diabetes"],
-      medications: [
-        { name: "Lisinopril", dosage: "10mg", frequency: "Daily" },
-        { name: "Metformin", dosage: "500mg", frequency: "Twice daily" }
-      ]
+  useEffect(() => {
+    const fetchProfile = async () => {
+      try {
+        setLoading(true);
+        const profile = await patientAPI.getProfile();
+        setPatient(profile);
+      } catch (e) {
+        console.error('Patient profile fetch error:', e);
+        if (e.message?.includes('404') || e.message?.includes('not found')) {
+          // Patient profile doesn't exist yet, create an empty state
+          setPatient({});
+          setError('');
+        } else {
+          setError(e.message || "Failed to load patient profile");
+        }
+      } finally {
+        setLoading(false);
+      }
+    };
+    if (isAuthenticated) fetchProfile();
+  }, [isAuthenticated]);
+
+  const primaryEmergency = useMemo(() => {
+    if (!patient?.emergencyContacts?.length) return null;
+    return patient.emergencyContacts.find(c => c.isPrimary) || patient.emergencyContacts[0];
+  }, [patient]);
+
+  useEffect(() => {
+    if (primaryEmergency) {
+      setEmergencyEdit({
+        name: primaryEmergency.name || '',
+        relationship: primaryEmergency.relationship || '',
+        phone: primaryEmergency.phone || ''
+      });
     }
-  };
+  }, [primaryEmergency]);
+
+  const activeMeds = useMemo(() => patient?.medications?.current?.filter(m => m.isActive) || [], [patient]);
+  const allergies = useMemo(() => patient?.allergies || [], [patient]);
+
+  // Get proper patient name from populated userId or fallback to user
+  const patientName = patient?.userId ? 
+    `${patient.userId.firstName || ""} ${patient.userId.lastName || ""}`.trim() :
+    `${user?.firstName || ""} ${user?.lastName || ""}`.trim() || "Patient";
+
+  // Get contact info from populated patient userId or fallback to user
+  const patientEmail = patient?.userId?.email || user?.email || 'N/A';
+  const patientPhone = patient?.userId?.phone || user?.phone || 'N/A';
+  const patientAddress = patient?.userId?.address || user?.address || {};
+  const patientDOB = patient?.userId?.dateOfBirth || user?.dateOfBirth;
+  const patientProfilePicture = patient?.userId?.profilePicture || user?.profilePicture;
+
+  useEffect(() => {
+    setContactEdit({
+      phone: patientPhone !== 'N/A' ? patientPhone : '',
+      street: patientAddress?.street || '',
+      city: patientAddress?.city || ''
+    });
+  }, [patientPhone, patientAddress]);
+
+  // Initialize health edit form with existing values
+  useEffect(() => {
+    if (patient) {
+      const bp = patient.vitalSigns?.bloodPressure;
+      const hr = patient.vitalSigns?.heartRate;
+      const weight = patient.vitalSigns?.weight;
+      const bloodSugar = patient.customVitals?.bloodSugar;
+      
+      setHealthEdit({
+        bloodPressureSystolic: bp?.systolic?.toString() || '',
+        bloodPressureDiastolic: bp?.diastolic?.toString() || '',
+        heartRate: hr?.value?.toString() || '',
+        weight: weight?.value?.toString() || '',
+        bloodSugar: bloodSugar?.value?.toString() || ''
+      });
+    }
+  }, [patient]);
+
+  if (!isAuthenticated) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <Card>
+          <CardContent className="p-6">Please login to view your profile.</CardContent>
+        </Card>
+      </div>
+    );
+  }
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <p>Loading profile...</p>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <p className="text-red-600">{error}</p>
+      </div>
+    );
+  }
+
+  // Derived quick info
+  const quickAllergies = allergies.slice(0, 4).map(a => a.allergen);
+  const bloodType = patient?.medicalHistory?.bloodType || "N/A";
+
+  // Fallback meds list
+  const medications = activeMeds.length ? activeMeds.map(m => ({ name: m.name, dosage: m.dosage || "", frequency: m.frequency || "" })) : [];
 
   const upcomingAppointments = [
     {
@@ -123,10 +221,8 @@ const PatientProfilePage = () => {
     }
   ];
 
-  const medications = patient.medicalInfo.medications;
-
   return (
-    <div className="min-h-screen bg-gradient-light">
+    <div className="min-h-screen bg-gradient-light patient-profile">
       <Header 
         isAuthenticated={isAuthenticated}
         userInitial={(user?.firstName?.[0]?.toUpperCase?.() || 'U')}
@@ -144,29 +240,71 @@ const PatientProfilePage = () => {
                 {/* Profile Photo & Basic Info */}
                 <div className="flex flex-col items-center lg:items-start">
                   <ProfileImageUpload 
-                    currentImage={user?.profilePicture}
+                    currentImage={patientProfilePicture}
                     size="lg"
                     onImageUpdate={(url, publicId) => {
                       console.log('Profile image updated:', url, publicId);
+                      // Refresh patient data after image update
+                      const fetchProfile = async () => {
+                        try {
+                          const profile = await patientAPI.getProfile();
+                          setPatient(profile);
+                        } catch (e) {
+                          console.error('Error refreshing patient profile:', e);
+                        }
+                      };
+                      fetchProfile();
                     }}
                   />
                   
                   <div className="text-center lg:text-left">
                     <h1 className="text-2xl font-bold text-foreground mb-2">
-                      {patient.firstName} {patient.lastName}
+                      {patientName}
                     </h1>
                     <p className="text-muted-foreground mb-4">
-                      Patient ID: #PAT-{patient.id.toString().padStart(6, '0')}
+                      Patient ID: {patient?.patientId || 'N/A'}
                     </p>
                     
                     <div className="flex gap-2">
                       <Button 
                         variant={isEditing ? "default" : "outline"} 
                         size="sm"
-                        onClick={() => setIsEditing(!isEditing)}
+                        onClick={async () => {
+                          if (isEditing) {
+                            // Save edits: currently only emergency contact via patient profile
+                            try {
+                              if (emergencyEdit) {
+                                await patientAPI.updateProfile({
+                                  emergencyContacts: [{
+                                    name: emergencyEdit.name,
+                                    relationship: emergencyEdit.relationship || 'spouse',
+                                    phone: emergencyEdit.phone,
+                                    isPrimary: true
+                                  }]
+                                });
+                              }
+                              // Save user contact info
+                              await authAPI.updateProfile({
+                                phone: contactEdit.phone,
+                                address: {
+                                  ...(user?.address || {}),
+                                  street: contactEdit.street,
+                                  city: contactEdit.city
+                                }
+                              });
+                              await refreshUser();
+                              // Re-fetch patient profile to reflect updates
+                              const profile = await patientAPI.getProfile();
+                              setPatient(profile);
+                            } catch (e) {
+                              console.error(e);
+                            }
+                          }
+                          setIsEditing(!isEditing);
+                        }}
                       >
                         <EditIcon className="h-4 w-4 mr-2" />
-                        {isEditing ? "Save Changes" : "Edit Profile"}
+                        {isEditing ? "Done" : "Edit Profile"}
                       </Button>
                       <Button variant="medical" size="sm">
                         <Calendar className="h-4 w-4 mr-2" />
@@ -185,32 +323,31 @@ const PatientProfilePage = () => {
                     <div className="space-y-3">
                       <div className="flex items-center gap-3">
                         <Mail className="h-4 w-4 text-muted-foreground" />
-                        {isEditing ? (
-                          <Input defaultValue={patient.email} className="text-sm" />
-                        ) : (
-                          <span className="text-muted-foreground">{patient.email}</span>
-                        )}
+                        <span className="text-muted-foreground">{patientEmail}</span>
                       </div>
                       <div className="flex items-center gap-3">
                         <Phone className="h-4 w-4 text-muted-foreground" />
                         {isEditing ? (
-                          <Input defaultValue={patient.phone} className="text-sm" />
+                          <Input value={contactEdit.phone} onChange={(e) => setContactEdit(prev => ({...prev, phone: e.target.value}))} className="text-sm" />
                         ) : (
-                          <span className="text-muted-foreground">{patient.phone}</span>
+                          <span className="text-muted-foreground">{patientPhone}</span>
                         )}
                       </div>
                       <div className="flex items-center gap-3">
                         <MapPin className="h-4 w-4 text-muted-foreground" />
                         {isEditing ? (
-                          <Input defaultValue={patient.address} className="text-sm" />
+                          <div className="grid gap-2 w-full">
+                            <Input placeholder="Street" value={contactEdit.street} onChange={(e) => setContactEdit(prev => ({...prev, street: e.target.value}))} className="text-sm" />
+                            <Input placeholder="City" value={contactEdit.city} onChange={(e) => setContactEdit(prev => ({...prev, city: e.target.value}))} className="text-sm" />
+                          </div>
                         ) : (
-                          <span className="text-muted-foreground">{patient.address}</span>
+                          <span className="text-muted-foreground">{patientAddress?.street || patientAddress?.city || 'N/A'}</span>
                         )}
                       </div>
                       <div className="flex items-center gap-3">
                         <Calendar className="h-4 w-4 text-muted-foreground" />
                         <span className="text-muted-foreground">
-                          Born: {new Date(patient.dateOfBirth).toLocaleDateString()}
+                          Born: {patientDOB ? new Date(patientDOB).toLocaleDateString() : 'N/A'}
                         </span>
                       </div>
                     </div>
@@ -223,21 +360,25 @@ const PatientProfilePage = () => {
                       <div className="flex items-center gap-3">
                         <User className="h-4 w-4 text-muted-foreground" />
                         {isEditing ? (
-                          <Input defaultValue={patient.emergencyContact.name} className="text-sm" />
+                          <Input value={emergencyEdit?.name || ''} onChange={(e) => setEmergencyEdit(prev => ({...prev, name: e.target.value}))} className="text-sm" />
                         ) : (
-                          <span className="text-muted-foreground">{patient.emergencyContact.name}</span>
+                          <span className="text-muted-foreground">{primaryEmergency?.name || 'N/A'}</span>
                         )}
                       </div>
                       <div className="flex items-center gap-3">
                         <Heart className="h-4 w-4 text-muted-foreground" />
-                        <span className="text-muted-foreground">{patient.emergencyContact.relationship}</span>
+                        {isEditing ? (
+                          <Input value={emergencyEdit?.relationship || ''} onChange={(e) => setEmergencyEdit(prev => ({...prev, relationship: e.target.value}))} className="text-sm" />
+                        ) : (
+                          <span className="text-muted-foreground">{primaryEmergency?.relationship || 'N/A'}</span>
+                        )}
                       </div>
                       <div className="flex items-center gap-3">
                         <Phone className="h-4 w-4 text-muted-foreground" />
                         {isEditing ? (
-                          <Input defaultValue={patient.emergencyContact.phone} className="text-sm" />
+                          <Input value={emergencyEdit?.phone || ''} onChange={(e) => setEmergencyEdit(prev => ({...prev, phone: e.target.value}))} className="text-sm" />
                         ) : (
-                          <span className="text-muted-foreground">{patient.emergencyContact.phone}</span>
+                          <span className="text-muted-foreground">{primaryEmergency?.phone || 'N/A'}</span>
                         )}
                       </div>
                     </div>
@@ -270,23 +411,132 @@ const PatientProfilePage = () => {
                 <div className="lg:col-span-2">
                   <Card className="shadow-soft border-0">
                     <CardHeader>
-                      <CardTitle className="flex items-center gap-2">
-                        <Activity className="h-5 w-5 text-primary" />
-                        Health Overview
+                      <CardTitle className="flex items-center justify-between">
+                        <span className="flex items-center gap-2">
+                          <Activity className="h-5 w-5 text-primary" />
+                          Health Overview
+                        </span>
+                        <Button 
+                          variant={isEditingHealth ? "default" : "outline"}
+                          size="sm"
+                          onClick={async () => {
+                            if (isEditingHealth) {
+                              // Save health data
+                              try {
+                                await patientAPI.updateHealthOverview(healthEdit);
+                                // Refresh patient data
+                                const profile = await patientAPI.getProfile();
+                                setPatient(profile);
+                              } catch (e) {
+                                console.error('Error updating health overview:', e);
+                              }
+                            }
+                            setIsEditingHealth(!isEditingHealth);
+                          }}
+                        >
+                          <EditIcon className="h-4 w-4 mr-2" />
+                          {isEditingHealth ? "Save" : "Edit"}
+                        </Button>
                       </CardTitle>
                     </CardHeader>
                     <CardContent>
                       <div className="grid md:grid-cols-2 gap-4">
-                        {[{ label: "Blood Pressure", current: "128/82", color: "text-yellow-600" },{ label: "Heart Rate", current: "72 bpm", color: "text-green-600" },{ label: "Weight", current: "165 lbs", color: "text-green-600" },{ label: "Blood Sugar", current: "145 mg/dL", color: "text-red-600" }].map((vital, index) => (
-                          <div key={index} className="p-4 bg-accent/30 rounded-lg">
-                            <div className="flex justify-between items-center">
-                              <span className="font-medium">{vital.label}</span>
-                              <span className={`text-sm font-medium ${vital.color}`}>
-                                {vital.current}
+                        {/* Blood Pressure */}
+                        <div className="p-4 bg-accent/30 rounded-lg">
+                          <div className="flex justify-between items-center">
+                            <span className="font-medium">Blood Pressure</span>
+                            {isEditingHealth ? (
+                              <div className="flex gap-1 items-center">
+                                <Input 
+                                  className="w-16 h-8 text-sm" 
+                                  placeholder="120" 
+                                  value={healthEdit.bloodPressureSystolic}
+                                  onChange={(e) => setHealthEdit(prev => ({...prev, bloodPressureSystolic: e.target.value}))}
+                                />
+                                <span>/</span>
+                                <Input 
+                                  className="w-16 h-8 text-sm" 
+                                  placeholder="80" 
+                                  value={healthEdit.bloodPressureDiastolic}
+                                  onChange={(e) => setHealthEdit(prev => ({...prev, bloodPressureDiastolic: e.target.value}))}
+                                />
+                              </div>
+                            ) : (
+                              <span className="text-sm font-medium text-yellow-600">
+                                {patient?.vitalSigns?.bloodPressure ? 
+                                  `${patient.vitalSigns.bloodPressure.systolic}/${patient.vitalSigns.bloodPressure.diastolic}` : 
+                                  'N/A'
+                                }
                               </span>
-                            </div>
+                            )}
                           </div>
-                        ))}
+                        </div>
+
+                        {/* Heart Rate */}
+                        <div className="p-4 bg-accent/30 rounded-lg">
+                          <div className="flex justify-between items-center">
+                            <span className="font-medium">Heart Rate</span>
+                            {isEditingHealth ? (
+                              <Input 
+                                className="w-20 h-8 text-sm" 
+                                placeholder="72" 
+                                value={healthEdit.heartRate}
+                                onChange={(e) => setHealthEdit(prev => ({...prev, heartRate: e.target.value}))}
+                              />
+                            ) : (
+                              <span className="text-sm font-medium text-green-600">
+                                {patient?.vitalSigns?.heartRate?.value ? 
+                                  `${patient.vitalSigns.heartRate.value} bpm` : 
+                                  'N/A'
+                                }
+                              </span>
+                            )}
+                          </div>
+                        </div>
+
+                        {/* Weight */}
+                        <div className="p-4 bg-accent/30 rounded-lg">
+                          <div className="flex justify-between items-center">
+                            <span className="font-medium">Weight</span>
+                            {isEditingHealth ? (
+                              <Input 
+                                className="w-20 h-8 text-sm" 
+                                placeholder="165" 
+                                value={healthEdit.weight}
+                                onChange={(e) => setHealthEdit(prev => ({...prev, weight: e.target.value}))}
+                              />
+                            ) : (
+                              <span className="text-sm font-medium text-green-600">
+                                {patient?.vitalSigns?.weight?.value ? 
+                                  `${patient.vitalSigns.weight.value} ${patient.vitalSigns.weight.unit || 'lbs'}` : 
+                                  'N/A'
+                                }
+                              </span>
+                            )}
+                          </div>
+                        </div>
+
+                        {/* Blood Sugar */}
+                        <div className="p-4 bg-accent/30 rounded-lg">
+                          <div className="flex justify-between items-center">
+                            <span className="font-medium">Blood Sugar</span>
+                            {isEditingHealth ? (
+                              <Input 
+                                className="w-20 h-8 text-sm" 
+                                placeholder="145" 
+                                value={healthEdit.bloodSugar}
+                                onChange={(e) => setHealthEdit(prev => ({...prev, bloodSugar: e.target.value}))}
+                              />
+                            ) : (
+                              <span className="text-sm font-medium text-red-600">
+                                {patient?.customVitals?.bloodSugar?.value ? 
+                                  `${patient.customVitals.bloodSugar.value} ${patient.customVitals.bloodSugar.unit || 'mg/dL'}` : 
+                                  'N/A'
+                                }
+                              </span>
+                            )}
+                          </div>
+                        </div>
                       </div>
                     </CardContent>
                   </Card>
@@ -303,16 +553,15 @@ const PatientProfilePage = () => {
                   <CardContent className="space-y-4">
                     <div>
                       <div className="text-sm text-muted-foreground mb-1">Blood Type</div>
-                      <Badge variant="secondary">{patient.medicalInfo.bloodType}</Badge>
-                    </div>
-                    <div>
-                      <div className="text-sm text-muted-foreground mb-1">Height / Weight</div>
-                      <div className="font-medium">{patient.medicalInfo.height} / {patient.medicalInfo.weight}</div>
+                      <Badge variant="secondary">{bloodType}</Badge>
                     </div>
                     <div>
                       <div className="text-sm text-muted-foreground mb-1">Allergies</div>
                       <div className="space-y-1">
-                        {patient.medicalInfo.allergies.map((allergy, index) => (
+                        {quickAllergies.length === 0 && (
+                          <span className="text-muted-foreground text-sm">No allergies recorded</span>
+                        )}
+                        {quickAllergies.map((allergy, index) => (
                           <Badge key={index} variant="destructive" className="text-xs mr-2">
                             {allergy}
                           </Badge>
@@ -448,9 +697,9 @@ const PatientProfilePage = () => {
                 </CardHeader>
                 <CardContent>
                   <div className="flex flex-wrap gap-2">
-                    {patient.medicalInfo.chronicConditions.map((condition, index) => (
+                    {(patient?.medicalHistory?.currentConditions || []).map((cond, index) => (
                       <Badge key={index} variant="destructive" className="text-sm">
-                        {condition}
+                        {cond?.condition || 'Condition'}
                       </Badge>
                     ))}
                   </div>

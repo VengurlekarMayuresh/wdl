@@ -9,6 +9,7 @@ import LoginPage from "./pages/LoginPage";
 import FindCarePage from "./pages/FindCarePage";
 import DoctorProfilePage from "./pages/DoctorProfilePage";
 import DoctorDashboard from "./pages/DoctorDashboard";
+import DoctorSelfProfilePage from "./pages/DoctorSelfProfilePage";
 import PatientProfilePage from "./pages/PatientProfilePage";
 import Profile from "./pages/Profile";
 import HealthyLivingPage from "./pages/HealthyLivingPage";
@@ -29,7 +30,8 @@ const App = () => (
             <Route path="/find-care" element={<FindCarePage />} />
             <Route path="/doctor/:id" element={<DoctorProfilePage />} />
             <Route path="/doctors" element={<FindCarePage />} />
-            <Route path="/doctor-dashboard" element={<DoctorDashboard />} />
+<Route path="/doctor-dashboard" element={<DoctorDashboard />} />
+            <Route path="/doctor-profile" element={<DoctorSelfProfilePage />} />
             <Route path="/profile" element={<Profile />} />
             <Route path="/patient-profile" element={<PatientProfilePage />} />
             <Route path="/healthy-living" element={<HealthyLivingPage />} />
