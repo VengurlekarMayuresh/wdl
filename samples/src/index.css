@@ -1,0 +1,179 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Definition of the design system. All colors, gradients, fonts, etc should be defined here. 
+All colors MUST be HSL.
+*/
+
+@layer base {
+  :root {
+    --background: 248 249 250% 100%;
+    --foreground: 180 31% 15%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 180 31% 15%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 180 31% 15%;
+
+    /* Medical teal theme */
+    --primary: 180 31% 25%;
+    --primary-foreground: 0 0% 98%;
+    --primary-dark: 180 40% 15%;
+    --primary-light: 180 35% 35%;
+    --primary-glow: 180 31% 45%;
+
+    --secondary: 210 40% 96.1%;
+    --secondary-foreground: 180 31% 15%;
+
+    --muted: 210 40% 96.1%;
+    --muted-foreground: 215.4 16.3% 46.9%;
+
+    --accent: 180 25% 90%;
+    --accent-foreground: 180 31% 15%;
+
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 210 40% 98%;
+
+    --border: 214.3 31.8% 91.4%;
+    --input: 214.3 31.8% 91.4%;
+    --ring: 180 31% 25%;
+
+    --radius: 0.75rem;
+
+    /* Medical gradients */
+    --gradient-primary: linear-gradient(135deg, hsl(var(--primary)), hsl(var(--primary-dark)));
+    --gradient-light: linear-gradient(180deg, hsl(var(--background)), hsl(var(--accent)));
+    --gradient-glow: linear-gradient(135deg, hsl(var(--primary-glow)), hsl(var(--primary)));
+
+    /* Shadows */
+    --shadow-soft: 0 4px 12px rgba(20, 106, 93, 0.08);
+    --shadow-medium: 0 8px 30px rgba(20, 106, 93, 0.12);
+    --shadow-strong: 0 20px 40px rgba(20, 106, 93, 0.15);
+
+    /* Animations */
+    --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    --transition-bounce: all 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+
+    --sidebar-background: 0 0% 98%;
+    --sidebar-foreground: 240 5.3% 26.1%;
+    --sidebar-primary: 180 31% 25%;
+    --sidebar-primary-foreground: 0 0% 98%;
+    --sidebar-accent: 240 4.8% 95.9%;
+    --sidebar-accent-foreground: 180 31% 25%;
+    --sidebar-border: 220 13% 91%;
+    --sidebar-ring: 180 31% 25%;
+  }
+
+  .dark {
+    --background: 180 31% 8%;
+    --foreground: 210 40% 98%;
+
+    --card: 180 31% 10%;
+    --card-foreground: 210 40% 98%;
+
+    --popover: 180 31% 10%;
+    --popover-foreground: 210 40% 98%;
+
+    --primary: 180 31% 85%;
+    --primary-foreground: 180 31% 8%;
+
+    --secondary: 180 25% 12%;
+    --secondary-foreground: 210 40% 98%;
+
+    --muted: 180 25% 12%;
+    --muted-foreground: 215 20.2% 65.1%;
+
+    --accent: 180 25% 15%;
+    --accent-foreground: 210 40% 98%;
+
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 210 40% 98%;
+
+    --border: 180 25% 15%;
+    --input: 180 25% 15%;
+    --ring: 180 31% 85%;
+
+    --sidebar-background: 180 31% 8%;
+    --sidebar-foreground: 240 4.8% 95.9%;
+    --sidebar-primary: 180 31% 85%;
+    --sidebar-primary-foreground: 180 31% 8%;
+    --sidebar-accent: 180 25% 12%;
+    --sidebar-accent-foreground: 240 4.8% 95.9%;
+    --sidebar-border: 180 25% 12%;
+    --sidebar-ring: 180 31% 85%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground font-sans;
+    font-family: 'Poppins', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    line-height: 1.6;
+    scroll-behavior: smooth;
+  }
+
+  /* Medical UI animations */
+  @keyframes slideInLeft {
+    0% {
+      opacity: 0;
+      transform: translateX(-30px);
+    }
+    100% {
+      opacity: 1;
+      transform: translateX(0);
+    }
+  }
+
+  @keyframes slideInRight {
+    0% {
+      opacity: 0;
+      transform: translateX(30px);
+    }
+    100% {
+      opacity: 1;
+      transform: translateX(0);
+    }
+  }
+
+  @keyframes fadeInUp {
+    0% {
+      opacity: 0;
+      transform: translateY(20px);
+    }
+    100% {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  @keyframes pulse {
+    0%, 100% {
+      opacity: 1;
+    }
+    50% {
+      opacity: 0.8;
+    }
+  }
+
+  .animate-slideInLeft {
+    animation: slideInLeft 0.8s ease-out;
+  }
+
+  .animate-slideInRight {
+    animation: slideInRight 0.8s ease-out;
+  }
+
+  .animate-fadeInUp {
+    animation: fadeInUp 0.6s ease-out;
+  }
+
+  .animate-pulse-soft {
+    animation: pulse 2s ease-in-out infinite;
+  }
+}

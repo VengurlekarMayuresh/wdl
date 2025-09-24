@@ -1,0 +1,437 @@
+[
+  {
+    "firstName": "Amanda",
+    "lastName": "Wilson",
+    "email": "amanda.wilson@homecare.com",
+    "password": "caregiver123",
+    "phone": "(555) 777-8888",
+    "dateOfBirth": "1988-06-20",
+    "gender": "female",
+    "address": {
+      "street": "789 Care Avenue",
+      "city": "Seattle",
+      "state": "WA",
+      "zipCode": "98101",
+      "country": "USA"
+    },
+    "profilePicture": "https://images.unsplash.com/photo-1582750433449-648ed127bb54?w=300&h=300&fit=crop&crop=face",
+    "bio": "Compassionate registered nurse with 8 years of experience in home healthcare and elderly care.",
+    "careProviderInfo": {
+      "certification": "RN",
+      "licenseNumber": "RN123456",
+      "licenseState": "WA",
+      "licenseExpiryDate": "2025-08-31",
+      "specializations": ["Geriatric Care", "Post-Surgical Care", "Chronic Disease Management"],
+      "yearsOfExperience": 8,
+      "education": [
+        {
+          "institution": "University of Washington School of Nursing",
+          "degree": "BSN",
+          "graduationYear": 2015
+        }
+      ],
+      "certifications": [
+        {
+          "name": "Basic Life Support (BLS)",
+          "issuingOrganization": "American Heart Association",
+          "issueDate": "2023-01-15",
+          "expiryDate": "2025-01-15"
+        },
+        {
+          "name": "Advanced Cardiovascular Life Support (ACLS)",
+          "issuingOrganization": "American Heart Association",
+          "issueDate": "2023-03-10",
+          "expiryDate": "2025-03-10"
+        }
+      ],
+      "services": [
+        {
+          "service": "Medication Management",
+          "description": "Assistance with medication administration and monitoring",
+          "rate": 35
+        },
+        {
+          "service": "Wound Care",
+          "description": "Professional wound assessment and care",
+          "rate": 45
+        },
+        {
+          "service": "Vital Signs Monitoring",
+          "description": "Regular monitoring of blood pressure, temperature, pulse",
+          "rate": 30
+        }
+      ],
+      "availability": {
+        "monday": {"start": "08:00", "end": "18:00"},
+        "tuesday": {"start": "08:00", "end": "18:00"},
+        "wednesday": {"start": "08:00", "end": "18:00"},
+        "thursday": {"start": "08:00", "end": "18:00"},
+        "friday": {"start": "08:00", "end": "18:00"},
+        "saturday": {"start": "10:00", "end": "16:00"},
+        "sunday": {"start": "10:00", "end": "16:00"}
+      },
+      "hourlyRate": 35,
+      "languagesSpoken": [
+        {"language": "English", "proficiency": "native"},
+        {"language": "Spanish", "proficiency": "conversational"}
+      ],
+      "backgroundCheck": {
+        "completed": true,
+        "completedDate": "2023-01-10",
+        "status": "cleared"
+      },
+      "isVerified": true,
+      "isAvailable": true,
+      "serviceArea": ["Seattle", "Bellevue", "Redmond"],
+      "transportationAvailable": true,
+      "emergencyContact": {
+        "name": "Robert Wilson",
+        "relationship": "Spouse",
+        "phone": "(555) 777-8889"
+      }
+    }
+  },
+  {
+    "firstName": "Marcus",
+    "lastName": "Thompson",
+    "email": "marcus.thompson@eldercare.com",
+    "password": "caregiver123",
+    "phone": "(555) 888-9999",
+    "dateOfBirth": "1985-03-15",
+    "gender": "male",
+    "address": {
+      "street": "456 Wellness Street",
+      "city": "Portland",
+      "state": "OR",
+      "zipCode": "97201",
+      "country": "USA"
+    },
+    "profilePicture": "https://images.unsplash.com/photo-1612349317150-e413f6a5b16d?w=300&h=300&fit=crop&crop=face",
+    "bio": "Dedicated physical therapist assistant specializing in rehabilitation and mobility assistance for seniors.",
+    "careProviderInfo": {
+      "certification": "PTA",
+      "licenseNumber": "PTA789012",
+      "licenseState": "OR",
+      "licenseExpiryDate": "2025-12-15",
+      "specializations": ["Physical Therapy", "Mobility Training", "Fall Prevention"],
+      "yearsOfExperience": 10,
+      "education": [
+        {
+          "institution": "Portland Community College",
+          "degree": "Associate in Physical Therapist Assistant",
+          "graduationYear": 2013
+        }
+      ],
+      "certifications": [
+        {
+          "name": "CPR Certification",
+          "issuingOrganization": "American Red Cross",
+          "issueDate": "2023-02-20",
+          "expiryDate": "2025-02-20"
+        }
+      ],
+      "services": [
+        {
+          "service": "Physical Therapy Assistance",
+          "description": "Support with prescribed physical therapy exercises",
+          "rate": 40
+        },
+        {
+          "service": "Mobility Training",
+          "description": "Help with walking, transferring, and mobility aids",
+          "rate": 35
+        },
+        {
+          "service": "Exercise Supervision",
+          "description": "Supervised exercise routines for strength and balance",
+          "rate": 30
+        }
+      ],
+      "availability": {
+        "monday": {"start": "07:00", "end": "15:00"},
+        "tuesday": {"start": "07:00", "end": "15:00"},
+        "wednesday": {"start": "07:00", "end": "15:00"},
+        "thursday": {"start": "07:00", "end": "15:00"},
+        "friday": {"start": "07:00", "end": "15:00"},
+        "saturday": {"start": "09:00", "end": "13:00"},
+        "sunday": "unavailable"
+      },
+      "hourlyRate": 38,
+      "languagesSpoken": [
+        {"language": "English", "proficiency": "native"}
+      ],
+      "backgroundCheck": {
+        "completed": true,
+        "completedDate": "2023-01-05",
+        "status": "cleared"
+      },
+      "isVerified": true,
+      "isAvailable": true,
+      "serviceArea": ["Portland", "Beaverton", "Lake Oswego"],
+      "transportationAvailable": true,
+      "emergencyContact": {
+        "name": "Sarah Thompson",
+        "relationship": "Sister",
+        "phone": "(555) 888-0000"
+      }
+    }
+  },
+  {
+    "firstName": "Isabella",
+    "lastName": "Martinez",
+    "email": "isabella.martinez@compassioncare.com",
+    "password": "caregiver123",
+    "phone": "(555) 999-0000",
+    "dateOfBirth": "1990-08-12",
+    "gender": "female",
+    "address": {
+      "street": "123 Comfort Lane",
+      "city": "San Diego",
+      "state": "CA",
+      "zipCode": "92101",
+      "country": "USA"
+    },
+    "profilePicture": "https://images.unsplash.com/photo-1594824272460-1fade3045d77?w=300&h=300&fit=crop&crop=face",
+    "bio": "Bilingual certified nursing assistant with expertise in dementia care and companionship services.",
+    "careProviderInfo": {
+      "certification": "CNA",
+      "licenseNumber": "CNA345678",
+      "licenseState": "CA",
+      "licenseExpiryDate": "2025-06-30",
+      "specializations": ["Dementia Care", "Alzheimer's Care", "Companionship", "Personal Care"],
+      "yearsOfExperience": 6,
+      "education": [
+        {
+          "institution": "San Diego Community College",
+          "degree": "Certificate in Nursing Assistant",
+          "graduationYear": 2017
+        }
+      ],
+      "certifications": [
+        {
+          "name": "Dementia Care Certification",
+          "issuingOrganization": "National Council of Certified Dementia Practitioners",
+          "issueDate": "2022-09-15",
+          "expiryDate": "2024-09-15"
+        }
+      ],
+      "services": [
+        {
+          "service": "Personal Care",
+          "description": "Assistance with bathing, dressing, and grooming",
+          "rate": 25
+        },
+        {
+          "service": "Companionship",
+          "description": "Social interaction and emotional support",
+          "rate": 20
+        },
+        {
+          "service": "Meal Preparation",
+          "description": "Planning and preparing nutritious meals",
+          "rate": 22
+        }
+      ],
+      "availability": {
+        "monday": {"start": "06:00", "end": "14:00"},
+        "tuesday": {"start": "06:00", "end": "14:00"},
+        "wednesday": {"start": "14:00", "end": "22:00"},
+        "thursday": {"start": "14:00", "end": "22:00"},
+        "friday": {"start": "06:00", "end": "14:00"},
+        "saturday": {"start": "08:00", "end": "16:00"},
+        "sunday": {"start": "08:00", "end": "16:00"}
+      },
+      "hourlyRate": 22,
+      "languagesSpoken": [
+        {"language": "English", "proficiency": "fluent"},
+        {"language": "Spanish", "proficiency": "native"}
+      ],
+      "backgroundCheck": {
+        "completed": true,
+        "completedDate": "2023-02-01",
+        "status": "cleared"
+      },
+      "isVerified": true,
+      "isAvailable": true,
+      "serviceArea": ["San Diego", "Chula Vista", "National City"],
+      "transportationAvailable": false,
+      "emergencyContact": {
+        "name": "Carlos Martinez",
+        "relationship": "Father",
+        "phone": "(555) 999-0001"
+      }
+    }
+  },
+  {
+    "firstName": "James",
+    "lastName": "Anderson",
+    "email": "james.anderson@reliablecare.com",
+    "password": "caregiver123",
+    "phone": "(555) 000-1111",
+    "dateOfBirth": "1982-11-30",
+    "gender": "male",
+    "address": {
+      "street": "567 Support Drive",
+      "city": "Denver",
+      "state": "CO",
+      "zipCode": "80201",
+      "country": "USA"
+    },
+    "profilePicture": "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=300&h=300&fit=crop&crop=face",
+    "bio": "Experienced home health aide with specialization in post-operative care and chronic condition management.",
+    "careProviderInfo": {
+      "certification": "HHA",
+      "licenseNumber": "HHA901234",
+      "licenseState": "CO",
+      "licenseExpiryDate": "2025-10-31",
+      "specializations": ["Post-Operative Care", "Diabetes Management", "Chronic Pain Management"],
+      "yearsOfExperience": 12,
+      "education": [
+        {
+          "institution": "Community College of Denver",
+          "degree": "Certificate in Home Health Aide",
+          "graduationYear": 2011
+        }
+      ],
+      "certifications": [
+        {
+          "name": "First Aid Certification",
+          "issuingOrganization": "American Red Cross",
+          "issueDate": "2023-04-10",
+          "expiryDate": "2025-04-10"
+        }
+      ],
+      "services": [
+        {
+          "service": "Post-Surgical Care",
+          "description": "Specialized care following surgical procedures",
+          "rate": 42
+        },
+        {
+          "service": "Diabetes Management",
+          "description": "Blood sugar monitoring and diabetic care",
+          "rate": 38
+        },
+        {
+          "service": "Light Housekeeping",
+          "description": "Basic cleaning and organization",
+          "rate": 18
+        }
+      ],
+      "availability": {
+        "monday": {"start": "09:00", "end": "17:00"},
+        "tuesday": {"start": "09:00", "end": "17:00"},
+        "wednesday": {"start": "09:00", "end": "17:00"},
+        "thursday": {"start": "09:00", "end": "17:00"},
+        "friday": {"start": "09:00", "end": "17:00"},
+        "saturday": "unavailable",
+        "sunday": "unavailable"
+      },
+      "hourlyRate": 32,
+      "languagesSpoken": [
+        {"language": "English", "proficiency": "native"}
+      ],
+      "backgroundCheck": {
+        "completed": true,
+        "completedDate": "2023-01-20",
+        "status": "cleared"
+      },
+      "isVerified": true,
+      "isAvailable": true,
+      "serviceArea": ["Denver", "Aurora", "Westminster"],
+      "transportationAvailable": true,
+      "emergencyContact": {
+        "name": "Lisa Anderson",
+        "relationship": "Wife",
+        "phone": "(555) 000-1112"
+      }
+    }
+  },
+  {
+    "firstName": "Sophia",
+    "lastName": "Chen",
+    "email": "sophia.chen@qualitycare.com",
+    "password": "caregiver123",
+    "phone": "(555) 111-2222",
+    "dateOfBirth": "1987-01-25",
+    "gender": "female",
+    "address": {
+      "street": "890 Healing Way",
+      "city": "San Francisco",
+      "state": "CA",
+      "zipCode": "94101",
+      "country": "USA"
+    },
+    "profilePicture": "https://images.unsplash.com/photo-1551601651-2a8555f1a136?w=300&h=300&fit=crop&crop=face",
+    "bio": "Multilingual licensed practical nurse with extensive experience in respiratory care and medication management.",
+    "careProviderInfo": {
+      "certification": "LPN",
+      "licenseNumber": "LPN567890",
+      "licenseState": "CA",
+      "licenseExpiryDate": "2025-04-15",
+      "specializations": ["Respiratory Care", "Medication Management", "IV Therapy"],
+      "yearsOfExperience": 9,
+      "education": [
+        {
+          "institution": "City College of San Francisco",
+          "degree": "Practical Nursing Certificate",
+          "graduationYear": 2014
+        }
+      ],
+      "certifications": [
+        {
+          "name": "IV Therapy Certification",
+          "issuingOrganization": "California Board of Vocational Nursing",
+          "issueDate": "2022-06-01",
+          "expiryDate": "2024-06-01"
+        }
+      ],
+      "services": [
+        {
+          "service": "IV Therapy",
+          "description": "Intravenous medication and fluid administration",
+          "rate": 55
+        },
+        {
+          "service": "Respiratory Care",
+          "description": "Oxygen therapy and breathing treatments",
+          "rate": 50
+        },
+        {
+          "service": "Medication Administration",
+          "description": "Safe administration of prescribed medications",
+          "rate": 40
+        }
+      ],
+      "availability": {
+        "monday": {"start": "12:00", "end": "20:00"},
+        "tuesday": {"start": "12:00", "end": "20:00"},
+        "wednesday": {"start": "12:00", "end": "20:00"},
+        "thursday": {"start": "12:00", "end": "20:00"},
+        "friday": {"start": "12:00", "end": "20:00"},
+        "saturday": {"start": "08:00", "end": "16:00"},
+        "sunday": {"start": "08:00", "end": "16:00"}
+      },
+      "hourlyRate": 48,
+      "languagesSpoken": [
+        {"language": "English", "proficiency": "fluent"},
+        {"language": "Mandarin", "proficiency": "native"},
+        {"language": "Cantonese", "proficiency": "native"}
+      ],
+      "backgroundCheck": {
+        "completed": true,
+        "completedDate": "2023-03-01",
+        "status": "cleared"
+      },
+      "isVerified": true,
+      "isAvailable": true,
+      "serviceArea": ["San Francisco", "Oakland", "Berkeley"],
+      "transportationAvailable": false,
+      "emergencyContact": {
+        "name": "David Chen",
+        "relationship": "Brother",
+        "phone": "(555) 111-2223"
+      }
+    }
+  }
+]
