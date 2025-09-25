@@ -33,7 +33,7 @@ import {
   Camera
 } from "lucide-react";
 import ProfileImageUpload from "@/components/ui/ProfileImageUpload";
-import SlotManager from "@/components/appointment/SlotManager";
+import SimpleSlotManager from "@/components/appointment/SimpleSlotManager";
 
 const DoctorSelfProfilePage = () => {
   const { user, isAuthenticated, logout, refreshUser } = useAuth();
@@ -1229,7 +1229,7 @@ const DoctorSelfProfilePage = () => {
                   </div>
                 </CardContent>
               </Card>
-              <SlotManager doctorId={user?.id || user?._id} />
+              <SimpleSlotManager doctorId={user?.id || user?._id} />
             </TabsContent>
 
           </Tabs>
