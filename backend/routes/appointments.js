@@ -1,0 +1,711 @@
+import express from 'express';
+import { authenticate, authorize } from '../middleware/auth.js';
+import Slot from '../models/Slot.js';
+import Appointment from '../models/Appointment.js';
+import Doctor from '../models/Doctor.js';
+import Patient from '../models/Patient.js';
+
+const router = express.Router();
+
+// =======================
+// SLOT MANAGEMENT ROUTES
+// =======================
+
+// @route   GET /api/appointments/slots/my
+// @desc    Get current doctor's slots
+// @access  Private (Doctor only)
+router.get('/slots/my', authenticate, authorize('doctor'), async (req, res) => {
+  try {
+    const doctor = await Doctor.findOne({ userId: req.user._id });
+    if (!doctor) {
+      return res.status(404).json({
+        success: false,
+        message: 'Doctor profile not found'
+      });
+    }
+
+    const { 
+      page = 1, 
+      limit = 20, 
+      status = 'all',
+      fromDate,
+      toDate 
+    } = req.query;
+
+    // Build query
+    const query = { doctorId: doctor._id };
+
+    // Filter by status
+    if (status !== 'all') {
+      if (status === 'available') {
+        query.isAvailable = true;
+        query.isBooked = false;
+        query.status = 'active';
+      } else if (status === 'booked') {
+        query.isBooked = true;
+      } else {
+        query.status = status;
+      }
+    }
+
+    // Filter by date range
+    if (fromDate || toDate) {
+      query.dateTime = {};
+      if (fromDate) query.dateTime.$gte = new Date(fromDate);
+      if (toDate) query.dateTime.$lte = new Date(toDate);
+    }
+
+    // Execute query with pagination
+    const skip = (parseInt(page) - 1) * parseInt(limit);
+    
+    const slots = await Slot.find(query)
+      .populate('patientId', 'firstName lastName phone email')
+      .populate('appointmentId')
+      .sort({ dateTime: 1 })
+      .skip(skip)
+      .limit(parseInt(limit));
+
+    const total = await Slot.countDocuments(query);
+
+    res.json({
+      success: true,
+      data: {
+        slots,
+        pagination: {
+          currentPage: parseInt(page),
+          totalPages: Math.ceil(total / parseInt(limit)),
+          totalSlots: total,
+          hasNextPage: skip + slots.length < total,
+          hasPrevPage: parseInt(page) > 1
+        }
+      }
+    });
+
+  } catch (error) {
+    console.error('Get doctor slots error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Server error fetching slots'
+    });
+  }
+});
+
+// @route   POST /api/appointments/slots
+// @desc    Create a new slot
+// @access  Private (Doctor only)
+router.post('/slots', authenticate, authorize('doctor'), async (req, res) => {
+  try {
+    const doctor = await Doctor.findOne({ userId: req.user._id });
+    if (!doctor) {
+      return res.status(404).json({
+        success: false,
+        message: 'Doctor profile not found'
+      });
+    }
+
+    const {
+      dateTime,
+      endTime,
+      type = 'consultation',
+      duration = 30,
+      consultationFee,
+      notes,
+      requirements,
+      consultationType = 'in-person',
+      telemedicineLink
+    } = req.body;
+
+    // Validation
+    if (!dateTime || !endTime) {
+      return res.status(400).json({
+        success: false,
+        message: 'Date, time, and end time are required'
+      });
+    }
+
+    // Check if slot date/time is in the past
+    const slotDateTime = new Date(dateTime);
+    if (slotDateTime < new Date()) {
+      return res.status(400).json({
+        success: false,
+        message: 'Cannot create slots in the past'
+      });
+    }
+
+    // Check for conflicting slots
+    const conflictingSlot = await Slot.findOne({
+      doctorId: doctor._id,
+      dateTime: slotDateTime,
+      status: 'active'
+    });
+
+    if (conflictingSlot) {
+      return res.status(400).json({
+        success: false,
+        message: 'A slot already exists at this date and time'
+      });
+    }
+
+    // Create new slot
+    const slot = new Slot({
+      doctorId: doctor._id,
+      dateTime: slotDateTime,
+      endTime,
+      type,
+      duration,
+      consultationFee: consultationFee || doctor.consultationFee || 0,
+      notes,
+      requirements,
+      consultationType,
+      telemedicineLink
+    });
+
+    await slot.save();
+
+    res.status(201).json({
+      success: true,
+      message: 'Slot created successfully',
+      data: { slot }
+    });
+
+  } catch (error) {
+    console.error('Create slot error:', error);
+    
+    if (error.name === 'ValidationError') {
+      const errors = Object.values(error.errors).map(err => err.message);
+      return res.status(400).json({
+        success: false,
+        message: 'Validation error',
+        errors
+      });
+    }
+
+    res.status(500).json({
+      success: false,
+      message: 'Server error creating slot'
+    });
+  }
+});
+
+// @route   PUT /api/appointments/slots/:slotId
+// @desc    Update a slot
+// @access  Private (Doctor only)
+router.put('/slots/:slotId', authenticate, authorize('doctor'), async (req, res) => {
+  try {
+    const doctor = await Doctor.findOne({ userId: req.user._id });
+    if (!doctor) {
+      return res.status(404).json({
+        success: false,
+        message: 'Doctor profile not found'
+      });
+    }
+
+    const slot = await Slot.findOne({
+      _id: req.params.slotId,
+      doctorId: doctor._id
+    });
+
+    if (!slot) {
+      return res.status(404).json({
+        success: false,
+        message: 'Slot not found'
+      });
+    }
+
+    // Check if slot is booked
+    if (slot.isBooked) {
+      return res.status(400).json({
+        success: false,
+        message: 'Cannot update a booked slot'
+      });
+    }
+
+    // Update allowed fields
+    const allowedFields = [
+      'dateTime', 'endTime', 'type', 'duration', 'consultationFee',
+      'notes', 'requirements', 'consultationType', 'telemedicineLink'
+    ];
+
+    const updates = {};
+    Object.keys(req.body).forEach(key => {
+      if (allowedFields.includes(key) && req.body[key] !== undefined) {
+        updates[key] = req.body[key];
+      }
+    });
+
+    if (Object.keys(updates).length === 0) {
+      return res.status(400).json({
+        success: false,
+        message: 'No valid fields to update'
+      });
+    }
+
+    // If updating dateTime, check for conflicts
+    if (updates.dateTime) {
+      const newDateTime = new Date(updates.dateTime);
+      
+      if (newDateTime < new Date()) {
+        return res.status(400).json({
+          success: false,
+          message: 'Cannot schedule slots in the past'
+        });
+      }
+
+      const conflictingSlot = await Slot.findOne({
+        _id: { $ne: slot._id },
+        doctorId: doctor._id,
+        dateTime: newDateTime,
+        status: 'active'
+      });
+
+      if (conflictingSlot) {
+        return res.status(400).json({
+          success: false,
+          message: 'A slot already exists at this date and time'
+        });
+      }
+    }
+
+    // Update the slot
+    Object.assign(slot, updates);
+    await slot.save();
+
+    res.json({
+      success: true,
+      message: 'Slot updated successfully',
+      data: { slot }
+    });
+
+  } catch (error) {
+    console.error('Update slot error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Server error updating slot'
+    });
+  }
+});
+
+// @route   DELETE /api/appointments/slots/:slotId
+// @desc    Delete a slot
+// @access  Private (Doctor only)
+router.delete('/slots/:slotId', authenticate, authorize('doctor'), async (req, res) => {
+  try {
+    const doctor = await Doctor.findOne({ userId: req.user._id });
+    if (!doctor) {
+      return res.status(404).json({
+        success: false,
+        message: 'Doctor profile not found'
+      });
+    }
+
+    const slot = await Slot.findOne({
+      _id: req.params.slotId,
+      doctorId: doctor._id
+    });
+
+    if (!slot) {
+      return res.status(404).json({
+        success: false,
+        message: 'Slot not found'
+      });
+    }
+
+    // Check if slot is booked
+    if (slot.isBooked) {
+      return res.status(400).json({
+        success: false,
+        message: 'Cannot delete a booked slot. Cancel the appointment first.'
+      });
+    }
+
+    await Slot.findByIdAndDelete(req.params.slotId);
+
+    res.json({
+      success: true,
+      message: 'Slot deleted successfully'
+    });
+
+  } catch (error) {
+    console.error('Delete slot error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Server error deleting slot'
+    });
+  }
+});
+
+// @route   GET /api/appointments/slots/doctor/:doctorId
+// @desc    Get available slots for a specific doctor (public)
+// @access  Public
+router.get('/slots/doctor/:doctorId', async (req, res) => {
+  try {
+    const { doctorId } = req.params;
+    const { 
+      fromDate = new Date().toISOString().split('T')[0], 
+      toDate,
+      type,
+      consultationType 
+    } = req.query;
+
+    // Build query for available slots only
+    const query = {
+      doctorId,
+      isAvailable: true,
+      isBooked: false,
+      status: 'active',
+      dateTime: { $gte: new Date(fromDate) }
+    };
+
+    if (toDate) {
+      query.dateTime.$lte = new Date(toDate);
+    }
+
+    if (type) {
+      query.type = type;
+    }
+
+    if (consultationType) {
+      query.consultationType = consultationType;
+    }
+
+    const slots = await Slot.find(query)
+      .sort({ dateTime: 1 })
+      .limit(50); // Limit to prevent too many results
+
+    res.json({
+      success: true,
+      data: { slots }
+    });
+
+  } catch (error) {
+    console.error('Get doctor slots error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Server error fetching doctor slots'
+    });
+  }
+});
+
+// =======================
+// APPOINTMENT ROUTES
+// =======================
+
+// @route   POST /api/appointments
+// @desc    Book an appointment (Patient)
+// @access  Private (Patient only)
+router.post('/', authenticate, authorize('patient'), async (req, res) => {
+  try {
+    const patient = await Patient.findOne({ userId: req.user._id });
+    if (!patient) {
+      return res.status(404).json({
+        success: false,
+        message: 'Patient profile not found'
+      });
+    }
+
+    const {
+      slotId,
+      reasonForVisit,
+      symptoms,
+      relevantMedicalHistory,
+      currentMedications = [],
+      allergies = [],
+      contactPreferences = {}
+    } = req.body;
+
+    // Validation
+    if (!slotId || !reasonForVisit) {
+      return res.status(400).json({
+        success: false,
+        message: 'Slot ID and reason for visit are required'
+      });
+    }
+
+    // Find and validate the slot
+    const slot = await Slot.findById(slotId).populate('doctorId');
+    if (!slot) {
+      return res.status(404).json({
+        success: false,
+        message: 'Slot not found'
+      });
+    }
+
+    if (!slot.canBeBooked()) {
+      return res.status(400).json({
+        success: false,
+        message: 'This slot is no longer available'
+      });
+    }
+
+    // Extract appointment time from slot
+    const appointmentDate = slot.dateTime;
+    const appointmentTime = slot.dateTime.toTimeString().substring(0, 5); // HH:MM format
+
+    // Create the appointment
+    const appointment = new Appointment({
+      doctorId: slot.doctorId._id,
+      patientId: patient._id,
+      slotId: slot._id,
+      appointmentDate,
+      appointmentTime,
+      endTime: slot.endTime,
+      duration: slot.duration,
+      appointmentType: slot.type,
+      consultationType: slot.consultationType,
+      reasonForVisit,
+      symptoms,
+      relevantMedicalHistory,
+      currentMedications,
+      allergies,
+      contactPreferences,
+      consultationFee: slot.consultationFee
+    });
+
+    await appointment.save();
+
+    // Update the slot to mark as booked
+    await slot.book(patient._id, appointment._id);
+
+    // Populate appointment data for response
+    const populatedAppointment = await Appointment.findById(appointment._id)
+      .populate('doctorId', 'primarySpecialty')
+      .populate('slotId');
+
+    res.status(201).json({
+      success: true,
+      message: 'Appointment booked successfully',
+      data: { appointment: populatedAppointment }
+    });
+
+  } catch (error) {
+    console.error('Book appointment error:', error);
+    
+    if (error.name === 'ValidationError') {
+      const errors = Object.values(error.errors).map(err => err.message);
+      return res.status(400).json({
+        success: false,
+        message: 'Validation error',
+        errors
+      });
+    }
+
+    res.status(500).json({
+      success: false,
+      message: 'Server error booking appointment'
+    });
+  }
+});
+
+// @route   GET /api/appointments/doctor/my
+// @desc    Get current doctor's appointments
+// @access  Private (Doctor only)
+router.get('/doctor/my', authenticate, authorize('doctor'), async (req, res) => {
+  try {
+    const doctor = await Doctor.findOne({ userId: req.user._id });
+    if (!doctor) {
+      return res.status(404).json({
+        success: false,
+        message: 'Doctor profile not found'
+      });
+    }
+
+    const { 
+      page = 1, 
+      limit = 20, 
+      status = 'all',
+      fromDate,
+      toDate 
+    } = req.query;
+
+    // Build query
+    const query = { doctorId: doctor._id };
+
+    if (status !== 'all') {
+      query.status = status;
+    }
+
+    // Filter by date range
+    if (fromDate || toDate) {
+      query.appointmentDate = {};
+      if (fromDate) query.appointmentDate.$gte = new Date(fromDate);
+      if (toDate) query.appointmentDate.$lte = new Date(toDate);
+    }
+
+    // Execute query with pagination
+    const skip = (parseInt(page) - 1) * parseInt(limit);
+    
+    const appointments = await Appointment.find(query)
+      .populate('patientId', 'firstName lastName phone email dateOfBirth')
+      .populate('slotId')
+      .sort({ appointmentDate: -1 })
+      .skip(skip)
+      .limit(parseInt(limit));
+
+    const total = await Appointment.countDocuments(query);
+
+    res.json({
+      success: true,
+      data: {
+        appointments,
+        pagination: {
+          currentPage: parseInt(page),
+          totalPages: Math.ceil(total / parseInt(limit)),
+          totalAppointments: total,
+          hasNextPage: skip + appointments.length < total,
+          hasPrevPage: parseInt(page) > 1
+        }
+      }
+    });
+
+  } catch (error) {
+    console.error('Get doctor appointments error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Server error fetching appointments'
+    });
+  }
+});
+
+// @route   GET /api/appointments/patient/my
+// @desc    Get current patient's appointments
+// @access  Private (Patient only)
+router.get('/patient/my', authenticate, authorize('patient'), async (req, res) => {
+  try {
+    const patient = await Patient.findOne({ userId: req.user._id });
+    if (!patient) {
+      return res.status(404).json({
+        success: false,
+        message: 'Patient profile not found'
+      });
+    }
+
+    const { limit = 20 } = req.query;
+
+    const appointments = await Appointment.findForPatient(patient._id, parseInt(limit))
+      .populate({
+        path: 'doctorId',
+        populate: {
+          path: 'userId',
+          select: 'firstName lastName'
+        }
+      });
+
+    res.json({
+      success: true,
+      data: { appointments }
+    });
+
+  } catch (error) {
+    console.error('Get patient appointments error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Server error fetching appointments'
+    });
+  }
+});
+
+// @route   PUT /api/appointments/:appointmentId/status
+// @desc    Update appointment status (Doctor)
+// @access  Private (Doctor only)
+router.put('/:appointmentId/status', authenticate, authorize('doctor'), async (req, res) => {
+  try {
+    const doctor = await Doctor.findOne({ userId: req.user._id });
+    if (!doctor) {
+      return res.status(404).json({
+        success: false,
+        message: 'Doctor profile not found'
+      });
+    }
+
+    const { status, notes, diagnosis, treatmentPlan, cancellationReason } = req.body;
+
+    const appointment = await Appointment.findOne({
+      _id: req.params.appointmentId,
+      doctorId: doctor._id
+    });
+
+    if (!appointment) {
+      return res.status(404).json({
+        success: false,
+        message: 'Appointment not found'
+      });
+    }
+
+    // Handle different status updates
+    switch (status) {
+      case 'confirmed':
+        await appointment.confirm();
+        break;
+      case 'cancelled':
+        if (!cancellationReason) {
+          return res.status(400).json({
+            success: false,
+            message: 'Cancellation reason is required'
+          });
+        }
+        await appointment.cancel('doctor', cancellationReason);
+        
+        // Free up the slot
+        const slot = await Slot.findById(appointment.slotId);
+        if (slot) {
+          await slot.cancelBooking('doctor', cancellationReason);
+        }
+        break;
+      case 'completed':
+        await appointment.complete(notes, diagnosis, treatmentPlan);
+        break;
+      default:
+        appointment.status = status;
+        await appointment.save();
+    }
+
+    res.json({
+      success: true,
+      message: `Appointment ${status} successfully`,
+      data: { appointment }
+    });
+
+  } catch (error) {
+    console.error('Update appointment status error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Server error updating appointment status'
+    });
+  }
+});
+
+// @route   DELETE /api/appointments/slots/all
+// @desc    Delete all slots for the current doctor (Admin cleanup)
+// @access  Private (Doctor only) - for admin cleanup
+router.delete('/slots/all', authenticate, authorize('doctor'), async (req, res) => {
+  try {
+    const doctor = await Doctor.findOne({ userId: req.user._id });
+    if (!doctor) {
+      return res.status(404).json({
+        success: false,
+        message: 'Doctor profile not found'
+      });
+    }
+
+    // Delete only unbooked slots
+    const result = await Slot.deleteMany({
+      doctorId: doctor._id,
+      isBooked: false
+    });
+
+    res.json({
+      success: true,
+      message: `Successfully deleted ${result.deletedCount} unbooked slots`,
+      data: { deletedCount: result.deletedCount }
+    });
+
+  } catch (error) {
+    console.error('Delete all slots error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Server error deleting slots'
+    });
+  }
+});
+
+export default router;

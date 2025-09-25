@@ -476,13 +476,24 @@ export const slotsAPI = {
     }
     throw new Error(response.message || 'Failed to fetch doctor slots');
   },
+
+  // Doctor: Delete all unbooked slots (Admin cleanup)
+  async deleteAllSlots() {
+    const response = await apiRequest('/appointments/slots/all', {
+      method: 'DELETE',
+    });
+    if (response.success) {
+      return response.data;
+    }
+    throw new Error(response.message || 'Failed to delete all slots');
+  },
 };
 
 // Appointments API
 export const appointmentsAPI = {
   // Patient: Book an appointment
   async bookAppointment(bookingData) {
-    const response = await apiRequest('/appointments/book', {
+    const response = await apiRequest('/appointments', {
       method: 'POST',
       body: JSON.stringify(bookingData),
     });
@@ -503,9 +514,10 @@ export const appointmentsAPI = {
   },
 
   // Patient: Cancel appointment
-  async cancelAppointment(appointmentId) {
-    const response = await apiRequest(`/appointments/${appointmentId}/cancel`, {
-      method: 'PATCH',
+  async cancelAppointment(appointmentId, reason = '') {
+    const response = await apiRequest(`/appointments/${appointmentId}/status`, {
+      method: 'PUT',
+      body: JSON.stringify({ status: 'cancelled', cancellationReason: reason }),
     });
     if (response.success && response.data) {
       return response.data.appointment;
@@ -515,7 +527,7 @@ export const appointmentsAPI = {
 
   // Doctor: Get pending appointment requests
   async getPendingRequests() {
-    const response = await apiRequest('/appointments/doctor/pending');
+    const response = await apiRequest('/appointments/doctor/my?status=pending');
     if (response.success && response.data) {
       return response.data.appointments || response.data;
     }
@@ -532,10 +544,11 @@ export const appointmentsAPI = {
     throw new Error(response.message || 'Failed to fetch appointments');
   },
 
-  // Doctor: Approve appointment
+  // Doctor: Approve appointment (confirm)
   async approveAppointment(appointmentId) {
-    const response = await apiRequest(`/appointments/${appointmentId}/approve`, {
-      method: 'PATCH',
+    const response = await apiRequest(`/appointments/${appointmentId}/status`, {
+      method: 'PUT',
+      body: JSON.stringify({ status: 'confirmed' }),
     });
     if (response.success && response.data) {
       return response.data.appointment;
@@ -543,11 +556,11 @@ export const appointmentsAPI = {
     throw new Error(response.message || 'Failed to approve appointment');
   },
 
-  // Doctor: Reject appointment
+  // Doctor: Reject appointment (cancel)
   async rejectAppointment(appointmentId, reason = '') {
-    const response = await apiRequest(`/appointments/${appointmentId}/reject`, {
-      method: 'PATCH',
-      body: JSON.stringify({ reason }),
+    const response = await apiRequest(`/appointments/${appointmentId}/status`, {
+      method: 'PUT',
+      body: JSON.stringify({ status: 'cancelled', cancellationReason: reason }),
     });
     if (response.success && response.data) {
       return response.data.appointment;
@@ -556,10 +569,15 @@ export const appointmentsAPI = {
   },
 
   // Doctor: Complete appointment
-  async completeAppointment(appointmentId, notes = '') {
-    const response = await apiRequest(`/appointments/${appointmentId}/complete`, {
-      method: 'PATCH',
-      body: JSON.stringify({ notes }),
+  async completeAppointment(appointmentId, notes = '', diagnosis = '', treatmentPlan = '') {
+    const response = await apiRequest(`/appointments/${appointmentId}/status`, {
+      method: 'PUT',
+      body: JSON.stringify({ 
+        status: 'completed', 
+        notes, 
+        diagnosis, 
+        treatmentPlan 
+      }),
     });
     if (response.success && response.data) {
       return response.data.appointment;

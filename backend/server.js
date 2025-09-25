@@ -13,6 +13,7 @@ import doctorRoutes from './routes/doctors.js';
 import patientRoutes from './routes/patients.js';
 import careProviderRoutes from './routes/careProviders.js';
 import uploadRoutes from './routes/upload.js';
+import appointmentRoutes from './routes/appointments.js';
 
 // Load environment variables
 dotenv.config();
@@ -166,6 +167,7 @@ app.use('/api/doctors', doctorRoutes);
 app.use('/api/patients', patientRoutes);
 app.use('/api/careproviders', careProviderRoutes);
 app.use('/api/upload', uploadRoutes);
+app.use('/api/appointments', appointmentRoutes);
 
 // Welcome route
 app.get('/api', (req, res) => {
@@ -179,6 +181,7 @@ app.get('/api', (req, res) => {
       doctors: '/api/doctors',
       patients: '/api/patients',
       careProviders: '/api/careproviders',
+      appointments: '/api/appointments',
       health: '/api/health'
     }
   });
@@ -327,6 +330,7 @@ const startServer = async () => {
       console.log('   • Doctors: /api/doctors');
       console.log('   • Patients: /api/patients');
       console.log('   • Care Providers: /api/careproviders');
+      console.log('   • Appointments: /api/appointments');
       console.log('\n✅ Server is ready to handle requests!\n');
     });
 
