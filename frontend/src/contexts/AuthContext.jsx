@@ -42,10 +42,30 @@ export const AuthProvider = ({ children }) => {
           // Then fetch fresh data from API
           try {
             const freshUserData = await authAPI.getCurrentUser();
-            console.log('Auth check - fresh API user data:', freshUserData);
-            setUser(freshUserData);
-            // Update stored user data
-            localStorage.setItem('user', JSON.stringify(freshUserData));
+            console.log('🔍 Auth check - RAW API response:', freshUserData);
+            console.log('🔍 Type of freshUserData:', typeof freshUserData);
+            console.log('🔍 Keys in freshUserData:', Object.keys(freshUserData || {}));
+            
+            // Check if the response has the nested structure
+            if (freshUserData && freshUserData.user) {
+              console.log('🔍 Found nested user structure');
+              console.log('🔍 freshUserData.user:', freshUserData.user);
+              console.log('🔍 freshUserData.profile:', freshUserData.profile);
+              
+              // For AuthContext, we want to store the complete structure
+              // but also flatten it for easier access
+              const flattenedUser = {
+                ...freshUserData.user,
+                profile: freshUserData.profile
+              };
+              console.log('🔧 Flattened user for AuthContext:', flattenedUser);
+              setUser(flattenedUser);
+              localStorage.setItem('user', JSON.stringify(flattenedUser));
+            } else {
+              console.log('🔍 Using direct user structure');
+              setUser(freshUserData);
+              localStorage.setItem('user', JSON.stringify(freshUserData));
+            }
           } catch (apiError) {
             console.error('API getCurrentUser failed:', apiError);
             // If API fails but we have stored data, keep using it
