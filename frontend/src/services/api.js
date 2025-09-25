@@ -138,9 +138,10 @@ export const authAPI = {
     });
     
     if (response.success && response.data) {
-      // Update stored user info
-      localStorage.setItem('user', JSON.stringify(response.data.user));
-      return response.data.user;
+      // Update stored user info - handle both nested and flat user structures
+      const userData = response.data.user || response.data;
+      localStorage.setItem('user', JSON.stringify(userData));
+      return userData;
     }
     
     throw new Error(response.message || 'Profile update failed');
@@ -323,6 +324,41 @@ export const isAuthenticated = () => {
 };
 
 // Upload API
+// Content API (health articles, tips, recipes, workouts)
+export const contentAPI = {
+  // Fetch featured articles
+  async getFeaturedArticles(params = {}) {
+    const query = new URLSearchParams(params).toString();
+    const response = await apiRequest(`/content/articles${query ? `?${query}` : ''}`);
+    if (response.success && response.data) return response.data.articles || response.data;
+    throw new Error(response.message || 'Failed to fetch articles');
+  },
+  // Fetch categories for healthy living
+  async getCategories() {
+    const response = await apiRequest('/content/healthy/categories');
+    if (response.success && response.data) return response.data.categories || response.data;
+    throw new Error(response.message || 'Failed to fetch categories');
+  },
+  // Fetch daily tips
+  async getTips() {
+    const response = await apiRequest('/content/tips');
+    if (response.success && response.data) return response.data.tips || response.data;
+    throw new Error(response.message || 'Failed to fetch tips');
+  },
+  // Fetch healthy recipes
+  async getRecipes() {
+    const response = await apiRequest('/content/recipes');
+    if (response.success && response.data) return response.data.recipes || response.data;
+    throw new Error(response.message || 'Failed to fetch recipes');
+  },
+  // Fetch workout plans
+  async getWorkouts() {
+    const response = await apiRequest('/content/workouts');
+    if (response.success && response.data) return response.data.workouts || response.data;
+    throw new Error(response.message || 'Failed to fetch workouts');
+  },
+};
+
 export const uploadAPI = {
   // Upload profile picture
   async uploadProfilePicture(file) {

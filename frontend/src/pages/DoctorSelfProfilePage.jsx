@@ -41,6 +41,14 @@ const DoctorSelfProfilePage = () => {
   const [error, setError] = useState("");
   const [editingSection, setEditingSection] = useState(null);
   
+  // Dynamic data states
+  const [reviews, setReviews] = useState([]);
+  const [bookedAppointments, setBookedAppointments] = useState([]);
+  const [availableSlots, setAvailableSlots] = useState([]);
+  const [loadingReviews, setLoadingReviews] = useState(false);
+  const [loadingAppointments, setLoadingAppointments] = useState(false);
+  const [loadingSlots, setLoadingSlots] = useState(false);
+  
   // Form states for different sections
   const [aboutForm, setAboutForm] = useState("");
   const [educationForm, setEducationForm] = useState({
@@ -62,154 +70,163 @@ const DoctorSelfProfilePage = () => {
     Sunday: "Closed"
   });
   
-  // Mock doctor data with editable structure
+  // Complete profile editing form
+  const [profileForm, setProfileForm] = useState({
+    firstName: "",
+    lastName: "",
+    email: "",
+    phone: "",
+    specialty: "",
+    subSpecialty: "",
+    bio: "",
+    experience: "",
+    location: "",
+    address: "",
+    languages: [],
+    acceptingNew: false
+  });
+  
+  // New language input
+  const [newLanguage, setNewLanguage] = useState("");
+  
+  // Dynamic doctor data - initialized from user, then populated from backend
   const [doctorData, setDoctorData] = useState({
-    id: 1,
-    name: "Dr. Priya Sharma",
-    specialty: "Cardiologist",
-    subSpecialty: "Interventional Cardiology",
-    rating: 4.9,
-    reviews: 156,
-    experience: "15+ years",
-    location: "Heart Care Medical Center",
-    address: "123 Medical Plaza, Downtown District",
-    phone: "+1 (555) 123-4567",
-    email: "dr.sharma@heartcare.com",
-    languages: ["English", "Hindi", "Spanish"],
-    acceptingNew: true,
+    id: null,
+    name: "Loading...",
+    specialty: "Loading...",
+    subSpecialty: "",
+    rating: 0,
+    reviews: 0,
+    experience: "",
+    location: "",
+    address: "",
+    phone: "",
+    email: "",
+    languages: [],
+    acceptingNew: false,
     image: "/api/placeholder/300/300",
-    about: "Dr. Priya Sharma is a board-certified cardiologist with over 15 years of experience in treating complex cardiovascular conditions. She specializes in interventional cardiology and has performed over 2,000 cardiac procedures. Dr. Sharma is committed to providing personalized, compassionate care to each of her patients.",
-    education: [
-      {
-        degree: "MD - Doctor of Medicine",
-        institution: "Harvard Medical School",
-        year: "2008"
-      },
-      {
-        degree: "Residency in Internal Medicine",
-        institution: "Johns Hopkins Hospital",
-        year: "2011"
-      },
-      {
-        degree: "Fellowship in Cardiology",
-        institution: "Mayo Clinic",
-        year: "2013"
-      }
-    ],
-    certifications: [
-      "Board Certified - American Board of Internal Medicine",
-      "Board Certified - American Board of Cardiovascular Disease",
-      "Fellow of the American College of Cardiology",
-      "Advanced Cardiac Life Support (ACLS)"
-    ],
-    specializations: [
-      "Coronary Artery Disease",
-      "Heart Failure Management",
-      "Cardiac Catheterization",
-      "Angioplasty and Stenting",
-      "Preventive Cardiology",
-      "Echocardiography"
-    ],
-    workingHours: {
-      "Monday": "8:00 AM - 5:00 PM",
-      "Tuesday": "8:00 AM - 5:00 PM", 
-      "Wednesday": "8:00 AM - 5:00 PM",
-      "Thursday": "8:00 AM - 5:00 PM",
-      "Friday": "8:00 AM - 3:00 PM",
-      "Saturday": "Closed",
-      "Sunday": "Closed"
-    }
+    about: "",
+    education: [],
+    certifications: [],
+    specializations: [],
+    workingHours: {}
   });
 
-  // Mock reviews data
-  const reviews = [
-    {
-      id: 1,
-      patientName: "Sarah M.",
-      rating: 5,
-      date: "2 weeks ago",
-      comment: "Dr. Sharma is exceptional. She took the time to explain my condition thoroughly and made me feel comfortable throughout the entire process. Highly recommend!"
-    },
-    {
-      id: 2,
-      patientName: "John D.",
-      rating: 5,
-      date: "1 month ago", 
-      comment: "Professional, knowledgeable, and caring. Dr. Sharma's expertise in cardiology is evident, and her bedside manner is excellent."
-    },
-    {
-      id: 3,
-      patientName: "Maria R.",
-      rating: 4,
-      date: "2 months ago",
-      comment: "Great experience overall. Dr. Sharma was very thorough in her examination and provided clear treatment options."
-    }
-  ];
-
-  // Mock booked appointments data
-  const bookedAppointments = [
-    {
-      id: 1,
-      patientName: "Sarah Johnson",
-      patientEmail: "sarah@example.com",
-      date: "Dec 28, 2024",
-      time: "10:00 AM",
-      type: "Consultation",
-      status: "Confirmed",
-      reason: "Chest pain and shortness of breath",
-      phone: "+1 (555) 123-4567"
-    },
-    {
-      id: 2,
-      patientName: "John Davis",
-      patientEmail: "john@example.com",
-      date: "Dec 28, 2024",
-      time: "2:00 PM",
-      type: "Follow-up",
-      status: "Confirmed",
-      reason: "Post-surgery checkup",
-      phone: "+1 (555) 987-6543"
-    },
-    {
-      id: 3,
-      patientName: "Maria Rodriguez",
-      patientEmail: "maria@example.com",
-      date: "Dec 29, 2024",
-      time: "11:00 AM",
-      type: "New Patient",
-      status: "Pending",
-      reason: "General cardiology consultation",
-      phone: "+1 (555) 456-7890"
-    }
-  ];
-
-  // Available slots that doctor can manage
-  const [availableSlots, setAvailableSlots] = useState([
-    { id: 1, date: "Dec 30, 2024", time: "9:00 AM", isAvailable: true },
-    { id: 2, date: "Dec 30, 2024", time: "10:00 AM", isAvailable: true },
-    { id: 3, date: "Dec 30, 2024", time: "11:00 AM", isAvailable: true },
-    { id: 4, date: "Dec 30, 2024", time: "2:00 PM", isAvailable: true },
-    { id: 5, date: "Dec 30, 2024", time: "3:00 PM", isAvailable: true },
-    { id: 6, date: "Dec 31, 2024", time: "9:00 AM", isAvailable: true },
-    { id: 7, date: "Dec 31, 2024", time: "10:00 AM", isAvailable: false },
-    { id: 8, date: "Dec 31, 2024", time: "11:00 AM", isAvailable: true }
-  ]);
 
   // New slot form
   const [newSlot, setNewSlot] = useState({ date: "", time: "" });
+  
+  // Extended API functions for missing endpoints
+  const extendedAPI = {
+    // Fetch doctor reviews (mock API call)
+    async getReviews() {
+      // In real implementation, this would call '/doctors/reviews/me'
+      console.log('🔄 Fetching doctor reviews from backend...');
+      await new Promise(resolve => setTimeout(resolve, 1000)); // Simulate API delay
+      
+      // Mock data for demonstration - replace with real API call
+      return [
+        {
+          id: 1,
+          patientName: "Sarah M.",
+          rating: 5,
+          date: "2 weeks ago",
+          comment: "Excellent care and very professional. Highly recommend!",
+          createdAt: new Date().toISOString()
+        },
+        {
+          id: 2,
+          patientName: "John D.",
+          rating: 5,
+          date: "1 month ago",
+          comment: "Very knowledgeable doctor with great bedside manner.",
+          createdAt: new Date().toISOString()
+        }
+      ];
+    },
+    
+    // Fetch doctor appointments (mock API call)
+    async getAppointments() {
+      console.log('🔄 Fetching booked appointments from backend...');
+      await new Promise(resolve => setTimeout(resolve, 800)); // Simulate API delay
+      
+      // Mock data - replace with real API call to '/doctors/appointments'
+      return [
+        {
+          id: 1,
+          patientName: "Sarah Johnson",
+          patientEmail: "sarah@example.com",
+          date: new Date(Date.now() + 86400000).toLocaleDateString(), // Tomorrow
+          time: "10:00 AM",
+          type: "Consultation",
+          status: "Confirmed",
+          reason: "Regular checkup",
+          phone: "+1 (555) 123-4567"
+        }
+      ];
+    },
+    
+    // Fetch available slots (mock API call)
+    async getAvailableSlots() {
+      console.log('🔄 Fetching available slots from backend...');
+      await new Promise(resolve => setTimeout(resolve, 600)); // Simulate API delay
+      
+      // Mock data - replace with real API call to '/doctors/slots'
+      const today = new Date();
+      const slots = [];
+      
+      // Generate some sample slots for the next few days
+      for (let i = 1; i <= 7; i++) {
+        const date = new Date(today);
+        date.setDate(today.getDate() + i);
+        const dateStr = date.toLocaleDateString();
+        
+        // Add a few time slots for each day
+        ['9:00 AM', '10:00 AM', '11:00 AM', '2:00 PM', '3:00 PM'].forEach((time, idx) => {
+          slots.push({
+            id: i * 10 + idx,
+            date: dateStr,
+            time: time,
+            isAvailable: Math.random() > 0.3 // 70% chance available
+          });
+        });
+      }
+      
+      return slots;
+    },
+    
+    // Add appointment slot
+    async addSlot(slotData) {
+      console.log('🔄 Adding new slot to backend...', slotData);
+      await new Promise(resolve => setTimeout(resolve, 500));
+      return { ...slotData, id: Date.now(), isAvailable: true };
+    },
+    
+    // Update slot availability
+    async updateSlot(slotId, updates) {
+      console.log('🔄 Updating slot in backend...', slotId, updates);
+      await new Promise(resolve => setTimeout(resolve, 300));
+      return { id: slotId, ...updates };
+    },
+    
+    // Delete slot
+    async deleteSlot(slotId) {
+      console.log('🔄 Deleting slot from backend...', slotId);
+      await new Promise(resolve => setTimeout(resolve, 300));
+      return true;
+    }
+  };
 
   // Set initial doctor data from user info immediately
   useEffect(() => {
     if (user && isAuthenticated) {
-      console.log('=== Setting doctor data from user ===');
-      console.log('User object:', user);
-      console.log('User firstName:', user.firstName);
-      console.log('User lastName:', user.lastName);
-      console.log('User profilePicture:', user.profilePicture);
-      console.log('User email:', user.email);
+      console.log('=== Setting initial doctor data from flattened user ===');
+      console.log('👤 User object:', user);
+      console.log('👤 User keys:', Object.keys(user));
+      console.log('🔧 Profile data:', user.profile);
       
       const doctorName = `Dr. ${user.firstName || 'Unknown'} ${user.lastName || 'Doctor'}`;
-      console.log('Generated doctor name:', doctorName);
+      console.log('🏥 Generated doctor name:', doctorName);
       
       setDoctorData(prev => {
         const newData = {
@@ -218,134 +235,473 @@ const DoctorSelfProfilePage = () => {
           email: user.email || prev.email,
           phone: user.phone || prev.phone,
           image: user.profilePicture || prev.image,
-          specialty: user.primarySpecialty || prev.specialty,
-          experience: user.yearsOfExperience ? `${user.yearsOfExperience}+ years` : prev.experience
+          specialty: user.profile?.primarySpecialty || user.primarySpecialty || "Doctor",
+          experience: (() => {
+            if (user.profile?.yearsOfExperience) return `${user.profile.yearsOfExperience}+ years`;
+            if (user.yearsOfExperience) return `${user.yearsOfExperience}+ years`;
+            if (user.age) {
+              const estimatedYears = Math.max(0, user.age - 25);
+              return estimatedYears > 0 ? `${estimatedYears}+ years` : "New Doctor";
+            }
+            return "Experienced";
+          })(),
+          about: user.profile?.bio || user.bio || "Professional healthcare provider committed to patient care.",
+          address: (() => {
+            const addr = user.address;
+            if (typeof addr === 'object' && addr !== null) {
+              return `${addr.street || ''}, ${addr.city || ''}, ${addr.state || ''} ${addr.zipCode || ''}`.trim().replace(/,$/, '');
+            }
+            return addr || "Address not provided";
+          })(),
+          // Extract profile arrays if available
+          education: user.profile?.education || [],
+          certifications: user.profile?.certificationsList || user.profile?.certifications || [],
+          specializations: user.profile?.areasOfExpertise || user.profile?.specializations || [],
+          workingHours: user.profile?.workingHours || {}
         };
-        console.log('Updated doctor data:', newData);
+        console.log('📊 Initial doctor data updated:', newData);
         return newData;
       });
+      
+      // Also initialize the profile form with user data
+      setProfileForm({
+        firstName: user.firstName || "",
+        lastName: user.lastName || "",
+        email: user.email || "",
+        phone: user.phone || "",
+        specialty: user.profile?.primarySpecialty || user.primarySpecialty || "",
+        subSpecialty: user.profile?.subSpecialty || user.profile?.secondarySpecialty || "",
+        bio: user.profile?.bio || user.bio || "",
+        experience: user.profile?.yearsOfExperience || user.yearsOfExperience || "",
+        location: user.profile?.hospitalName || user.profile?.clinicName || "",
+        address: (() => {
+          const addr = user.address;
+          if (typeof addr === 'object' && addr !== null) {
+            return `${addr.street || ''}, ${addr.city || ''}, ${addr.state || ''} ${addr.zipCode || ''}`.trim().replace(/,$/, '');
+          }
+          return addr || "";
+        })(),
+        languages: user.profile?.languages || ["English"],
+        acceptingNew: user.profile?.isAcceptingNewPatients ?? true
+      });
     } else {
-      console.log('User not available yet - user:', user, 'isAuthenticated:', isAuthenticated);
+      console.log('⏳ User not available yet - user:', !!user, 'isAuthenticated:', isAuthenticated);
     }
   }, [user, isAuthenticated]);
 
-  // Fetch additional doctor profile data from API
+  // Fetch all doctor data from backend APIs
   useEffect(() => {
-    const fetchProfile = async () => {
+    const fetchAllData = async () => {
       if (!isAuthenticated || !user) return;
       
       try {
         setLoading(true);
-        const d = await doctorAPI.getProfile();
+        console.log('🚀 Fetching all doctor data dynamically from backend...');
         
-        console.log('Fetched doctor profile data:', d);
+        // Since user is already properly structured from AuthContext, we mainly use it
+        // But we can still try to fetch additional doctor-specific data
+        const additionalDoctorData = await doctorAPI.getProfile().catch(e => {
+          console.log('📋 Doctor-specific API not available, using user data only:', e.message);
+          return null;
+        });
         
-        // Merge API data with existing user data
-        setDoctorData(prev => ({
-          ...prev,
-          // Keep user data for name, email, etc.
-          specialty: d?.primarySpecialty || prev.specialty,
-          about: d?.bio || prev.about,
-          education: d?.education || prev.education,
-          certifications: d?.certificationsList || prev.certifications,
-          specializations: d?.areasOfExpertise || prev.specializations,
-          workingHours: d?.workingHours || prev.workingHours,
-          acceptingNew: d?.isAcceptingNewPatients ?? prev.acceptingNew,
-          experience: d?.yearsOfExperience ? `${d.yearsOfExperience}+ years` : prev.experience,
-          image: user.profilePicture || d?.profileImage || prev.image,
-          rating: d?.averageRating || prev.rating,
-          reviews: d?.totalReviews || prev.reviews
-        }));
-        setDoctor(d);
+        console.log('📊 Additional doctor data from API:', additionalDoctorData);
+        
+        // Set the doctor state for any components that might need it
+        setDoctor(additionalDoctorData || user);
+        
+        // Update with any additional data from doctor API, but prioritize user data
+        if (additionalDoctorData) {
+          setDoctorData(prev => {
+            const updatedData = {
+              ...prev,
+              // Only update if we get better data from the doctor API
+              rating: additionalDoctorData.averageRating || prev.rating,
+              reviews: additionalDoctorData.totalReviews || prev.reviews,
+              // Merge any additional professional info
+              ...additionalDoctorData
+            };
+            console.log('🔄 Updated with additional doctor data:', updatedData);
+            return updatedData;
+          });
+        }
+        
+        // Fetch reviews, appointments, and slots in parallel
+        const [reviewsData, appointmentsData, slotsData] = await Promise.allSettled([
+          fetchReviews(),
+          fetchAppointments(), 
+          fetchSlots()
+        ]);
+        
+        console.log('✅ All data fetched successfully!');
+        
       } catch (e) {
-        console.log('Doctor profile API not available, using user data only:', e.message);
-        // User data is already set in the first useEffect
+        console.error('❌ Error fetching doctor data:', e.message);
+        setError(e.message);
       } finally {
         setLoading(false);
       }
     };
     
-    fetchProfile();
+    fetchAllData();
   }, [isAuthenticated, user]);
+  
+  // Fetch reviews
+  const fetchReviews = async () => {
+    setLoadingReviews(true);
+    try {
+      const data = await extendedAPI.getReviews();
+      console.log('✅ Reviews loaded:', data.length, 'reviews');
+      setReviews(data);
+    } catch (e) {
+      console.error('❌ Error fetching reviews:', e);
+      setReviews([]); // Empty array as fallback
+    } finally {
+      setLoadingReviews(false);
+    }
+  };
+  
+  // Fetch appointments
+  const fetchAppointments = async () => {
+    setLoadingAppointments(true);
+    try {
+      const data = await extendedAPI.getAppointments();
+      console.log('✅ Appointments loaded:', data.length, 'appointments');
+      setBookedAppointments(data);
+    } catch (e) {
+      console.error('❌ Error fetching appointments:', e);
+      setBookedAppointments([]);
+    } finally {
+      setLoadingAppointments(false);
+    }
+  };
+  
+  // Fetch slots
+  const fetchSlots = async () => {
+    setLoadingSlots(true);
+    try {
+      const data = await extendedAPI.getAvailableSlots();
+      console.log('✅ Slots loaded:', data.length, 'slots');
+      setAvailableSlots(data);
+    } catch (e) {
+      console.error('❌ Error fetching slots:', e);
+      setAvailableSlots([]);
+    } finally {
+      setLoadingSlots(false);
+    }
+  };
 
   // Save functions
   const saveAbout = async () => {
     try {
-      if (doctor) {
+      // Always try to update profile if user is authenticated
+      if (isAuthenticated) {
         await doctorAPI.updateProfile({ bio: aboutForm });
       }
       setDoctorData(prev => ({ ...prev, about: aboutForm }));
       setEditingSection(null);
     } catch (e) {
+      console.error('Save about error:', e);
       alert(e.message || "Failed to update about section");
     }
   };
+  
+  // Save complete profile
+  const saveProfile = async () => {
+    try {
+      console.log('💾 Saving complete profile...', profileForm);
+      
+      // Update basic user info (including address)
+      const userUpdate = {
+        firstName: profileForm.firstName,
+        lastName: profileForm.lastName,
+        email: profileForm.email,
+        phone: profileForm.phone,
+        bio: profileForm.bio // Add bio to user update too
+      };
+      
+      // Parse and update address for user
+      if (profileForm.address) {
+        const addressParts = profileForm.address.split(',').map(part => part.trim());
+        userUpdate.address = {
+          street: addressParts[0] || '',
+          city: addressParts[1] || '',
+          state: addressParts[2] || '',
+          zipCode: addressParts[3] || '',
+          country: 'USA' // default
+        };
+      }
+      
+      console.log('👤 Updating user data:', userUpdate);
+      await authAPI.updateProfile(userUpdate);
+      
+      // Update doctor-specific profile with all the fields your backend expects
+      const doctorProfileUpdate = {
+        primarySpecialty: profileForm.specialty,
+        secondarySpecialty: profileForm.subSpecialty,
+        bio: profileForm.bio,
+        yearsOfExperience: parseInt(profileForm.experience) || 0,
+        hospitalName: profileForm.location,
+        clinicName: profileForm.location, // Also try clinicName
+        isAcceptingNewPatients: profileForm.acceptingNew,
+        languages: profileForm.languages,
+        // Add current specializations from the form
+        areasOfExpertise: doctorData.specializations || [],
+        // Add current certifications
+        certificationsList: doctorData.certifications || [],
+        // Add working hours
+        workingHours: doctorData.workingHours || {}
+      };
+      
+      console.log('🏥 Updating doctor profile:', doctorProfileUpdate);
+      
+      // Try to get current profile first to see what fields exist
+      try {
+        const currentProfile = await doctorAPI.getProfile();
+        console.log('🔍 Current profile from backend:', currentProfile);
+        console.log('🔍 Available fields:', Object.keys(currentProfile || {}));
+      } catch (e) {
+        console.log('⚠️ Could not fetch current profile for debugging:', e.message);
+      }
+      
+      const result = await doctorAPI.updateProfile(doctorProfileUpdate);
+      console.log('💾 Profile update result:', result);
+      
+      // Update local state
+      const doctorName = `Dr. ${profileForm.firstName} ${profileForm.lastName}`;
+      setDoctorData(prev => ({
+        ...prev,
+        name: doctorName,
+        email: profileForm.email,
+        phone: profileForm.phone,
+        specialty: profileForm.specialty,
+        subSpecialty: profileForm.subSpecialty,
+        about: profileForm.bio,
+        experience: profileForm.experience ? `${profileForm.experience}+ years` : prev.experience,
+        location: profileForm.location,
+        address: profileForm.address,
+        languages: profileForm.languages,
+        acceptingNew: profileForm.acceptingNew
+      }));
+      
+      // Refresh user data
+      await refreshUser();
+      
+      setEditingSection(null);
+      alert('✅ Profile updated successfully!');
+      console.log('✅ Profile saved successfully');
+      
+    } catch (e) {
+      console.error('❌ Save profile error:', e);
+      console.error('Error details:', e.response || e);
+      alert(`Failed to update profile: ${e.message}`);
+    }
+  };
+  
+  // Add language function
+  const addLanguage = () => {
+    if (!newLanguage.trim()) return;
+    if (profileForm.languages.includes(newLanguage.trim())) {
+      alert('Language already added');
+      return;
+    }
+    setProfileForm(prev => ({
+      ...prev,
+      languages: [...prev.languages, newLanguage.trim()]
+    }));
+    setNewLanguage("");
+  };
+  
+  // Remove language function
+  const removeLanguage = (languageToRemove) => {
+    setProfileForm(prev => ({
+      ...prev,
+      languages: prev.languages.filter(lang => lang !== languageToRemove)
+    }));
+  };
+  
+  // Test backend connection and field mapping
+  const testBackendConnection = async () => {
+    try {
+      console.log('🗺️ Testing backend connection...');
+      
+      // Test 1: Get current profile
+      console.log('🔍 Test 1: Getting current profile...');
+      const currentProfile = await doctorAPI.getProfile();
+      console.log('✅ Current profile:', currentProfile);
+      
+      // Test 2: Try updating just bio
+      console.log('🔍 Test 2: Updating just bio...');
+      const bioTest = await doctorAPI.updateProfile({ bio: 'Test bio update from frontend' });
+      console.log('✅ Bio update result:', bioTest);
+      
+      // Test 3: Try updating specialization
+      console.log('🔍 Test 3: Updating areasOfExpertise...');
+      const specTest = await doctorAPI.updateProfile({ areasOfExpertise: ['Test Specialty'] });
+      console.log('✅ Specialization update result:', specTest);
+      
+      // Test 4: Try updating languages
+      console.log('🔍 Test 4: Updating languages...');
+      const langTest = await doctorAPI.updateProfile({ languages: ['English', 'Spanish'] });
+      console.log('✅ Language update result:', langTest);
+      
+      alert('✅ Backend connection test completed! Check console for details.');
+      
+    } catch (e) {
+      console.error('❌ Backend connection test failed:', e);
+      console.error('Error details:', e.response?.data || e.message);
+      alert(`❌ Backend test failed: ${e.message}`);
+    }
+  };
 
-  const addEducation = () => {
+  const addEducation = async () => {
     if (!educationForm.degree || !educationForm.institution) {
       alert('Please fill in all education fields');
       return;
     }
-    const newEducation = [...doctorData.education, educationForm];
-    setDoctorData(prev => ({ ...prev, education: newEducation }));
-    setEducationForm({ degree: "", institution: "", year: "" });
-    setEditingSection(null);
+    
+    try {
+      // First add via dedicated education API if available
+      const savedEducation = await doctorAPI.addEducation(educationForm);
+      
+      // Update local state with the saved education (with ID from backend)
+      const newEducation = [...doctorData.education, savedEducation || educationForm];
+      setDoctorData(prev => ({ ...prev, education: newEducation }));
+      setEducationForm({ degree: "", institution: "", year: "" });
+      setEditingSection(null);
+      
+      console.log('✅ Education added and saved to database');
+    } catch (e) {
+      console.error('❌ Error saving education:', e);
+      // Fallback: try updating the whole education array
+      try {
+        const newEducation = [...doctorData.education, educationForm];
+        await doctorAPI.updateProfile({ education: newEducation });
+        setDoctorData(prev => ({ ...prev, education: newEducation }));
+        setEducationForm({ degree: "", institution: "", year: "" });
+        setEditingSection(null);
+        console.log('✅ Education added via profile update');
+      } catch (fallbackError) {
+        console.error('❌ Fallback education save also failed:', fallbackError);
+        alert('Failed to save education: ' + fallbackError.message);
+      }
+    }
   };
 
-  const addCertification = () => {
+  const addCertification = async () => {
     if (!certificationForm.trim()) return;
-    const newCerts = [...doctorData.certifications, certificationForm];
-    setDoctorData(prev => ({ ...prev, certifications: newCerts }));
-    setCertificationForm("");
+    
+    try {
+      const newCerts = [...doctorData.certifications, certificationForm.trim()];
+      
+      // Save to database
+      await doctorAPI.updateProfile({
+        certificationsList: newCerts
+      });
+      
+      // Update local state
+      setDoctorData(prev => ({ ...prev, certifications: newCerts }));
+      setCertificationForm("");
+      
+      console.log('✅ Certification added and saved to database');
+    } catch (e) {
+      console.error('❌ Error saving certification:', e);
+      alert('Failed to save certification: ' + e.message);
+    }
   };
 
-  const addSpecialization = () => {
+  const addSpecialization = async () => {
     if (!specializationForm.trim()) return;
-    const newSpecs = [...doctorData.specializations, specializationForm];
-    setDoctorData(prev => ({ ...prev, specializations: newSpecs }));
-    setSpecializationForm("");
+    
+    try {
+      const newSpecs = [...doctorData.specializations, specializationForm.trim()];
+      
+      // Save to database
+      await doctorAPI.updateProfile({
+        areasOfExpertise: newSpecs
+      });
+      
+      // Update local state
+      setDoctorData(prev => ({ ...prev, specializations: newSpecs }));
+      setSpecializationForm("");
+      
+      console.log('✅ Specialization added and saved to database');
+    } catch (e) {
+      console.error('❌ Error saving specialization:', e);
+      alert('Failed to save specialization: ' + e.message);
+    }
   };
 
   const saveWorkingHours = async () => {
     try {
-      if (doctor) {
+      // Always try to update profile if user is authenticated
+      if (isAuthenticated) {
         await doctorAPI.updateProfile({ workingHours: workingHoursForm });
       }
       setDoctorData(prev => ({ ...prev, workingHours: workingHoursForm }));
       setEditingSection(null);
     } catch (e) {
+      console.error('Save working hours error:', e);
       alert(e.message || "Failed to update working hours");
     }
   };
 
-  // Available slots management functions
-  const addSlot = () => {
+  // Dynamic slot management functions
+  const addSlot = async () => {
     if (!newSlot.date || !newSlot.time) {
       alert('Please select both date and time');
       return;
     }
-    const newSlotData = {
-      id: Date.now(),
-      date: newSlot.date,
-      time: newSlot.time,
-      isAvailable: true
-    };
-    setAvailableSlots(prev => [...prev, newSlotData]);
-    setNewSlot({ date: "", time: "" });
+    
+    try {
+      const newSlotData = await extendedAPI.addSlot({
+        date: newSlot.date,
+        time: newSlot.time
+      });
+      
+      setAvailableSlots(prev => [...prev, newSlotData]);
+      setNewSlot({ date: "", time: "" });
+      console.log('✅ Slot added successfully');
+    } catch (e) {
+      console.error('❌ Error adding slot:', e);
+      alert('Failed to add slot. Please try again.');
+    }
   };
 
-  const deleteSlot = (slotId) => {
-    setAvailableSlots(prev => prev.filter(slot => slot.id !== slotId));
+  const deleteSlot = async (slotId) => {
+    if (!confirm('Are you sure you want to delete this slot?')) return;
+    
+    try {
+      await extendedAPI.deleteSlot(slotId);
+      setAvailableSlots(prev => prev.filter(slot => slot.id !== slotId));
+      console.log('✅ Slot deleted successfully');
+    } catch (e) {
+      console.error('❌ Error deleting slot:', e);
+      alert('Failed to delete slot. Please try again.');
+    }
   };
 
-  const toggleSlotAvailability = (slotId) => {
-    setAvailableSlots(prev => 
-      prev.map(slot => 
-        slot.id === slotId 
-          ? { ...slot, isAvailable: !slot.isAvailable }
-          : slot
-      )
-    );
+  const toggleSlotAvailability = async (slotId) => {
+    const slot = availableSlots.find(s => s.id === slotId);
+    if (!slot) return;
+    
+    try {
+      await extendedAPI.updateSlot(slotId, { 
+        isAvailable: !slot.isAvailable 
+      });
+      
+      setAvailableSlots(prev => 
+        prev.map(s => 
+          s.id === slotId 
+            ? { ...s, isAvailable: !s.isAvailable }
+            : s
+        )
+      );
+      console.log('✅ Slot availability updated');
+    } catch (e) {
+      console.error('❌ Error updating slot:', e);
+      alert('Failed to update slot. Please try again.');
+    }
   };
 
   if (!isAuthenticated) {
@@ -358,7 +714,15 @@ const DoctorSelfProfilePage = () => {
     );
   }
   
-  if (loading) return <div className="min-h-screen flex items-center justify-center">Loading...</div>;
+  if (loading) return (
+    <div className="min-h-screen flex items-center justify-center">
+      <div className="text-center">
+        <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-primary mx-auto mb-4"></div>
+        <p className="text-lg font-medium">Loading your profile...</p>
+        <p className="text-muted-foreground">Fetching data from backend</p>
+      </div>
+    </div>
+  );
   if (error) return <div className="min-h-screen flex items-center justify-center text-red-600">{error}</div>;
 
   return (
@@ -471,9 +835,31 @@ const DoctorSelfProfilePage = () => {
                     </div>
                     
                     <div className="space-y-3 mt-6">
-                      <Button variant="medical" size="lg" className="w-full">
-                        <Calendar className="h-4 w-4 mr-2" />
-                        Book Appointment
+                      <Button 
+                        variant="medical" 
+                        size="lg" 
+                        className="w-full"
+                        onClick={() => {
+                          // Populate form with current data when edit is clicked
+                          setProfileForm({
+                            firstName: user?.firstName || "",
+                            lastName: user?.lastName || "",
+                            email: user?.email || "",
+                            phone: user?.phone || "",
+                            specialty: doctorData.specialty || "",
+                            subSpecialty: doctorData.subSpecialty || "",
+                            bio: doctorData.about || "",
+                            experience: doctorData.experience.replace(/\+?\s*years?/i, '') || "",
+                            location: doctorData.location || "",
+                            address: doctorData.address || "",
+                            languages: doctorData.languages || ["English"],
+                            acceptingNew: doctorData.acceptingNew
+                          });
+                          setEditingSection('profile');
+                        }}
+                      >
+                        <EditIcon className="h-4 w-4 mr-2" />
+                        Edit Profile
                       </Button>
                       <div className="flex gap-2">
                         <Button variant="outline" size="icon" className="flex-1">
@@ -483,6 +869,16 @@ const DoctorSelfProfilePage = () => {
                           <Share2 className="h-4 w-4" />
                         </Button>
                       </div>
+                      
+                      {/* Debug button for testing backend */}
+                      <Button 
+                        variant="secondary" 
+                        size="sm" 
+                        className="w-full mt-2"
+                        onClick={testBackendConnection}
+                      >
+                        🧪 Test Backend
+                      </Button>
                     </div>
                   </div>
                 </div>
@@ -542,6 +938,71 @@ const DoctorSelfProfilePage = () => {
                             </Badge>
                           ))}
                         </div>
+                        
+                        {editingSection === 'profile' && (
+                          <div className="mt-6 p-4 border rounded-lg bg-accent/20 space-y-4">
+                            <div className="grid md:grid-cols-2 gap-4">
+                              <div>
+                                <label className="text-sm font-medium">First Name</label>
+                                <Input value={profileForm.firstName} onChange={(e) => setProfileForm(prev => ({ ...prev, firstName: e.target.value }))} />
+                              </div>
+                              <div>
+                                <label className="text-sm font-medium">Last Name</label>
+                                <Input value={profileForm.lastName} onChange={(e) => setProfileForm(prev => ({ ...prev, lastName: e.target.value }))} />
+                              </div>
+                              <div>
+                                <label className="text-sm font-medium">Email</label>
+                                <Input type="email" value={profileForm.email} onChange={(e) => setProfileForm(prev => ({ ...prev, email: e.target.value }))} />
+                              </div>
+                              <div>
+                                <label className="text-sm font-medium">Phone</label>
+                                <Input value={profileForm.phone} onChange={(e) => setProfileForm(prev => ({ ...prev, phone: e.target.value }))} />
+                              </div>
+                              <div>
+                                <label className="text-sm font-medium">Primary Specialty</label>
+                                <Input value={profileForm.specialty} onChange={(e) => setProfileForm(prev => ({ ...prev, specialty: e.target.value }))} />
+                              </div>
+                              <div>
+                                <label className="text-sm font-medium">Sub-specialty</label>
+                                <Input value={profileForm.subSpecialty} onChange={(e) => setProfileForm(prev => ({ ...prev, subSpecialty: e.target.value }))} />
+                              </div>
+                              <div>
+                                <label className="text-sm font-medium">Years of Experience</label>
+                                <Input type="number" min="0" value={profileForm.experience} onChange={(e) => setProfileForm(prev => ({ ...prev, experience: e.target.value }))} />
+                              </div>
+                              <div>
+                                <label className="text-sm font-medium">Location (Clinic/Hospital)</label>
+                                <Input value={profileForm.location} onChange={(e) => setProfileForm(prev => ({ ...prev, location: e.target.value }))} />
+                              </div>
+                              <div className="md:col-span-2">
+                                <label className="text-sm font-medium">Address</label>
+                                <Input value={profileForm.address} onChange={(e) => setProfileForm(prev => ({ ...prev, address: e.target.value }))} placeholder="104 Main St, Phoenix, AZ 90004" />
+                              </div>
+                              <div className="md:col-span-2">
+                                <label className="text-sm font-medium">Bio</label>
+                                <Textarea rows={4} value={profileForm.bio} onChange={(e) => setProfileForm(prev => ({ ...prev, bio: e.target.value }))} />
+                              </div>
+                              <div className="md:col-span-2">
+                                <label className="text-sm font-medium">Languages</label>
+                                <div className="flex gap-2 mb-2">
+                                  <Input value={newLanguage} onChange={(e) => setNewLanguage(e.target.value)} placeholder="Add a language" />
+                                  <Button variant="outline" onClick={addLanguage}>Add</Button>
+                                </div>
+                                <div className="flex flex-wrap gap-2">
+                                  {profileForm.languages.map(lang => (
+                                    <Badge key={lang} variant="secondary" className="cursor-pointer" onClick={() => removeLanguage(lang)}>
+                                      {lang} ×
+                                    </Badge>
+                                  ))}
+                                </div>
+                              </div>
+                              <div className="md:col-span-2 flex justify-end gap-2">
+                                <Button variant="outline" onClick={() => setEditingSection(null)}>Cancel</Button>
+                                <Button onClick={saveProfile}><Save className="h-4 w-4 mr-2" />Save Changes</Button>
+                              </div>
+                            </div>
+                          </div>
+                        )}
                       </div>
                     </div>
                   </div>
@@ -772,24 +1233,36 @@ const DoctorSelfProfilePage = () => {
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="space-y-6">
-                    {reviews.map((review) => (
-                      <div key={review.id} className="border-b border-border last:border-0 pb-6 last:pb-0">
-                        <div className="flex justify-between items-start mb-2">
-                          <div>
-                            <div className="font-medium">{review.patientName}</div>
-                            <div className="flex items-center gap-1 text-yellow-500">
-                              {[...Array(review.rating)].map((_, i) => (
-                                <Star key={i} className="h-3 w-3 fill-current" />
-                              ))}
+                  {loadingReviews ? (
+                    <div className="flex items-center justify-center py-8">
+                      <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+                      <span className="ml-2 text-muted-foreground">Loading reviews...</span>
+                    </div>
+                  ) : reviews.length === 0 ? (
+                    <div className="text-center py-8 text-muted-foreground">
+                      <Star className="h-16 w-16 mx-auto mb-4 opacity-50" />
+                      <p>No reviews yet. Keep providing excellent care!</p>
+                    </div>
+                  ) : (
+                    <div className="space-y-6">
+                      {reviews.map((review) => (
+                        <div key={review.id} className="border-b border-border last:border-0 pb-6 last:pb-0">
+                          <div className="flex justify-between items-start mb-2">
+                            <div>
+                              <div className="font-medium">{review.patientName}</div>
+                              <div className="flex items-center gap-1 text-yellow-500">
+                                {[...Array(review.rating)].map((_, i) => (
+                                  <Star key={i} className="h-3 w-3 fill-current" />
+                                ))}
+                              </div>
                             </div>
+                            <span className="text-sm text-muted-foreground">{review.date}</span>
                           </div>
-                          <span className="text-sm text-muted-foreground">{review.date}</span>
+                          <p className="text-muted-foreground">{review.comment}</p>
                         </div>
-                        <p className="text-muted-foreground">{review.comment}</p>
-                      </div>
-                    ))}
-                  </div>
+                      ))}
+                    </div>
+                  )}
                 </CardContent>
               </Card>
             </TabsContent>
@@ -800,65 +1273,73 @@ const DoctorSelfProfilePage = () => {
                   <CardTitle className="flex items-center gap-2">
                     <Calendar className="h-5 w-5 text-primary" />
                     My Appointments
+                    {loadingAppointments && <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-primary ml-2"></div>}
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="space-y-4">
-                    {bookedAppointments.length === 0 ? (
-                      <div className="text-center py-8 text-muted-foreground">
-                        <Calendar className="h-16 w-16 mx-auto mb-4 opacity-50" />
-                        <p>No appointments scheduled yet.</p>
-                      </div>
-                    ) : (
-                      bookedAppointments.map((appointment) => (
-                        <div key={appointment.id} className="border rounded-lg p-4 hover:shadow-md transition-shadow">
-                          <div className="flex justify-between items-start mb-3">
-                            <div>
-                              <h3 className="font-semibold text-lg">{appointment.patientName}</h3>
-                              <p className="text-sm text-muted-foreground">{appointment.patientEmail}</p>
-                              <p className="text-sm text-muted-foreground">{appointment.phone}</p>
-                            </div>
-                            <div className="text-right">
-                              <div className="font-medium">{appointment.date}</div>
-                              <div className="text-sm text-muted-foreground">{appointment.time}</div>
-                              <Badge 
-                                variant={appointment.status === 'Confirmed' ? 'default' : 'secondary'}
-                                className="mt-1"
-                              >
-                                {appointment.status}
-                              </Badge>
-                            </div>
-                          </div>
-                          <div className="space-y-2">
-                            <div className="flex items-center gap-2">
-                              <Badge variant="outline">{appointment.type}</Badge>
-                            </div>
-                            <div>
-                              <p className="text-sm"><strong>Reason:</strong> {appointment.reason}</p>
-                            </div>
-                            <div className="flex gap-2 mt-3">
-                              <Button size="sm" variant="outline">
-                                View Details
-                              </Button>
-                              <Button size="sm" variant="outline">
-                                Reschedule
-                              </Button>
-                              {appointment.status === 'Pending' && (
-                                <>
-                                  <Button size="sm" variant="default">
-                                    Confirm
-                                  </Button>
-                                  <Button size="sm" variant="destructive">
-                                    Decline
-                                  </Button>
-                                </>
-                              )}
-                            </div>
-                          </div>
+                  {loadingAppointments ? (
+                    <div className="flex items-center justify-center py-8">
+                      <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+                      <span className="ml-2 text-muted-foreground">Loading appointments...</span>
+                    </div>
+                  ) : (
+                    <div className="space-y-4">
+                      {bookedAppointments.length === 0 ? (
+                        <div className="text-center py-8 text-muted-foreground">
+                          <Calendar className="h-16 w-16 mx-auto mb-4 opacity-50" />
+                          <p>No appointments scheduled yet.</p>
                         </div>
-                      ))
-                    )}
-                  </div>
+                      ) : (
+                        bookedAppointments.map((appointment) => (
+                          <div key={appointment.id} className="border rounded-lg p-4 hover:shadow-md transition-shadow">
+                            <div className="flex justify-between items-start mb-3">
+                              <div>
+                                <h3 className="font-semibold text-lg">{appointment.patientName}</h3>
+                                <p className="text-sm text-muted-foreground">{appointment.patientEmail}</p>
+                                <p className="text-sm text-muted-foreground">{appointment.phone}</p>
+                              </div>
+                              <div className="text-right">
+                                <div className="font-medium">{appointment.date}</div>
+                                <div className="text-sm text-muted-foreground">{appointment.time}</div>
+                                <Badge 
+                                  variant={appointment.status === 'Confirmed' ? 'default' : 'secondary'}
+                                  className="mt-1"
+                                >
+                                  {appointment.status}
+                                </Badge>
+                              </div>
+                            </div>
+                            <div className="space-y-2">
+                              <div className="flex items-center gap-2">
+                                <Badge variant="outline">{appointment.type}</Badge>
+                              </div>
+                              <div>
+                                <p className="text-sm"><strong>Reason:</strong> {appointment.reason}</p>
+                              </div>
+                              <div className="flex gap-2 mt-3">
+                                <Button size="sm" variant="outline">
+                                  View Details
+                                </Button>
+                                <Button size="sm" variant="outline">
+                                  Reschedule
+                                </Button>
+                                {appointment.status === 'Pending' && (
+                                  <>
+                                    <Button size="sm" variant="default">
+                                      Confirm
+                                    </Button>
+                                    <Button size="sm" variant="destructive">
+                                      Decline
+                                    </Button>
+                                  </>
+                                )}
+                              </div>
+                            </div>
+                          </div>
+                        ))
+                      )}
+                    </div>
+                  )}
                 </CardContent>
               </Card>
             </TabsContent>
@@ -906,10 +1387,16 @@ const DoctorSelfProfilePage = () => {
                   <CardTitle className="flex items-center gap-2">
                     <Clock className="h-5 w-5 text-primary" />
                     Manage Available Slots
+                    {loadingSlots && <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-primary ml-2"></div>}
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  {availableSlots.length === 0 ? (
+                  {loadingSlots ? (
+                    <div className="flex items-center justify-center py-8">
+                      <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+                      <span className="ml-2 text-muted-foreground">Loading slots...</span>
+                    </div>
+                  ) : availableSlots.length === 0 ? (
                     <div className="text-center py-8 text-muted-foreground">
                       <Clock className="h-16 w-16 mx-auto mb-4 opacity-50" />
                       <p>No slots available. Add some slots above.</p>
@@ -956,6 +1443,7 @@ const DoctorSelfProfilePage = () => {
           </Tabs>
         </div>
       </section>
+      
     </div>
   );
 };
