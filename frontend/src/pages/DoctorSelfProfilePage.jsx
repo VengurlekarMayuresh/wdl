@@ -33,6 +33,7 @@ import {
   Camera
 } from "lucide-react";
 import ProfileImageUpload from "@/components/ui/ProfileImageUpload";
+import SlotManager from "@/components/appointment/SlotManager";
 
 const DoctorSelfProfilePage = () => {
   const { user, isAuthenticated, logout, refreshUser } = useAuth();
@@ -44,10 +45,8 @@ const DoctorSelfProfilePage = () => {
   // Dynamic data states
   const [reviews, setReviews] = useState([]);
   const [bookedAppointments, setBookedAppointments] = useState([]);
-  const [availableSlots, setAvailableSlots] = useState([]);
   const [loadingReviews, setLoadingReviews] = useState(false);
   const [loadingAppointments, setLoadingAppointments] = useState(false);
-  const [loadingSlots, setLoadingSlots] = useState(false);
   
   // Form states for different sections
   const [aboutForm, setAboutForm] = useState("");
@@ -113,8 +112,6 @@ const DoctorSelfProfilePage = () => {
   });
 
 
-  // New slot form
-  const [newSlot, setNewSlot] = useState({ date: "", time: "" });
   
   // Extended API functions for missing endpoints
   const extendedAPI = {
@@ -166,55 +163,6 @@ const DoctorSelfProfilePage = () => {
       ];
     },
     
-    // Fetch available slots (mock API call)
-    async getAvailableSlots() {
-      console.log('🔄 Fetching available slots from backend...');
-      await new Promise(resolve => setTimeout(resolve, 600)); // Simulate API delay
-      
-      // Mock data - replace with real API call to '/doctors/slots'
-      const today = new Date();
-      const slots = [];
-      
-      // Generate some sample slots for the next few days
-      for (let i = 1; i <= 7; i++) {
-        const date = new Date(today);
-        date.setDate(today.getDate() + i);
-        const dateStr = date.toLocaleDateString();
-        
-        // Add a few time slots for each day
-        ['9:00 AM', '10:00 AM', '11:00 AM', '2:00 PM', '3:00 PM'].forEach((time, idx) => {
-          slots.push({
-            id: i * 10 + idx,
-            date: dateStr,
-            time: time,
-            isAvailable: Math.random() > 0.3 // 70% chance available
-          });
-        });
-      }
-      
-      return slots;
-    },
-    
-    // Add appointment slot
-    async addSlot(slotData) {
-      console.log('🔄 Adding new slot to backend...', slotData);
-      await new Promise(resolve => setTimeout(resolve, 500));
-      return { ...slotData, id: Date.now(), isAvailable: true };
-    },
-    
-    // Update slot availability
-    async updateSlot(slotId, updates) {
-      console.log('🔄 Updating slot in backend...', slotId, updates);
-      await new Promise(resolve => setTimeout(resolve, 300));
-      return { id: slotId, ...updates };
-    },
-    
-    // Delete slot
-    async deleteSlot(slotId) {
-      console.log('🔄 Deleting slot from backend...', slotId);
-      await new Promise(resolve => setTimeout(resolve, 300));
-      return true;
-    }
   };
 
   // Set initial doctor data from user info immediately
@@ -326,11 +274,10 @@ const DoctorSelfProfilePage = () => {
           });
         }
         
-        // Fetch reviews, appointments, and slots in parallel
-        const [reviewsData, appointmentsData, slotsData] = await Promise.allSettled([
+        // Fetch reviews and appointments in parallel
+        const [reviewsData, appointmentsData] = await Promise.allSettled([
           fetchReviews(),
-          fetchAppointments(), 
-          fetchSlots()
+          fetchAppointments()
         ]);
         
         console.log('✅ All data fetched successfully!');
@@ -373,21 +320,6 @@ const DoctorSelfProfilePage = () => {
       setBookedAppointments([]);
     } finally {
       setLoadingAppointments(false);
-    }
-  };
-  
-  // Fetch slots
-  const fetchSlots = async () => {
-    setLoadingSlots(true);
-    try {
-      const data = await extendedAPI.getAvailableSlots();
-      console.log('✅ Slots loaded:', data.length, 'slots');
-      setAvailableSlots(data);
-    } catch (e) {
-      console.error('❌ Error fetching slots:', e);
-      setAvailableSlots([]);
-    } finally {
-      setLoadingSlots(false);
     }
   };
 
@@ -646,63 +578,6 @@ const DoctorSelfProfilePage = () => {
     }
   };
 
-  // Dynamic slot management functions
-  const addSlot = async () => {
-    if (!newSlot.date || !newSlot.time) {
-      alert('Please select both date and time');
-      return;
-    }
-    
-    try {
-      const newSlotData = await extendedAPI.addSlot({
-        date: newSlot.date,
-        time: newSlot.time
-      });
-      
-      setAvailableSlots(prev => [...prev, newSlotData]);
-      setNewSlot({ date: "", time: "" });
-      console.log('✅ Slot added successfully');
-    } catch (e) {
-      console.error('❌ Error adding slot:', e);
-      alert('Failed to add slot. Please try again.');
-    }
-  };
-
-  const deleteSlot = async (slotId) => {
-    if (!confirm('Are you sure you want to delete this slot?')) return;
-    
-    try {
-      await extendedAPI.deleteSlot(slotId);
-      setAvailableSlots(prev => prev.filter(slot => slot.id !== slotId));
-      console.log('✅ Slot deleted successfully');
-    } catch (e) {
-      console.error('❌ Error deleting slot:', e);
-      alert('Failed to delete slot. Please try again.');
-    }
-  };
-
-  const toggleSlotAvailability = async (slotId) => {
-    const slot = availableSlots.find(s => s.id === slotId);
-    if (!slot) return;
-    
-    try {
-      await extendedAPI.updateSlot(slotId, { 
-        isAvailable: !slot.isAvailable 
-      });
-      
-      setAvailableSlots(prev => 
-        prev.map(s => 
-          s.id === slotId 
-            ? { ...s, isAvailable: !s.isAvailable }
-            : s
-        )
-      );
-      console.log('✅ Slot availability updated');
-    } catch (e) {
-      console.error('❌ Error updating slot:', e);
-      alert('Failed to update slot. Please try again.');
-    }
-  };
 
   if (!isAuthenticated) {
     return (
@@ -1345,99 +1220,16 @@ const DoctorSelfProfilePage = () => {
             </TabsContent>
 
             <TabsContent value="slots" className="space-y-6">
-              {/* Add New Slot */}
-              <Card className="shadow-soft border-0">
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Plus className="h-5 w-5 text-primary" />
-                    Add New Available Slot
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="grid md:grid-cols-3 gap-4">
-                    <div>
-                      <label className="text-sm font-medium mb-2 block">Date</label>
-                      <Input
-                        type="date"
-                        value={newSlot.date}
-                        onChange={(e) => setNewSlot(prev => ({ ...prev, date: e.target.value }))}
-                      />
-                    </div>
-                    <div>
-                      <label className="text-sm font-medium mb-2 block">Time</label>
-                      <Input
-                        type="time"
-                        value={newSlot.time}
-                        onChange={(e) => setNewSlot(prev => ({ ...prev, time: e.target.value }))}
-                      />
-                    </div>
-                    <div className="flex items-end">
-                      <Button onClick={addSlot} className="w-full">
-                        <Plus className="h-4 w-4 mr-2" />
-                        Add Slot
-                      </Button>
-                    </div>
+              <Card className="shadow-soft border-0 mb-4">
+                <CardContent className="p-4">
+                  <div className="text-sm text-muted-foreground">
+                    <strong>Debug Info:</strong> Doctor ID: {user?.id || user?._id || 'Not found'} | 
+                    User Type: {user?.userType || 'Unknown'} | 
+                    Name: {user?.firstName} {user?.lastName}
                   </div>
                 </CardContent>
               </Card>
-
-              {/* Manage Existing Slots */}
-              <Card className="shadow-soft border-0">
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Clock className="h-5 w-5 text-primary" />
-                    Manage Available Slots
-                    {loadingSlots && <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-primary ml-2"></div>}
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  {loadingSlots ? (
-                    <div className="flex items-center justify-center py-8">
-                      <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-                      <span className="ml-2 text-muted-foreground">Loading slots...</span>
-                    </div>
-                  ) : availableSlots.length === 0 ? (
-                    <div className="text-center py-8 text-muted-foreground">
-                      <Clock className="h-16 w-16 mx-auto mb-4 opacity-50" />
-                      <p>No slots available. Add some slots above.</p>
-                    </div>
-                  ) : (
-                    <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
-                      {availableSlots.map((slot) => (
-                        <div key={slot.id} className="border rounded-lg p-4 space-y-3">
-                          <div className="text-center">
-                            <div className="font-medium">{slot.date}</div>
-                            <div className="text-sm text-muted-foreground">{slot.time}</div>
-                            <Badge 
-                              variant={slot.isAvailable ? "default" : "secondary"}
-                              className="mt-2"
-                            >
-                              {slot.isAvailable ? "Available" : "Unavailable"}
-                            </Badge>
-                          </div>
-                          <div className="flex gap-2">
-                            <Button 
-                              size="sm" 
-                              variant="outline"
-                              onClick={() => toggleSlotAvailability(slot.id)}
-                              className="flex-1"
-                            >
-                              {slot.isAvailable ? "Disable" : "Enable"}
-                            </Button>
-                            <Button 
-                              size="sm" 
-                              variant="destructive"
-                              onClick={() => deleteSlot(slot.id)}
-                            >
-                              <Trash2 className="h-4 w-4" />
-                            </Button>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                </CardContent>
-              </Card>
+              <SlotManager doctorId={user?.id || user?._id} />
             </TabsContent>
 
           </Tabs>

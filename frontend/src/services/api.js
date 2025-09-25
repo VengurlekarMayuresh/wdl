@@ -422,6 +422,152 @@ export const uploadAPI = {
   },
 };
 
+// Appointment Slots API
+export const slotsAPI = {
+  // Doctor: Create/Add a new slot
+  async createSlot(slotData) {
+    const response = await apiRequest('/appointments/slots', {
+      method: 'POST',
+      body: JSON.stringify(slotData),
+    });
+    if (response.success && response.data) {
+      return response.data.slot;
+    }
+    throw new Error(response.message || 'Failed to create slot');
+  },
+
+  // Doctor: Get my slots
+  async getMySlots() {
+    const response = await apiRequest('/appointments/slots/my');
+    if (response.success && response.data) {
+      return response.data.slots || response.data;
+    }
+    throw new Error(response.message || 'Failed to fetch slots');
+  },
+
+  // Doctor: Update a slot
+  async updateSlot(slotId, updates) {
+    const response = await apiRequest(`/appointments/slots/${slotId}`, {
+      method: 'PUT',
+      body: JSON.stringify(updates),
+    });
+    if (response.success && response.data) {
+      return response.data.slot;
+    }
+    throw new Error(response.message || 'Failed to update slot');
+  },
+
+  // Doctor: Delete a slot
+  async deleteSlot(slotId) {
+    const response = await apiRequest(`/appointments/slots/${slotId}`, {
+      method: 'DELETE',
+    });
+    if (response.success) {
+      return true;
+    }
+    throw new Error(response.message || 'Failed to delete slot');
+  },
+
+  // Public: Get available slots for a doctor
+  async getDoctorSlots(doctorId) {
+    const response = await apiRequest(`/appointments/slots/doctor/${doctorId}`);
+    if (response.success && response.data) {
+      return response.data.slots || response.data;
+    }
+    throw new Error(response.message || 'Failed to fetch doctor slots');
+  },
+};
+
+// Appointments API
+export const appointmentsAPI = {
+  // Patient: Book an appointment
+  async bookAppointment(bookingData) {
+    const response = await apiRequest('/appointments/book', {
+      method: 'POST',
+      body: JSON.stringify(bookingData),
+    });
+    if (response.success && response.data) {
+      return response.data.appointment;
+    }
+    throw new Error(response.message || 'Failed to book appointment');
+  },
+
+  // Patient: Get my appointments
+  async getMyAppointments(status = 'all') {
+    const query = status !== 'all' ? `?status=${status}` : '';
+    const response = await apiRequest(`/appointments/patient/my${query}`);
+    if (response.success && response.data) {
+      return response.data.appointments || response.data;
+    }
+    throw new Error(response.message || 'Failed to fetch appointments');
+  },
+
+  // Patient: Cancel appointment
+  async cancelAppointment(appointmentId) {
+    const response = await apiRequest(`/appointments/${appointmentId}/cancel`, {
+      method: 'PATCH',
+    });
+    if (response.success && response.data) {
+      return response.data.appointment;
+    }
+    throw new Error(response.message || 'Failed to cancel appointment');
+  },
+
+  // Doctor: Get pending appointment requests
+  async getPendingRequests() {
+    const response = await apiRequest('/appointments/doctor/pending');
+    if (response.success && response.data) {
+      return response.data.appointments || response.data;
+    }
+    throw new Error(response.message || 'Failed to fetch pending requests');
+  },
+
+  // Doctor: Get my appointments
+  async getDoctorAppointments(status = 'all') {
+    const query = status !== 'all' ? `?status=${status}` : '';
+    const response = await apiRequest(`/appointments/doctor/my${query}`);
+    if (response.success && response.data) {
+      return response.data.appointments || response.data;
+    }
+    throw new Error(response.message || 'Failed to fetch appointments');
+  },
+
+  // Doctor: Approve appointment
+  async approveAppointment(appointmentId) {
+    const response = await apiRequest(`/appointments/${appointmentId}/approve`, {
+      method: 'PATCH',
+    });
+    if (response.success && response.data) {
+      return response.data.appointment;
+    }
+    throw new Error(response.message || 'Failed to approve appointment');
+  },
+
+  // Doctor: Reject appointment
+  async rejectAppointment(appointmentId, reason = '') {
+    const response = await apiRequest(`/appointments/${appointmentId}/reject`, {
+      method: 'PATCH',
+      body: JSON.stringify({ reason }),
+    });
+    if (response.success && response.data) {
+      return response.data.appointment;
+    }
+    throw new Error(response.message || 'Failed to reject appointment');
+  },
+
+  // Doctor: Complete appointment
+  async completeAppointment(appointmentId, notes = '') {
+    const response = await apiRequest(`/appointments/${appointmentId}/complete`, {
+      method: 'PATCH',
+      body: JSON.stringify({ notes }),
+    });
+    if (response.success && response.data) {
+      return response.data.appointment;
+    }
+    throw new Error(response.message || 'Failed to complete appointment');
+  },
+};
+
 // Get stored user
 export const getStoredUser = () => {
   const userStr = localStorage.getItem('user');

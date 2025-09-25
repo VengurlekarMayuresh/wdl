@@ -7,8 +7,8 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { MapPin, Stethoscope, Star, Search, UserCircle2, Clock, Phone, Calendar, Filter, Users, Award, CheckCircle } from 'lucide-react';
-import { doctorAPI } from '@/services/api';
+import { MapPin, Stethoscope, Star, Search, UserCircle2, Clock, Phone, Calendar, Filter, Users, Award, CheckCircle, CalendarCheck } from 'lucide-react';
+import { doctorAPI, slotsAPI } from '@/services/api';
 
 const FindCarePage = () => {
   const { user, isAuthenticated, logout } = useAuth();
@@ -18,6 +18,8 @@ const FindCarePage = () => {
   const [sortBy, setSortBy] = useState("relevance");
   const [isLoading, setIsLoading] = useState(false);
   const [doctors, setDoctors] = useState([]);
+  const [doctorSlots, setDoctorSlots] = useState({});
+  const [slotsLoading, setSlotsLoading] = useState(false);
 
   const loadDoctors = async () => {
     try {
@@ -29,10 +31,54 @@ const FindCarePage = () => {
       if (sortBy && sortBy !== 'relevance') params.sortBy = sortBy;
       const { doctors: list } = await doctorAPI.list(params);
       setDoctors(list || []);
+      
+      // Load available slots for each doctor
+      loadDoctorSlots(list || []);
     } catch (e) {
       console.error(e);
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const loadDoctorSlots = async (doctorList) => {
+    try {
+      setSlotsLoading(true);
+      const slotsData = {};
+      
+      // Load slots for each doctor in parallel
+        await Promise.all(
+          doctorList.map(async (doctor) => {
+            try {
+              const slots = await slotsAPI.getDoctorSlots(doctor._id);
+              console.log(`Slots for doctor ${doctor._id}:`, slots); // Debug logging
+              
+              // Filter slots to show only available ones that are not booked and in the future
+              const availableSlots = slots.filter(slot => {
+                const slotDate = new Date(slot.dateTime);
+                const now = new Date();
+                const isAvailable = slot.isAvailable !== false; // Default to true if not specified
+                const isNotBooked = !slot.isBooked;
+                const isFuture = slotDate > now;
+                
+                return isAvailable && isNotBooked && isFuture;
+              });
+              
+              slotsData[doctor._id] = availableSlots;
+              console.log(`Available slots for doctor ${doctor._id}:`, availableSlots); // Debug logging
+            } catch (e) {
+              console.log(`Failed to load slots for doctor ${doctor._id}:`, e);
+              // If failed to load slots for this doctor, set empty array
+              slotsData[doctor._id] = [];
+            }
+          })
+        );
+      
+      setDoctorSlots(slotsData);
+    } catch (e) {
+      console.error('Failed to load doctor slots:', e);
+    } finally {
+      setSlotsLoading(false);
     }
   };
 
@@ -234,17 +280,78 @@ const FindCarePage = () => {
                       </div>
                     )}
                     
+                    {/* Available Slots */}
+                    {doctorSlots[doc._id] && (
+                      <div className="mb-4">
+                        <div className="flex items-center justify-between mb-2">
+                          <span className="text-sm text-muted-foreground">Available Slots:</span>
+                          <Badge variant={doctorSlots[doc._id].length > 0 ? "success" : "secondary"} className="text-xs">
+                            {slotsLoading ? (
+                              <div className="flex items-center gap-1">
+                                <div className="animate-spin rounded-full h-3 w-3 border-b border-current" />
+                                <span>Loading...</span>
+                              </div>
+                            ) : (
+                              `${doctorSlots[doc._id].length} available`
+                            )}
+                          </Badge>
+                        </div>
+                        
+                        {doctorSlots[doc._id].length > 0 && (
+                          <div className="space-y-1">
+                            {/* Show first 2 slots */}
+                            {doctorSlots[doc._id].slice(0, 2).map((slot, index) => {
+                              const slotDate = new Date(slot.dateTime);
+                              return (
+                                <div key={slot._id || index} className="flex items-center justify-between text-xs p-2 bg-primary/5 rounded">
+                                  <div className="flex items-center gap-2">
+                                    <CalendarCheck className="h-3 w-3" />
+                                    <span>
+                                      {slotDate.toLocaleDateString('en-US', { 
+                                        month: 'short', 
+                                        day: 'numeric' 
+                                      })} at {slotDate.toLocaleTimeString('en-US', {
+                                        hour: '2-digit',
+                                        minute: '2-digit'
+                                      })}
+                                    </span>
+                                  </div>
+                                  {slot.type && (
+                                    <Badge variant="outline" className="text-xs px-1 py-0">
+                                      {slot.type}
+                                    </Badge>
+                                  )}
+                                </div>
+                              );
+                            })}
+                            {doctorSlots[doc._id].length > 2 && (
+                              <div className="text-xs text-muted-foreground text-center py-1">
+                                +{doctorSlots[doc._id].length - 2} more slots available
+                              </div>
+                            )}
+                          </div>
+                        )}
+                      </div>
+                    )}
+                    
                     <div className="flex gap-2 pt-2 border-t">
                       <Link to={`/doctor/${doc._id}`} className="flex-1">
-                        <Button variant="medical" className="w-full" size="sm">
+                        <Button variant="outline" className="w-full" size="sm">
                           <Users className="h-4 w-4 mr-2" />
                           View Profile
                         </Button>
                       </Link>
-                      {doc.isAcceptingNewPatients && (
-                        <Button variant="outline" size="sm">
+                      {doc.isAcceptingNewPatients && doctorSlots[doc._id] && doctorSlots[doc._id].length > 0 ? (
+                        <Link to={`/doctor/${doc._id}?tab=availability`}>
+                          <Button variant="medical" size="sm">
+                            <Calendar className="h-4 w-4 mr-2" />
+                            Book Now
+                          </Button>
+                        </Link>
+                      ) : (
+                        <Button variant="secondary" size="sm" disabled>
                           <Calendar className="h-4 w-4 mr-2" />
-                          Book
+                          {!doc.isAcceptingNewPatients ? 'Not Accepting' : 'No Slots'}
                         </Button>
                       )}
                     </div>
