@@ -7,8 +7,8 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Separator } from '@/components/ui/separator';
-import { Calendar, Stethoscope, Award, Clock, Star, MapPin, Phone, Mail, UserCircle2, BookOpen, Heart, Shield, Users, MessageCircle, Share2, ArrowLeft, CheckCircle, Video, Building, GraduationCap, Languages, DollarSign } from 'lucide-react';
-import { doctorAPI } from '@/services/api';
+import { Calendar, Stethoscope, Award, Clock, Star, MapPin, Phone, Mail, UserCircle2, BookOpen, Heart, Shield, Users, MessageCircle, Share2, ArrowLeft, CheckCircle, Video, Building, GraduationCap, Languages, DollarSign, AlertCircle } from 'lucide-react';
+import { doctorAPI, slotsAPI, appointmentsAPI } from '@/services/api';
 
 const DoctorProfilePage = () => {
   const { user, isAuthenticated, logout } = useAuth();
@@ -19,6 +19,11 @@ const DoctorProfilePage = () => {
   const [error, setError] = useState('');
   const [showBookingModal, setShowBookingModal] = useState(false);
   const [selectedTab, setSelectedTab] = useState('overview');
+  const [doctorSlots, setDoctorSlots] = useState([]);
+  const [slotsLoading, setSlotsLoading] = useState(false);
+  const [selectedSlot, setSelectedSlot] = useState(null);
+  const [bookingReason, setBookingReason] = useState('');
+  const [bookingLoading, setBookingLoading] = useState(false);
 
   useEffect(() => {
     const fetchDoctor = async () => {
@@ -26,6 +31,8 @@ const DoctorProfilePage = () => {
         setLoading(true);
         const doc = await doctorAPI.getById(id);
         setDoctor(doc);
+        // Load slots after doctor is loaded
+        loadDoctorSlots();
       } catch (e) {
         setError(e.message || 'Failed to load doctor');
       } finally {
@@ -35,13 +42,79 @@ const DoctorProfilePage = () => {
     fetchDoctor();
   }, [id]);
 
-  const handleBookAppointment = () => {
+  const loadDoctorSlots = async () => {
+    try {
+      setSlotsLoading(true);
+      const slots = await slotsAPI.getDoctorSlots(id);
+      console.log('Raw slots from API:', slots); // Debug logging
+      
+      // Filter slots to show only available ones that are not booked and in the future
+      const availableSlots = slots.filter(slot => {
+        const slotDate = new Date(slot.dateTime);
+        const now = new Date();
+        const isAvailable = slot.isAvailable !== false; // Default to true if not specified
+        const isNotBooked = !slot.isBooked;
+        const isFuture = slotDate > now;
+        
+        console.log('Slot filtering:', {
+          slotId: slot._id,
+          dateTime: slot.dateTime,
+          isAvailable,
+          isNotBooked,
+          isFuture,
+          shouldShow: isAvailable && isNotBooked && isFuture
+        });
+        
+        return isAvailable && isNotBooked && isFuture;
+      });
+      
+      console.log('Filtered available slots:', availableSlots); // Debug logging
+      setDoctorSlots(availableSlots);
+    } catch (e) {
+      console.error('Failed to load doctor slots:', e);
+      setDoctorSlots([]);
+    } finally {
+      setSlotsLoading(false);
+    }
+  };
+
+  const handleBookAppointment = (slot = null) => {
     if (!isAuthenticated) {
       // Redirect to login or show login modal
       navigate('/login', { state: { returnTo: `/doctor/${id}` } });
       return;
     }
+    setSelectedSlot(slot);
     setShowBookingModal(true);
+  };
+
+  const handleBookSlot = async () => {
+    if (!selectedSlot) return;
+    
+    try {
+      setBookingLoading(true);
+      await appointmentsAPI.bookAppointment({
+        doctorId: id,
+        slotId: selectedSlot._id,
+        reason: bookingReason,
+        appointmentType: selectedSlot.type || 'consultation',
+      });
+      
+      // Show success message
+      alert('Appointment request sent successfully! The doctor will review and approve your request.');
+      
+      // Refresh slots to show updated availability
+      loadDoctorSlots();
+      
+      // Close modal and reset
+      setShowBookingModal(false);
+      setSelectedSlot(null);
+      setBookingReason('');
+    } catch (e) {
+      alert('Failed to book appointment: ' + e.message);
+    } finally {
+      setBookingLoading(false);
+    }
   };
 
   const handleBack = () => {
@@ -278,35 +351,82 @@ const DoctorProfilePage = () => {
                 </div>
               </TabsContent>
 
-              {/* Availability */}
+              {/* Available Slots */}
               <TabsContent value="availability" className="mt-6">
                 <Card className="border-none shadow-soft">
                   <CardHeader>
-                    <CardTitle>Available Slots</CardTitle>
+                    <CardTitle>Available Appointment Slots</CardTitle>
+                    <p className="text-sm text-muted-foreground mt-1">
+                      Click on any available slot to book your appointment
+                    </p>
                   </CardHeader>
                   <CardContent>
-                    {doctor.availability && doctor.availability.length > 0 ? (
-                      <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-3">
-                        {doctor.availability.map((slot, i) => (
-                          <div key={i} className="flex items-center justify-between p-3 rounded-md border bg-card">
-                            <div className="flex items-center gap-2 text-sm">
-                              <Clock className="h-4 w-4" />
-                              <span>{slot.day}</span>
-                            </div>
-                            <Badge variant="outline" className="text-xs">
-                              {slot.startTime} - {slot.endTime}
-                            </Badge>
-                          </div>
-                        ))}
+                    {slotsLoading ? (
+                      <div className="flex items-center justify-center py-8">
+                        <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-primary" />
+                        <span className="ml-2 text-sm">Loading available slots...</span>
+                      </div>
+                    ) : doctorSlots.length > 0 ? (
+                      <div className="grid gap-3">
+                        {doctorSlots.map((slot) => {
+                          const slotDate = new Date(slot.dateTime);
+                          const endTime = slot.endTime ? new Date(`1970-01-01T${slot.endTime}`) : null;
+                          
+                          return (
+                            <Card key={slot._id} className="border hover:border-primary/50 transition-colors cursor-pointer" 
+                                  onClick={() => handleBookAppointment(slot)}>
+                              <CardContent className="p-4">
+                                <div className="flex items-center justify-between">
+                                  <div className="flex items-center gap-4">
+                                    <div className="flex items-center gap-2">
+                                      <Calendar className="h-4 w-4 text-primary" />
+                                      <span className="font-medium">
+                                        {slotDate.toLocaleDateString('en-US', {
+                                          weekday: 'short',
+                                          month: 'short',
+                                          day: 'numeric',
+                                          year: 'numeric'
+                                        })}
+                                      </span>
+                                    </div>
+                                    <div className="flex items-center gap-2">
+                                      <Clock className="h-4 w-4 text-muted-foreground" />
+                                      <span className="text-sm">
+                                        {slotDate.toLocaleTimeString('en-US', {
+                                          hour: '2-digit',
+                                          minute: '2-digit'
+                                        })}
+                                        {endTime && ` - ${endTime.toLocaleTimeString('en-US', {
+                                          hour: '2-digit',
+                                          minute: '2-digit'
+                                        })}`}
+                                      </span>
+                                    </div>
+                                    {slot.type && (
+                                      <Badge variant="secondary" className="text-xs">
+                                        {slot.type}
+                                      </Badge>
+                                    )}
+                                  </div>
+                                  <Button variant="medical" size="sm" onClick={(e) => {
+                                    e.stopPropagation();
+                                    handleBookAppointment(slot);
+                                  }}>
+                                    <Calendar className="h-4 w-4 mr-1" /> Book
+                                  </Button>
+                                </div>
+                              </CardContent>
+                            </Card>
+                          );
+                        })}
                       </div>
                     ) : (
-                      <p className="text-sm text-muted-foreground">No availability posted.</p>
+                      <div className="text-center py-8">
+                        <Calendar className="h-12 w-12 mx-auto mb-4 text-muted-foreground opacity-50" />
+                        <p className="text-muted-foreground">No available slots at the moment.</p>
+                        <p className="text-sm text-muted-foreground">Please check back later or contact the doctor directly.</p>
+                      </div>
                     )}
-                    <div className="mt-4">
-                      <Button variant="medical" onClick={handleBookAppointment}>
-                        <Calendar className="h-4 w-4 mr-2" /> Book Appointment
-                      </Button>
-                    </div>
                   </CardContent>
                 </Card>
               </TabsContent>
@@ -341,54 +461,122 @@ const DoctorProfilePage = () => {
           </div>
         )}
 
-        {/* Booking Modal - Simple placeholder for now */}
-        {showBookingModal && (
-          <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50" onClick={() => setShowBookingModal(false)}>
+        {/* Booking Modal */}
+        {showBookingModal && selectedSlot && (
+          <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50" onClick={() => {
+            setShowBookingModal(false);
+            setSelectedSlot(null);
+            setBookingReason('');
+          }}>
             <Card className="w-full max-w-md mx-4" onClick={(e) => e.stopPropagation()}>
               <CardHeader>
                 <CardTitle>Book Appointment</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
                 <p className="text-sm text-muted-foreground">
                   Book an appointment with Dr. {doctor?.userId?.firstName} {doctor?.userId?.lastName}
                 </p>
-                <div className="space-y-3">
-                  <div>
-                    <label className="block text-sm font-medium mb-1">Preferred Date</label>
-                    <input 
-                      type="date" 
-                      className="w-full px-3 py-2 border border-input rounded-md text-sm" 
-                      min={new Date().toISOString().split('T')[0]}
-                    />
+              </CardHeader>
+              <CardContent className="space-y-4">
+                {/* Selected Slot Info */}
+                <div className="p-3 bg-primary/5 border border-primary/20 rounded-md">
+                  <div className="flex items-center gap-2 mb-2">
+                    <CheckCircle className="h-4 w-4 text-primary" />
+                    <span className="font-medium text-sm">Selected Slot</span>
                   </div>
-                  <div>
-                    <label className="block text-sm font-medium mb-1">Preferred Time</label>
-                    <select className="w-full px-3 py-2 border border-input rounded-md text-sm">
-                      <option value="">Select time</option>
-                      <option value="09:00">9:00 AM</option>
-                      <option value="10:00">10:00 AM</option>
-                      <option value="11:00">11:00 AM</option>
-                      <option value="14:00">2:00 PM</option>
-                      <option value="15:00">3:00 PM</option>
-                      <option value="16:00">4:00 PM</option>
-                    </select>
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium mb-1">Reason for visit</label>
-                    <textarea 
-                      className="w-full px-3 py-2 border border-input rounded-md text-sm" 
-                      rows={3}
-                      placeholder="Brief description of your concern"
-                    />
+                  <div className="space-y-1">
+                    <div className="flex items-center gap-2 text-sm">
+                      <Calendar className="h-3 w-3" />
+                      <span>
+                        {new Date(selectedSlot.dateTime).toLocaleDateString('en-US', {
+                          weekday: 'long',
+                          year: 'numeric',
+                          month: 'long',
+                          day: 'numeric'
+                        })}
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-2 text-sm">
+                      <Clock className="h-3 w-3" />
+                      <span>
+                        {new Date(selectedSlot.dateTime).toLocaleTimeString('en-US', {
+                          hour: '2-digit',
+                          minute: '2-digit'
+                        })}
+                        {selectedSlot.endTime && ` - ${new Date(`1970-01-01T${selectedSlot.endTime}`).toLocaleTimeString('en-US', {
+                          hour: '2-digit',
+                          minute: '2-digit'
+                        })}`}
+                      </span>
+                    </div>
+                    {selectedSlot.type && (
+                      <Badge variant="secondary" className="text-xs mt-2">
+                        {selectedSlot.type}
+                      </Badge>
+                    )}
                   </div>
                 </div>
-                <div className="flex gap-2 pt-4">
-                  <Button variant="outline" onClick={() => setShowBookingModal(false)} className="flex-1">
+
+                {/* Consultation Fee */}
+                {doctor.consultationFee && (
+                  <div className="flex justify-between items-center p-3 bg-gray-50 rounded-md">
+                    <span className="text-sm font-medium">Consultation Fee:</span>
+                    <span className="text-sm font-semibold">₹{doctor.consultationFee}</span>
+                  </div>
+                )}
+
+                {/* Reason for visit */}
+                <div>
+                  <label className="block text-sm font-medium mb-2">Reason for visit *</label>
+                  <textarea 
+                    className="w-full px-3 py-2 border border-input rounded-md text-sm" 
+                    rows={3}
+                    placeholder="Please describe your symptoms or reason for consultation"
+                    value={bookingReason}
+                    onChange={(e) => setBookingReason(e.target.value)}
+                    required
+                  />
+                </div>
+
+                {/* Important Notice */}
+                <div className="p-3 bg-amber-50 border border-amber-200 rounded-md">
+                  <div className="flex items-start gap-2">
+                    <AlertCircle className="h-4 w-4 text-amber-600 mt-0.5" />
+                    <div className="text-xs text-amber-700">
+                      <p className="font-medium mb-1">Please Note:</p>
+                      <p>Your appointment request will be sent to the doctor for approval. You will be notified once the doctor confirms your appointment.</p>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="flex gap-2 pt-2">
+                  <Button 
+                    variant="outline" 
+                    onClick={() => {
+                      setShowBookingModal(false);
+                      setSelectedSlot(null);
+                      setBookingReason('');
+                    }} 
+                    className="flex-1"
+                    disabled={bookingLoading}
+                  >
                     Cancel
                   </Button>
-                  <Button variant="medical" className="flex-1">
-                    <Calendar className="h-4 w-4 mr-2" />
-                    Book Appointment
+                  <Button 
+                    variant="medical" 
+                    className="flex-1" 
+                    onClick={handleBookSlot}
+                    disabled={!bookingReason.trim() || bookingLoading}
+                  >
+                    {bookingLoading ? (
+                      <>
+                        <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2" />
+                        Booking...
+                      </>
+                    ) : (
+                      <>
+                        <Calendar className="h-4 w-4 mr-2" />
+                        Send Request
+                      </>
+                    )}
                   </Button>
                 </div>
               </CardContent>
