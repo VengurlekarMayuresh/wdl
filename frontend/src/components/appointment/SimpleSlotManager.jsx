@@ -16,7 +16,8 @@ const SimpleSlotManager = ({ doctorId }) => {
   // Form data
   const [date, setDate] = useState('');
   const [startTime, setStartTime] = useState('');
-  const [endTime, setEndTime] = useState('');
+  const [duration, setDuration] = useState(30);
+  const [consultationFee, setConsultationFee] = useState(200);
 
   useEffect(() => {
     if (doctorId) {
@@ -44,8 +45,8 @@ const SimpleSlotManager = ({ doctorId }) => {
   };
 
   const createSlot = async () => {
-    if (!date || !startTime || !endTime) {
-      setError('Please fill in all fields (date, start time, end time)');
+    if (!date || !startTime) {
+      setError('Please fill in date and start time');
       return;
     }
 
@@ -54,13 +55,12 @@ const SimpleSlotManager = ({ doctorId }) => {
       setError('');
       setSuccess('');
 
-      // Create the slot data
+      // Create the slot data (endTime will be calculated by backend)
       const slotData = {
         dateTime: new Date(`${date}T${startTime}`),
-        endTime: endTime,
-        type: 'consultation',
-        isAvailable: true,
-        isBooked: false
+        duration: duration,
+        consultationType: 'in-person',
+        consultationFee: consultationFee
       };
 
       console.log('Creating slot with data:', slotData);
@@ -74,7 +74,8 @@ const SimpleSlotManager = ({ doctorId }) => {
       // Reset form
       setDate('');
       setStartTime('');
-      setEndTime('');
+      setDuration(30);
+      setConsultationFee(200);
       
       setSuccess('✅ Slot created successfully! It is now visible to patients.');
       
@@ -163,7 +164,7 @@ const SimpleSlotManager = ({ doctorId }) => {
           )}
 
           {/* Form */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
             <div>
               <label className="block text-sm font-medium mb-2">Date *</label>
               <Input
@@ -184,31 +185,49 @@ const SimpleSlotManager = ({ doctorId }) => {
               />
             </div>
             <div>
-              <label className="block text-sm font-medium mb-2">End Time *</label>
-              <Input
-                type="time"
-                value={endTime}
-                onChange={(e) => setEndTime(e.target.value)}
-                className="w-full"
+              <label className="block text-sm font-medium mb-2">Duration (minutes)</label>
+              <select
+                value={duration}
+                onChange={(e) => setDuration(parseInt(e.target.value))}
+                className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-primary focus:border-transparent"
+              >
+                <option value={15}>15 minutes</option>
+                <option value={30}>30 minutes</option>
+                <option value={45}>45 minutes</option>
+                <option value={60}>1 hour</option>
+                <option value={90}>1.5 hours</option>
+                <option value={120}>2 hours</option>
+              </select>
+            </div>
+            <div>
+              <label className="block text-sm font-medium mb-2">Consultation Fee ($)</label>
+              <input
+                type="number"
+                value={consultationFee}
+                onChange={(e) => setConsultationFee(parseFloat(e.target.value) || 0)}
+                min="0"
+                step="0.01"
+                className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-primary focus:border-transparent"
+                placeholder="200.00"
               />
             </div>
           </div>
 
-          <div className="flex gap-2">
+          <div className="flex gap-3">
             <Button 
               onClick={createSlot} 
-              disabled={createLoading || !date || !startTime || !endTime}
-              className="flex-1 md:flex-initial"
+              disabled={createLoading || !date || !startTime}
+              className="flex-1 md:flex-initial bg-primary hover:bg-primary/90"
             >
               {createLoading ? (
                 <>
                   <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2" />
-                  Creating...
+                  Creating Slot...
                 </>
               ) : (
                 <>
                   <Plus className="h-4 w-4 mr-2" />
-                  Create Slot
+                  Create New Slot
                 </>
               )}
             </Button>
@@ -216,25 +235,29 @@ const SimpleSlotManager = ({ doctorId }) => {
               variant="outline" 
               onClick={loadSlots} 
               disabled={loading}
+              className="px-4"
             >
-              {loading ? 'Loading...' : 'Refresh'}
+              {loading ? 'Refreshing...' : 'Refresh Slots'}
             </Button>
           </div>
 
-          <div className="text-xs text-muted-foreground">
-            <strong>Debug Info:</strong> Doctor ID: {doctorId}
-          </div>
+          <p className="text-xs text-gray-500 mt-2">
+            💡 Create slots for times when you're available to see patients. Duration is automatically calculated.
+          </p>
         </CardContent>
       </Card>
 
-      {/* My Slots Section */}
+      {/* Available Slots Section */}
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center justify-between">
             <span className="flex items-center gap-2">
               <Calendar className="h-5 w-5 text-primary" />
-              My Appointment Slots ({slots.length})
+              Available Appointment Slots
             </span>
+            <Badge variant="outline" className="text-xs">
+              {slots.filter(slot => !slot.isBooked).length} available
+            </Badge>
           </CardTitle>
         </CardHeader>
         <CardContent>
@@ -243,56 +266,99 @@ const SimpleSlotManager = ({ doctorId }) => {
               <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary" />
               <span className="ml-2">Loading slots...</span>
             </div>
-          ) : slots.length === 0 ? (
+          ) : slots.filter(slot => !slot.isBooked).length === 0 ? (
             <div className="text-center py-8 text-muted-foreground">
               <Calendar className="h-12 w-12 mx-auto mb-4 opacity-50" />
-              <p className="font-medium">No appointment slots created yet</p>
-              <p className="text-sm">Create your first slot above to start accepting appointments</p>
+              <p className="font-medium">No available slots</p>
+              <p className="text-sm">Create new appointment slots above for patients to book</p>
             </div>
           ) : (
             <div className="space-y-3">
-              {slots.map((slot) => (
-                <div key={slot._id} className="flex items-center justify-between p-4 border rounded-lg bg-card">
+              {slots
+                .filter(slot => !slot.isBooked)
+                .sort((a, b) => new Date(a.dateTime) - new Date(b.dateTime))
+                .map((slot) => (
+                <div key={slot._id} className="flex items-center justify-between p-4 border-2 border-green-100 rounded-lg bg-green-50/30 hover:bg-green-50 transition-colors">
                   <div className="flex items-center gap-4">
-                    <div className="flex items-center gap-2">
-                      <Calendar className="h-4 w-4 text-muted-foreground" />
-                      <span className="font-medium">
-                        {formatDateTime(slot.dateTime)}
-                      </span>
+                    <div className="w-10 h-10 rounded-full bg-green-100 flex items-center justify-center">
+                      <Calendar className="h-5 w-5 text-green-600" />
                     </div>
-                    {slot.endTime && (
-                      <div className="flex items-center gap-2">
-                        <Clock className="h-4 w-4 text-muted-foreground" />
-                        <span className="text-sm text-muted-foreground">
-                          Until {new Date(`1970-01-01T${slot.endTime}`).toLocaleTimeString('en-US', { 
-                            hour: '2-digit', 
-                            minute: '2-digit' 
-                          })}
-                        </span>
+                    <div>
+                      <div className="font-semibold text-gray-900">
+                        {new Date(slot.dateTime).toLocaleDateString('en-US', {
+                          weekday: 'long',
+                          month: 'short',
+                          day: 'numeric',
+                          year: 'numeric'
+                        })}
                       </div>
-                    )}
-                    <Badge variant={slot.isBooked ? 'destructive' : 'success'} className="text-xs">
-                      {slot.isBooked ? 'Booked' : 'Available'}
-                    </Badge>
+                      <div className="flex items-center gap-4 text-sm text-gray-600">
+                        <div className="flex items-center gap-1">
+                          <Clock className="h-3 w-3" />
+                          <span>
+                            {new Date(slot.dateTime).toLocaleTimeString('en-US', {
+                              hour: '2-digit',
+                              minute: '2-digit'
+                            })}
+                          </span>
+                        </div>
+                        {slot.duration && (
+                          <span className="text-xs bg-gray-100 px-2 py-1 rounded">
+                            {slot.duration} min
+                          </span>
+                        )}
+                        {slot.consultationFee && (
+                          <span className="text-xs bg-blue-100 text-blue-700 px-2 py-1 rounded">
+                            ${slot.consultationFee}
+                          </span>
+                        )}
+                      </div>
+                    </div>
                   </div>
                   <div className="flex items-center gap-2">
-                    {slot.isBooked && slot.bookedBy && (
-                      <span className="text-sm text-muted-foreground mr-2">
-                        Patient: {slot.bookedBy.firstName} {slot.bookedBy.lastName}
-                      </span>
-                    )}
-                    {!slot.isBooked && (
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => deleteSlot(slot._id)}
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
-                    )}
+                    <Badge variant="success" className="bg-green-100 text-green-700 hover:bg-green-100">
+                      Available for Booking
+                    </Badge>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => deleteSlot(slot._id)}
+                      className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
                   </div>
                 </div>
               ))}
+              
+              {slots.filter(slot => slot.isBooked).length > 0 && (
+                <div className="mt-6 pt-4 border-t">
+                  <h4 className="text-sm font-medium text-gray-700 mb-2">
+                    Booked Slots ({slots.filter(slot => slot.isBooked).length})
+                  </h4>
+                  <p className="text-xs text-gray-500 mb-3">
+                    These slots have appointments scheduled. Manage them in the Appointments tab.
+                  </p>
+                  <div className="space-y-2">
+                    {slots
+                      .filter(slot => slot.isBooked)
+                      .sort((a, b) => new Date(a.dateTime) - new Date(b.dateTime))
+                      .map((slot) => (
+                      <div key={slot._id} className="flex items-center justify-between p-3 border border-gray-200 rounded-md bg-gray-50">
+                        <div className="flex items-center gap-3">
+                          <Calendar className="h-4 w-4 text-gray-500" />
+                          <span className="text-sm font-medium">
+                            {formatDateTime(slot.dateTime)}
+                          </span>
+                          <Badge variant="secondary" className="text-xs">
+                            Booked
+                          </Badge>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
             </div>
           )}
         </CardContent>

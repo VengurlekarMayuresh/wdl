@@ -94,10 +94,13 @@ const DoctorProfilePage = () => {
     try {
       setBookingLoading(true);
       await appointmentsAPI.bookAppointment({
-        doctorId: id,
         slotId: selectedSlot._id,
-        reason: bookingReason,
-        appointmentType: selectedSlot.type || 'consultation',
+        reasonForVisit: bookingReason || 'General consultation',
+        symptoms: '',
+        relevantMedicalHistory: '',
+        currentMedications: [],
+        allergies: [],
+        contactPreferences: {}
       });
       
       // Show success message

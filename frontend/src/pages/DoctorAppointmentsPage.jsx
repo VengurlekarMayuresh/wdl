@@ -6,8 +6,9 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Textarea } from '@/components/ui/textarea';
-import { Calendar, Clock, User, Stethoscope, MapPin, Phone, AlertCircle, CheckCircle, XCircle, MessageCircle, RefreshCw } from 'lucide-react';
+import { Calendar, Clock, User, Stethoscope, MapPin, Phone, AlertCircle, CheckCircle, XCircle, MessageCircle, RefreshCw, Edit } from 'lucide-react';
 import { appointmentsAPI } from '@/services/api';
+import RescheduleModal from '@/components/appointment/RescheduleModal';
 
 const DoctorAppointmentsPage = () => {
   const { user, isAuthenticated } = useAuth();
@@ -21,6 +22,7 @@ const DoctorAppointmentsPage = () => {
   const [error, setError] = useState('');
   const [activeTab, setActiveTab] = useState('pending');
   const [actionLoading, setActionLoading] = useState({});
+  const [rescheduleModal, setRescheduleModal] = useState({ isOpen: false, appointment: null });
 
   useEffect(() => {
     loadAppointments();
@@ -102,6 +104,20 @@ const DoctorAppointmentsPage = () => {
         return newState;
       });
     }
+  };
+
+  const handleRescheduleAppointment = (appointment) => {
+    setRescheduleModal({ isOpen: true, appointment });
+  };
+
+  const handleRescheduleSuccess = () => {
+    setRescheduleModal({ isOpen: false, appointment: null });
+    loadAppointments(); // Refresh appointments
+    alert('Appointment rescheduled successfully!');
+  };
+
+  const handleRescheduleClose = () => {
+    setRescheduleModal({ isOpen: false, appointment: null });
   };
 
   const getStatusBadge = (status) => {
@@ -258,6 +274,21 @@ const DoctorAppointmentsPage = () => {
                       <XCircle className="h-4 w-4 mr-2" />
                     )}
                     {currentAction === 'rejecting' ? 'Rejecting...' : 'Reject'}
+                  </Button>
+                </div>
+              )}
+              
+              {appointment.status === 'confirmed' && new Date(slot.dateTime) > new Date() && (
+                <div className="flex gap-2">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => handleRescheduleAppointment(appointment)}
+                    disabled={currentAction}
+                    className="flex-1"
+                  >
+                    <Edit className="h-4 w-4 mr-2" />
+                    Reschedule
                   </Button>
                 </div>
               )}
@@ -438,6 +469,15 @@ const DoctorAppointmentsPage = () => {
             </div>
           </TabsContent>
         </Tabs>
+        
+        {/* Reschedule Modal */}
+        <RescheduleModal
+          appointment={rescheduleModal.appointment}
+          isOpen={rescheduleModal.isOpen}
+          onClose={handleRescheduleClose}
+          onReschedule={handleRescheduleSuccess}
+          userType="doctor"
+        />
       </div>
     </div>
   );

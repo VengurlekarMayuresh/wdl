@@ -1,29 +1,85 @@
-﻿const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+// Robust API URL configuration
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
 
-// Helper function to make API requests
+console.log('🔗 API Base URL:', API_BASE_URL);
+console.log('🌐 Environment:', import.meta.env.MODE);
+console.log('📦 All env vars:', import.meta.env);
+
+// Helper function to make API requests with improved error handling
 async function apiRequest(endpoint, options = {}) {
   const token = localStorage.getItem('token');
+  const fullUrl = `${API_BASE_URL}${endpoint}`;
+  
+  console.log(`🚀 Making API request to: ${fullUrl}`);
+  console.log(`📋 Request options:`, { 
+    method: options.method || 'GET',
+    headers: options.headers,
+    hasBody: !!options.body 
+  });
+  
+  // Log the actual request body for debugging
+  if (options.body) {
+    console.log(`📦 Request body (raw):`, options.body);
+    try {
+      const parsedBody = JSON.parse(options.body);
+      console.log(`📦 Request body (parsed):`, parsedBody);
+      console.log(`📧 Email being sent:`, parsedBody.email);
+      console.log(`🔑 Password being sent:`, parsedBody.password ? '[PRESENT]' : '[MISSING]');
+      console.log(`🔑 Password length:`, parsedBody.password ? parsedBody.password.length : 0);
+    } catch (e) {
+      console.log(`⚠️ Could not parse request body as JSON`);
+    }
+  }
   
   const config = {
     headers: {
       'Content-Type': 'application/json',
+      'Accept': 'application/json',
       ...(token && { Authorization: `Bearer ${token}` }),
       ...options.headers,
     },
+    credentials: 'include', // Include credentials for CORS
     ...options,
   };
 
   try {
-    const response = await fetch(`${API_BASE_URL}${endpoint}`, config);
-    const data = await response.json();
+    console.log(`⏳ Fetching: ${fullUrl}`);
+    const response = await fetch(fullUrl, config);
+    
+    console.log(`📡 Response status: ${response.status} ${response.statusText}`);
+    console.log(`📋 Response headers:`, Object.fromEntries(response.headers.entries()));
+    
+    // Handle different content types
+    let data;
+    const contentType = response.headers.get('content-type');
+    
+    if (contentType && contentType.includes('application/json')) {
+      data = await response.json();
+    } else {
+      data = { message: await response.text() };
+    }
+    
+    console.log(`📦 Response data:`, data);
     
     if (!response.ok) {
-      throw new Error(data.message || 'API request failed');
+      const errorMessage = data.message || `HTTP ${response.status}: ${response.statusText}`;
+      console.error(`❌ API Error: ${errorMessage}`);
+      throw new Error(errorMessage);
     }
     
     return data;
   } catch (error) {
-    console.error('API request error:', error);
+    console.error(`❌ API request failed:`, {
+      url: fullUrl,
+      error: error.message,
+      stack: error.stack
+    });
+    
+    // Provide more specific error messages
+    if (error.name === 'TypeError' && error.message.includes('Failed to fetch')) {
+      throw new Error(`Cannot connect to server at ${API_BASE_URL}. Please check if the backend is running.`);
+    }
+    
     throw error;
   }
 }
@@ -498,7 +554,7 @@ export const appointmentsAPI = {
       body: JSON.stringify(bookingData),
     });
     if (response.success && response.data) {
-      return response.data.appointment;
+      return response.data;
     }
     throw new Error(response.message || 'Failed to book appointment');
   },
@@ -556,11 +612,11 @@ export const appointmentsAPI = {
     throw new Error(response.message || 'Failed to approve appointment');
   },
 
-  // Doctor: Reject appointment (cancel)
+  // Doctor: Reject appointment
   async rejectAppointment(appointmentId, reason = '') {
     const response = await apiRequest(`/appointments/${appointmentId}/status`, {
       method: 'PUT',
-      body: JSON.stringify({ status: 'cancelled', cancellationReason: reason }),
+      body: JSON.stringify({ status: 'rejected', rejectionReason: reason }),
     });
     if (response.success && response.data) {
       return response.data.appointment;
@@ -583,6 +639,21 @@ export const appointmentsAPI = {
       return response.data.appointment;
     }
     throw new Error(response.message || 'Failed to complete appointment');
+  },
+
+  // Reschedule appointment (available for both doctor and patient)
+  async rescheduleAppointment(appointmentId, newSlotId, reason = '') {
+    const response = await apiRequest(`/appointments/${appointmentId}/reschedule`, {
+      method: 'PUT',
+      body: JSON.stringify({ 
+        newSlotId,
+        reason
+      }),
+    });
+    if (response.success && response.data) {
+      return response.data.appointment;
+    }
+    throw new Error(response.message || 'Failed to reschedule appointment');
   },
 };
 

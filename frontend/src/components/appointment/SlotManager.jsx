@@ -24,8 +24,8 @@ const SlotManager = ({ doctorId }) => {
   const [formData, setFormData] = useState({
     date: '',
     startTime: '',
-    endTime: '',
-    type: 'consultation',
+    duration: 30,
+    consultationFee: 200,
     isAvailable: true,
   });
 
@@ -52,9 +52,10 @@ const SlotManager = ({ doctorId }) => {
     e.preventDefault();
     try {
       const slotData = {
-        ...formData,
         dateTime: new Date(`${formData.date}T${formData.startTime}`),
-        endTime: formData.endTime,
+        duration: formData.duration,
+        consultationFee: formData.consultationFee,
+        consultationType: 'in-person',
         isAvailable: true, // Explicitly set as available
         isBooked: false,   // Explicitly set as not booked
       };
@@ -104,8 +105,8 @@ const SlotManager = ({ doctorId }) => {
     setFormData({
       date: '',
       startTime: '',
-      endTime: '',
-      type: 'consultation',
+      duration: 30,
+      consultationFee: 200,
       isAvailable: true,
     });
   };
@@ -197,7 +198,7 @@ const SlotManager = ({ doctorId }) => {
                 <CardTitle className="text-lg">Add New Slot</CardTitle>
               </CardHeader>
               <CardContent>
-                <form onSubmit={handleAddSlot} className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <form onSubmit={handleAddSlot} className="grid grid-cols-1 md:grid-cols-3 gap-4">
                   <div>
                     <label className="block text-sm font-medium mb-1">Date</label>
                     <Input
@@ -218,29 +219,29 @@ const SlotManager = ({ doctorId }) => {
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium mb-1">End Time</label>
-                    <Input
-                      type="time"
-                      value={formData.endTime}
-                      onChange={(e) => setFormData(prev => ({ ...prev, endTime: e.target.value }))}
-                      required
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium mb-1">Appointment Type</label>
-                    <Select value={formData.type} onValueChange={(value) => setFormData(prev => ({ ...prev, type: value }))}>
+                    <label className="block text-sm font-medium mb-1">Duration (minutes)</label>
+                    <Select value={formData.duration.toString()} onValueChange={(value) => setFormData(prev => ({ ...prev, duration: parseInt(value) }))}>
                       <SelectTrigger>
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="consultation">Consultation</SelectItem>
-                        <SelectItem value="follow-up">Follow-up</SelectItem>
-                        <SelectItem value="emergency">Emergency</SelectItem>
-                        <SelectItem value="routine-checkup">Routine Checkup</SelectItem>
+                        <SelectItem value="15">15 minutes</SelectItem>
+                        <SelectItem value="30">30 minutes</SelectItem>
+                        <SelectItem value="45">45 minutes</SelectItem>
+                        <SelectItem value="60">60 minutes</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
-                  <div className="md:col-span-2 flex gap-2">
+                  <div>
+                    <label className="block text-sm font-medium mb-1">Consultation Fee ($)</label>
+                    <Input
+                      type="number"
+                      min="0"
+                      value={formData.consultationFee}
+                      onChange={(e) => setFormData(prev => ({ ...prev, consultationFee: parseFloat(e.target.value) || 0 }))}
+                    />
+                  </div>
+                  <div className="md:col-span-3 flex gap-2">
                     <Button type="submit" className="flex-1">
                       <Save className="h-4 w-4 mr-2" /> Save Slot
                     </Button>
@@ -279,18 +280,15 @@ const SlotManager = ({ doctorId }) => {
                           <div className="flex items-center gap-2">
                             <Clock className="h-4 w-4 text-muted-foreground" />
                             <span className="text-sm text-muted-foreground">
-                              {slot.endTime && `- ${new Date(`1970-01-01T${slot.endTime}`).toLocaleTimeString('en-US', { 
-                                hour: '2-digit', 
-                                minute: '2-digit' 
-                              })}`}
+                              {slot.duration} minutes
                             </span>
                           </div>
                           <Badge variant={status.variant} className="text-xs">
                             {status.text}
                           </Badge>
-                          {slot.type && (
+                          {slot.consultationFee && (
                             <Badge variant="outline" className="text-xs">
-                              {slot.type}
+                              ${slot.consultationFee}
                             </Badge>
                           )}
                         </div>

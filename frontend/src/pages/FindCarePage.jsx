@@ -9,6 +9,7 @@ import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { MapPin, Stethoscope, Star, Search, UserCircle2, Clock, Phone, Calendar, Filter, Users, Award, CheckCircle, CalendarCheck } from 'lucide-react';
 import { doctorAPI, slotsAPI } from '@/services/api';
+import BookingModal from '@/components/appointment/BookingModal';
 
 const FindCarePage = () => {
   const { user, isAuthenticated, logout } = useAuth();
@@ -20,22 +21,31 @@ const FindCarePage = () => {
   const [doctors, setDoctors] = useState([]);
   const [doctorSlots, setDoctorSlots] = useState({});
   const [slotsLoading, setSlotsLoading] = useState(false);
+  const [bookingModal, setBookingModal] = useState({ isOpen: false, doctor: null, slot: null });
 
   const loadDoctors = async () => {
     try {
       setIsLoading(true);
       const params = {};
-      if (specialty) params.specialty = specialty;
-      if (city) params.city = city;
+      
+      // Only apply filters if they are actually set by user
+      if (specialty && specialty.trim()) params.specialty = specialty.trim();
+      if (city && city.trim()) params.city = city.trim();
       if (accepting !== "any") params.acceptingNewPatients = accepting === "yes";
       if (sortBy && sortBy !== 'relevance') params.sortBy = sortBy;
-      const { doctors: list } = await doctorAPI.list(params);
-      setDoctors(list || []);
+      
+      console.log('Loading doctors with params:', params);
+      const response = await doctorAPI.list(params);
+      console.log('Doctors API response:', response);
+      
+      const list = response.doctors || response.data || response || [];
+      setDoctors(list);
       
       // Load available slots for each doctor
-      loadDoctorSlots(list || []);
+      loadDoctorSlots(list);
     } catch (e) {
-      console.error(e);
+      console.error('Error loading doctors:', e);
+      setDoctors([]);
     } finally {
       setIsLoading(false);
     }
@@ -80,6 +90,21 @@ const FindCarePage = () => {
     } finally {
       setSlotsLoading(false);
     }
+  };
+
+  const handleBookSlot = (doctor, slot) => {
+    setBookingModal({ isOpen: true, doctor, slot });
+  };
+
+  const handleBookingSuccess = (appointment) => {
+    console.log('Booking successful:', appointment);
+    setBookingModal({ isOpen: false, doctor: null, slot: null });
+    // Optionally refresh slots to show updated availability
+    loadDoctorSlots(doctors);
+  };
+
+  const handleBookingClose = () => {
+    setBookingModal({ isOpen: false, doctor: null, slot: null });
   };
 
   useEffect(() => {
@@ -303,8 +328,8 @@ const FindCarePage = () => {
                             {doctorSlots[doc._id].slice(0, 2).map((slot, index) => {
                               const slotDate = new Date(slot.dateTime);
                               return (
-                                <div key={slot._id || index} className="flex items-center justify-between text-xs p-2 bg-primary/5 rounded">
-                                  <div className="flex items-center gap-2">
+                                <div key={slot._id || index} className="flex items-center justify-between text-xs p-2 bg-primary/5 rounded hover:bg-primary/10 transition-colors">
+                                  <div className="flex items-center gap-2 flex-1">
                                     <CalendarCheck className="h-3 w-3" />
                                     <span>
                                       {slotDate.toLocaleDateString('en-US', { 
@@ -315,11 +340,28 @@ const FindCarePage = () => {
                                         minute: '2-digit'
                                       })}
                                     </span>
+                                    {slot.duration && (
+                                      <span className="text-muted-foreground">({slot.duration}min)</span>
+                                    )}
+                                    {slot.consultationFee && (
+                                      <span className="text-green-600 font-medium">${slot.consultationFee}</span>
+                                    )}
                                   </div>
-                                  {slot.type && (
-                                    <Badge variant="outline" className="text-xs px-1 py-0">
-                                      {slot.type}
-                                    </Badge>
+                                  {isAuthenticated && user?.userType === 'patient' ? (
+                                    <Button 
+                                      size="sm" 
+                                      variant="outline" 
+                                      className="text-xs h-6 px-2"
+                                      onClick={() => handleBookSlot(doc, slot)}
+                                    >
+                                      Book
+                                    </Button>
+                                  ) : (
+                                    slot.consultationType && (
+                                      <Badge variant="outline" className="text-xs px-1 py-0">
+                                        {slot.consultationType}
+                                      </Badge>
+                                    )
                                   )}
                                 </div>
                               );
@@ -361,6 +403,15 @@ const FindCarePage = () => {
             </Card>
           ))}
         </div>
+        
+        {/* Booking Modal */}
+        <BookingModal
+          doctor={bookingModal.doctor}
+          slot={bookingModal.slot}
+          isOpen={bookingModal.isOpen}
+          onClose={handleBookingClose}
+          onBookingSuccess={handleBookingSuccess}
+        />
       </div>
     </div>
   );

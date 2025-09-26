@@ -91,51 +91,73 @@ export const AuthProvider = ({ children }) => {
   }, []);
 
   const login = async (email, password) => {
+    console.log('🚀 AuthContext: Starting login process');
+    console.log('📧 Login credentials:', { email, password: '[HIDDEN]' });
+    
     try {
+      // Clear any previous errors or user data
+      setUser(null);
+      
+      console.log('📡 AuthContext: Calling authAPI.login...');
       // Call the login API
       const loginResponse = await authAPI.login({ email, password });
-      console.log('Login API response:', loginResponse);
+      console.log('✅ AuthContext: Login API response received:', {
+        success: !!loginResponse,
+        hasUser: !!loginResponse?.user,
+        hasProfile: !!loginResponse?.profile,
+        hasToken: !!loginResponse?.token
+      });
+      console.log('📦 Full login response:', loginResponse);
       
       // The login API already stores token and user in localStorage
-      // Now get the current user data
-      const userData = await authAPI.getCurrentUser();
-      console.log('User data after login:', userData);
-      
-      setUser(userData);
+      // Use the user data from the login response
+      if (loginResponse && loginResponse.user) {
+        const userData = {
+          ...loginResponse.user,
+          profile: loginResponse.profile
+        };
+        console.log('👤 AuthContext: Setting user data:', {
+          userId: userData._id,
+          email: userData.email,
+          userType: userData.userType,
+          hasProfile: !!userData.profile
+        });
+        setUser(userData);
+        console.log('✅ AuthContext: Login successful!');
+      } else {
+        console.error('❌ AuthContext: Invalid login response structure:', loginResponse);
+        throw new Error('Invalid response from server: missing user data');
+      }
       
     } catch (error) {
-      console.error('Login failed:', error);
+      console.error('❌ AuthContext: Login failed with error:', {
+        message: error.message,
+        stack: error.stack,
+        name: error.name
+      });
       
-      // For development/testing purposes, create a mock user if API fails
-      console.log('API login failed, creating mock user for testing:', error.message);
+      // Clear any stale data and throw the error
+      localStorage.removeItem('token');
+      localStorage.removeItem('user');
+      setUser(null);
       
-      // Create realistic mock user data
-      const mockUser = {
-        _id: 'mock_' + Date.now(),
-        firstName: email.includes('doctor') ? 'John' : 'Jane',
-        lastName: email.includes('doctor') ? 'Smith' : 'Doe',
-        email: email,
-        userType: email.includes('doctor') ? 'doctor' : 'patient',
-        phone: '+1 (555) 123-4567',
-        profilePicture: email.includes('doctor') ? 'https://images.unsplash.com/photo-1612349317150-e413f6a5b16d?w=400&h=400&fit=crop&crop=face' : 'https://images.unsplash.com/photo-1494790108755-2616b79e8b93?w=400&h=400&fit=crop&crop=face',
-        // Additional fields
-        primarySpecialty: email.includes('doctor') ? 'Cardiology' : undefined,
-        yearsOfExperience: email.includes('doctor') ? 15 : undefined,
-        dateOfBirth: '1985-01-01',
-        address: {
-          street: '123 Medical Plaza',
-          city: 'New York',
-          state: 'NY',
-          zipCode: '10001'
-        }
-      };
+      // Provide more user-friendly error messages
+      let userFriendlyMessage = error.message;
       
-      // Set mock token and user
-      localStorage.setItem('token', 'mock_token_' + Date.now());
-      localStorage.setItem('user', JSON.stringify(mockUser));
-      setUser(mockUser);
+      if (error.message.includes('Cannot connect to server')) {
+        userFriendlyMessage = 'Cannot connect to server. Please check your internet connection and try again.';
+      } else if (error.message.includes('Invalid credentials')) {
+        userFriendlyMessage = 'Invalid email or password. Please check your credentials and try again.';
+      } else if (error.message.includes('Failed to fetch')) {
+        userFriendlyMessage = 'Network error. Please check if the server is running and try again.';
+      }
       
-      console.log('Mock user created and stored:', mockUser);
+      console.error('🚨 AuthContext: Throwing user-friendly error:', userFriendlyMessage);
+      
+      // Re-throw with user-friendly message
+      const friendlyError = new Error(userFriendlyMessage);
+      friendlyError.originalError = error;
+      throw friendlyError;
     }
   };
 

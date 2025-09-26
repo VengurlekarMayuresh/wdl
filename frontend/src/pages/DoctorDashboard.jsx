@@ -30,8 +30,174 @@ import {
   Settings,
   Loader2
 } from "lucide-react";
-import { doctorAPI, authAPI, getStoredUser } from "@/services/api";
+import { doctorAPI, authAPI, getStoredUser, appointmentsAPI } from "@/services/api";
 import { useAuth } from "@/contexts/AuthContext";
+import SimpleSlotManager from "@/components/appointment/SimpleSlotManager";
+
+// Appointment Card Component
+const AppointmentCard = ({ appointment, onApprove, onReject, isLoading, showActions = false }) => {
+  const patient = appointment.patientId;
+  const slot = appointment.slotId;
+  
+  if (!patient || !slot) {
+    return (
+      <Card>
+        <CardContent className="p-4 text-center text-muted-foreground">
+          <p>Appointment data incomplete</p>
+        </CardContent>
+      </Card>
+    );
+  }
+  
+  const formatDateTime = (dateTime) => {
+    const date = new Date(dateTime);
+    return {
+      date: date.toLocaleDateString('en-US', {
+        weekday: 'short',
+        year: 'numeric',
+        month: 'short',
+        day: 'numeric'
+      }),
+      time: date.toLocaleTimeString('en-US', {
+        hour: '2-digit',
+        minute: '2-digit'
+      })
+    };
+  };
+  
+  const { date, time } = formatDateTime(slot.dateTime);
+  
+  const getStatusBadge = (status) => {
+    const statusConfig = {
+      pending: { variant: 'warning', text: 'Pending', icon: Clock },
+      confirmed: { variant: 'success', text: 'Confirmed', icon: CheckCircle },
+      completed: { variant: 'secondary', text: 'Completed', icon: CheckCircle },
+      cancelled: { variant: 'destructive', text: 'Cancelled', icon: X },
+      rejected: { variant: 'destructive', text: 'Rejected', icon: X }
+    };
+    
+    const config = statusConfig[status] || { variant: 'secondary', text: status, icon: Clock };
+    const Icon = config.icon;
+    
+    return (
+      <Badge variant={config.variant} className="flex items-center gap-1">
+        <Icon className="h-3 w-3" />
+        {config.text}
+      </Badge>
+    );
+  };
+  
+  return (
+    <Card className="border-none shadow-soft hover:shadow-medium transition-all duration-300">
+      <CardContent className="p-6">
+        <div className="flex justify-between items-start mb-4">
+          <div className="flex items-center gap-3">
+            <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center">
+              {patient.userId?.profilePicture ? (
+                <img 
+                  src={patient.userId.profilePicture} 
+                  alt={`${patient.userId.firstName}`}
+                  className="w-full h-full object-cover rounded-full"
+                />
+              ) : (
+                <User className="h-6 w-6 text-primary" />
+              )}
+            </div>
+            <div>
+              <h3 className="font-semibold">
+                {patient.userId?.firstName} {patient.userId?.lastName}
+              </h3>
+              <p className="text-sm text-muted-foreground">{patient.userId?.email}</p>
+              {patient.userId?.phone && (
+                <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                  <Phone className="h-3 w-3" />
+                  <span>{patient.userId.phone}</span>
+                </div>
+              )}
+            </div>
+          </div>
+          {getStatusBadge(appointment.status)}
+        </div>
+
+        <div className="grid grid-cols-2 gap-4 mb-4">
+          <div className="flex items-center gap-2 text-sm">
+            <Calendar className="h-4 w-4 text-muted-foreground" />
+            <span>{date}</span>
+          </div>
+          <div className="flex items-center gap-2 text-sm">
+            <Clock className="h-4 w-4 text-muted-foreground" />
+            <span>{time}</span>
+          </div>
+        </div>
+
+        {appointment.reasonForVisit && (
+          <div className="mb-4 p-3 bg-blue-50 border border-blue-200 rounded-md">
+            <div className="flex items-center gap-2 mb-1">
+              <Stethoscope className="h-4 w-4 text-blue-600" />
+              <span className="text-sm font-medium text-blue-700">Reason for Visit:</span>
+            </div>
+            <p className="text-sm text-blue-600">{appointment.reasonForVisit}</p>
+          </div>
+        )}
+
+        {appointment.rejectionReason && (
+          <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-md">
+            <div className="flex items-center gap-2 mb-1">
+              <X className="h-4 w-4 text-red-600" />
+              <span className="text-sm font-medium text-red-700">Rejection Reason:</span>
+            </div>
+            <p className="text-sm text-red-600">{appointment.rejectionReason}</p>
+          </div>
+        )}
+
+        {showActions && appointment.status === 'pending' && (
+          <div className="pt-4 border-t">
+            <div className="flex gap-2">
+              <Button
+                variant="default"
+                size="sm"
+                onClick={onApprove}
+                disabled={isLoading}
+                className="flex-1"
+              >
+                {isLoading === 'approving' ? (
+                  <>
+                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                    Approving...
+                  </>
+                ) : (
+                  <>
+                    <CheckCircle className="h-4 w-4 mr-2" />
+                    Approve
+                  </>
+                )}
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={onReject}
+                disabled={isLoading}
+                className="flex-1"
+              >
+                {isLoading === 'rejecting' ? (
+                  <>
+                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                    Rejecting...
+                  </>
+                ) : (
+                  <>
+                    <X className="h-4 w-4 mr-2" />
+                    Reject
+                  </>
+                )}
+              </Button>
+            </div>
+          </div>
+        )}
+      </CardContent>
+    </Card>
+  );
+};
 
 const DoctorDashboard = () => {
   const { user, logout } = useAuth();
@@ -41,6 +207,16 @@ const DoctorDashboard = () => {
   const [isSaving, setIsSaving] = useState(false);
   const [editedProfile, setEditedProfile] = useState({});
   const [isAddingEducation, setIsAddingEducation] = useState(false);
+  
+  // Appointment management state
+  const [appointments, setAppointments] = useState({
+    pending: [],
+    upcoming: [],
+    completed: [],
+    cancelled: []
+  });
+  const [appointmentsLoading, setAppointmentsLoading] = useState(false);
+  const [actionLoading, setActionLoading] = useState({});
   const [newEducation, setNewEducation] = useState({
     institution: "",
     degree: "",
@@ -51,6 +227,7 @@ const DoctorDashboard = () => {
 
   useEffect(() => {
     fetchDoctorProfile();
+    loadAppointments();
   }, []);
 
   const fetchDoctorProfile = async () => {
@@ -145,6 +322,85 @@ const DoctorDashboard = () => {
     }));
   };
 
+  // Appointment management functions
+  const loadAppointments = async () => {
+    try {
+      setAppointmentsLoading(true);
+      const allAppointments = await appointmentsAPI.getDoctorAppointments();
+      
+      // Categorize appointments
+      const categorized = {
+        pending: allAppointments.filter(apt => apt.status === 'pending'),
+        upcoming: allAppointments.filter(apt => apt.status === 'confirmed' && new Date(apt.slotId?.dateTime || apt.appointmentDate) > new Date()),
+        completed: allAppointments.filter(apt => apt.status === 'completed'),
+        cancelled: allAppointments.filter(apt => apt.status === 'cancelled' || apt.status === 'rejected')
+      };
+      
+      setAppointments(categorized);
+    } catch (e) {
+      toast({
+        title: "Error",
+        description: e.message || "Failed to load appointments",
+        variant: "destructive",
+      });
+    } finally {
+      setAppointmentsLoading(false);
+    }
+  };
+
+  const handleApproveAppointment = async (appointmentId) => {
+    try {
+      setActionLoading(prev => ({ ...prev, [appointmentId]: 'approving' }));
+      await appointmentsAPI.approveAppointment(appointmentId);
+      await loadAppointments(); // Refresh appointments
+      toast({
+        title: "Success",
+        description: "Appointment approved successfully",
+        variant: "default",
+      });
+    } catch (e) {
+      toast({
+        title: "Error",
+        description: e.message || "Failed to approve appointment",
+        variant: "destructive",
+      });
+    } finally {
+      setActionLoading(prev => {
+        const newState = { ...prev };
+        delete newState[appointmentId];
+        return newState;
+      });
+    }
+  };
+
+  const handleRejectAppointment = async (appointmentId) => {
+    const reason = prompt('Please provide a reason for rejection:');
+    if (!reason) return;
+    
+    try {
+      setActionLoading(prev => ({ ...prev, [appointmentId]: 'rejecting' }));
+      await appointmentsAPI.rejectAppointment(appointmentId, reason);
+      await loadAppointments(); // Refresh appointments
+      toast({
+        title: "Success",
+        description: "Appointment rejected successfully",
+        variant: "default",
+      });
+    } catch (e) {
+      toast({
+        title: "Error",
+        description: e.message || "Failed to reject appointment",
+        variant: "destructive",
+      });
+    } finally {
+      setActionLoading(prev => {
+        const newState = { ...prev };
+        delete newState[appointmentId];
+        return newState;
+      });
+    }
+  };
+
   const specialtyOptions = [
     'Cardiology', 'Dermatology', 'Emergency Medicine', 'Endocrinology',
     'Family Medicine', 'Gastroenterology', 'General Surgery', 'Gynecology',
@@ -231,11 +487,12 @@ const DoctorDashboard = () => {
         </div>
 
         <Tabs defaultValue="profile" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-4">
+          <TabsList className="grid w-full grid-cols-5">
             <TabsTrigger value="profile">Profile</TabsTrigger>
+            <TabsTrigger value="appointments">My Appointments</TabsTrigger>
+            <TabsTrigger value="slots">Manage Slots</TabsTrigger>
             <TabsTrigger value="education">Education</TabsTrigger>
             <TabsTrigger value="settings">Settings</TabsTrigger>
-            <TabsTrigger value="reviews">Reviews</TabsTrigger>
           </TabsList>
 
           <TabsContent value="profile" className="space-y-6">
@@ -413,6 +670,126 @@ const DoctorDashboard = () => {
                 )}
               </CardContent>
             </Card>
+          </TabsContent>
+
+          <TabsContent value="appointments" className="space-y-6">
+            <div className="flex items-center justify-between mb-6">
+              <div>
+                <h2 className="text-2xl font-bold">My Appointments</h2>
+                <p className="text-muted-foreground">Manage your patient appointments</p>
+              </div>
+              <Button onClick={loadAppointments} disabled={appointmentsLoading}>
+                {appointmentsLoading ? (
+                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                ) : (
+                  <Clock className="h-4 w-4 mr-2" />
+                )}
+                Refresh
+              </Button>
+            </div>
+            
+            {appointmentsLoading ? (
+              <Card>
+                <CardContent className="p-8 text-center">
+                  <Loader2 className="h-8 w-8 animate-spin mx-auto mb-4" />
+                  <p>Loading appointments...</p>
+                </CardContent>
+              </Card>
+            ) : (
+              <Tabs defaultValue="pending" className="space-y-4">
+                <TabsList className="grid w-full grid-cols-4">
+                  <TabsTrigger value="pending">
+                    Pending ({appointments.pending.length})
+                  </TabsTrigger>
+                  <TabsTrigger value="upcoming">
+                    Upcoming ({appointments.upcoming.length})
+                  </TabsTrigger>
+                  <TabsTrigger value="completed">
+                    Completed ({appointments.completed.length})
+                  </TabsTrigger>
+                  <TabsTrigger value="cancelled">
+                    Cancelled ({appointments.cancelled.length})
+                  </TabsTrigger>
+                </TabsList>
+
+                <TabsContent value="pending" className="space-y-4">
+                  {appointments.pending.length === 0 ? (
+                    <Card>
+                      <CardContent className="p-8 text-center">
+                        <Clock className="h-12 w-12 mx-auto mb-4 text-muted-foreground opacity-50" />
+                        <p className="text-muted-foreground">No pending appointment requests</p>
+                      </CardContent>
+                    </Card>
+                  ) : (
+                    appointments.pending.map((appointment) => (
+                      <AppointmentCard 
+                        key={appointment._id} 
+                        appointment={appointment}
+                        onApprove={() => handleApproveAppointment(appointment._id)}
+                        onReject={() => handleRejectAppointment(appointment._id)}
+                        isLoading={actionLoading[appointment._id]}
+                        showActions={true}
+                      />
+                    ))
+                  )}
+                </TabsContent>
+
+                <TabsContent value="upcoming" className="space-y-4">
+                  {appointments.upcoming.length === 0 ? (
+                    <Card>
+                      <CardContent className="p-8 text-center">
+                        <Calendar className="h-12 w-12 mx-auto mb-4 text-muted-foreground opacity-50" />
+                        <p className="text-muted-foreground">No upcoming appointments</p>
+                      </CardContent>
+                    </Card>
+                  ) : (
+                    appointments.upcoming.map((appointment) => (
+                      <AppointmentCard key={appointment._id} appointment={appointment} />
+                    ))
+                  )}
+                </TabsContent>
+
+                <TabsContent value="completed" className="space-y-4">
+                  {appointments.completed.length === 0 ? (
+                    <Card>
+                      <CardContent className="p-8 text-center">
+                        <CheckCircle className="h-12 w-12 mx-auto mb-4 text-muted-foreground opacity-50" />
+                        <p className="text-muted-foreground">No completed appointments</p>
+                      </CardContent>
+                    </Card>
+                  ) : (
+                    appointments.completed.map((appointment) => (
+                      <AppointmentCard key={appointment._id} appointment={appointment} />
+                    ))
+                  )}
+                </TabsContent>
+
+                <TabsContent value="cancelled" className="space-y-4">
+                  {appointments.cancelled.length === 0 ? (
+                    <Card>
+                      <CardContent className="p-8 text-center">
+                        <X className="h-12 w-12 mx-auto mb-4 text-muted-foreground opacity-50" />
+                        <p className="text-muted-foreground">No cancelled appointments</p>
+                      </CardContent>
+                    </Card>
+                  ) : (
+                    appointments.cancelled.map((appointment) => (
+                      <AppointmentCard key={appointment._id} appointment={appointment} />
+                    ))
+                  )}
+                </TabsContent>
+              </Tabs>
+            )}
+          </TabsContent>
+
+          <TabsContent value="slots" className="space-y-6">
+            <div className="mb-6">
+              <h2 className="text-2xl font-bold mb-2">Manage Appointment Slots</h2>
+              <p className="text-muted-foreground">
+                Create and manage your available appointment times
+              </p>
+            </div>
+            {profile?._id && <SimpleSlotManager doctorId={profile._id} />}
           </TabsContent>
 
           <TabsContent value="education" className="space-y-6">

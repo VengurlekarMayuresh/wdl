@@ -1,357 +1,1302 @@
 [
   {
-    "firstName": "John",
-    "lastName": "Smith",
-    "email": "john.smith@email.com",
+    "firstName": "Michelle",
+    "lastName": "Jackson",
+    "email": "michelle.jackson0@email.com",
     "password": "patient123",
-    "phone": "(555) 111-2222",
-    "dateOfBirth": "1990-04-12",
-    "gender": "male",
+    "phone": "5552002080",
+    "dateOfBirth": "1980-01-01",
+    "gender": "female",
     "address": {
-      "street": "123 Main Street",
+      "street": "1100 Main St",
       "city": "New York",
       "state": "NY",
-      "zipCode": "10001",
+      "zipCode": "91000",
       "country": "USA"
     },
-    "profilePicture": "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=300&h=300&fit=crop&crop=face",
-    "bio": "Software engineer looking to maintain good health through regular check-ups.",
+    "profilePicture": "https://randomuser.me/api/portraits/women/50.jpg",
+    "bio": "Patient focused on wellness and preventive care.",
     "patientInfo": {
       "emergencyContact": {
-        "name": "Jane Smith",
+        "name": "John Doe",
         "relationship": "Spouse",
-        "phone": "(555) 111-2223",
-        "email": "jane.smith@email.com"
-      },
-      "insurance": {
-        "provider": "Blue Cross Blue Shield",
-        "policyNumber": "BCBS123456",
-        "groupNumber": "GRP001"
-      },
-      "bloodType": "O+",
-      "height": {
-        "feet": 5,
-        "inches": 10
-      },
-      "weight": 175,
-      "medicalHistory": [
-        {
-          "condition": "Hypertension",
-          "diagnosedDate": "2020-03-15",
-          "status": "managed",
-          "notes": "Controlled with medication"
-        }
-      ],
-      "allergies": [
-        {
-          "allergen": "Penicillin",
-          "severity": "moderate",
-          "reaction": "Rash"
-        }
-      ],
-      "currentMedications": [
-        {
-          "name": "Lisinopril",
-          "dosage": "10mg",
-          "frequency": "once daily",
-          "prescribedBy": "Dr. Johnson",
-          "startDate": "2020-03-20"
-        }
-      ],
-      "familyHistory": [
-        {
-          "relation": "Father",
-          "condition": "Diabetes Type 2",
-          "ageAtDiagnosis": 55
-        }
-      ],
-      "socialHistory": {
-        "smoking": "never",
-        "alcohol": "social",
-        "exercise": "regular"
-      },
-      "isActive": true
+        "phone": "5553003060",
+        "email": "john0@email.com"
+      }
     }
   },
   {
-    "firstName": "Maria",
-    "lastName": "Garcia",
-    "email": "maria.garcia@email.com",
+    "firstName": "Donald",
+    "lastName": "Martin",
+    "email": "donald.martin1@email.com",
     "password": "patient123",
-    "phone": "(555) 222-3333",
-    "dateOfBirth": "1985-11-28",
-    "gender": "female",
+    "phone": "5552012187",
+    "dateOfBirth": "1981-02-02",
+    "gender": "male",
     "address": {
-      "street": "456 Oak Avenue",
+      "street": "1101 Main St",
       "city": "Los Angeles",
       "state": "CA",
-      "zipCode": "90210",
+      "zipCode": "91001",
       "country": "USA"
     },
-    "profilePicture": "https://images.unsplash.com/photo-1494790108755-2616b612b786?w=300&h=300&fit=crop&crop=face",
-    "bio": "Teacher and mother of two, focused on family health and wellness.",
+    "profilePicture": "https://randomuser.me/api/portraits/men/51.jpg",
+    "bio": "Patient focused on wellness and preventive care.",
     "patientInfo": {
       "emergencyContact": {
-        "name": "Carlos Garcia",
+        "name": "Jane Doe",
         "relationship": "Spouse",
-        "phone": "(555) 222-3334",
-        "email": "carlos.garcia@email.com"
-      },
-      "insurance": {
-        "provider": "Kaiser Permanente",
-        "policyNumber": "KP789012",
-        "groupNumber": "GRP002"
-      },
-      "bloodType": "A-",
-      "height": {
-        "feet": 5,
-        "inches": 4
-      },
-      "weight": 135,
-      "medicalHistory": [
-        {
-          "condition": "Gestational Diabetes",
-          "diagnosedDate": "2018-05-10",
-          "status": "resolved",
-          "notes": "Resolved after pregnancy"
-        }
-      ],
-      "allergies": [
-        {
-          "allergen": "Shellfish",
-          "severity": "severe",
-          "reaction": "Anaphylaxis"
-        }
-      ],
-      "currentMedications": [
-        {
-          "name": "Multivitamin",
-          "dosage": "1 tablet",
-          "frequency": "daily",
-          "prescribedBy": "Self-care",
-          "startDate": "2023-01-01"
-        }
-      ],
-      "familyHistory": [
-        {
-          "relation": "Mother",
-          "condition": "Breast Cancer",
-          "ageAtDiagnosis": 62
-        }
-      ],
-      "socialHistory": {
-        "smoking": "never",
-        "alcohol": "occasional",
-        "exercise": "moderate"
-      },
-      "isActive": true
+        "phone": "5553013167",
+        "email": "jane1@email.com"
+      }
+    }
+  },
+  {
+    "firstName": "Sandra",
+    "lastName": "Smith",
+    "email": "sandra.smith2@email.com",
+    "password": "patient123",
+    "phone": "5552022294",
+    "dateOfBirth": "1982-03-03",
+    "gender": "female",
+    "address": {
+      "street": "1102 Main St",
+      "city": "Chicago",
+      "state": "IL",
+      "zipCode": "91002",
+      "country": "USA"
+    },
+    "profilePicture": "https://randomuser.me/api/portraits/women/52.jpg",
+    "bio": "Patient focused on wellness and preventive care.",
+    "patientInfo": {
+      "emergencyContact": {
+        "name": "John Doe",
+        "relationship": "Spouse",
+        "phone": "5553023274",
+        "email": "john2@email.com"
+      }
+    }
+  },
+  {
+    "firstName": "Matthew",
+    "lastName": "Hernandez",
+    "email": "matthew.hernandez3@email.com",
+    "password": "patient123",
+    "phone": "5552032311",
+    "dateOfBirth": "1983-04-04",
+    "gender": "male",
+    "address": {
+      "street": "1103 Main St",
+      "city": "Houston",
+      "state": "TX",
+      "zipCode": "91003",
+      "country": "USA"
+    },
+    "profilePicture": "https://randomuser.me/api/portraits/men/53.jpg",
+    "bio": "Patient focused on wellness and preventive care.",
+    "patientInfo": {
+      "emergencyContact": {
+        "name": "Jane Doe",
+        "relationship": "Spouse",
+        "phone": "5553033381",
+        "email": "jane3@email.com"
+      }
+    }
+  },
+  {
+    "firstName": "Emily",
+    "lastName": "Johnson",
+    "email": "emily.johnson4@email.com",
+    "password": "patient123",
+    "phone": "5552042418",
+    "dateOfBirth": "1984-05-05",
+    "gender": "female",
+    "address": {
+      "street": "1104 Main St",
+      "city": "Phoenix",
+      "state": "AZ",
+      "zipCode": "91004",
+      "country": "USA"
+    },
+    "profilePicture": "https://randomuser.me/api/portraits/women/54.jpg",
+    "bio": "Patient focused on wellness and preventive care.",
+    "patientInfo": {
+      "emergencyContact": {
+        "name": "John Doe",
+        "relationship": "Spouse",
+        "phone": "5553043488",
+        "email": "john4@email.com"
+      }
     }
   },
   {
     "firstName": "Robert",
-    "lastName": "Williams",
-    "email": "robert.williams@email.com",
+    "lastName": "Brown",
+    "email": "robert.brown5@email.com",
     "password": "patient123",
-    "phone": "(555) 333-4444",
-    "dateOfBirth": "1978-02-14",
+    "phone": "5552052525",
+    "dateOfBirth": "1985-06-06",
     "gender": "male",
     "address": {
-      "street": "789 Pine Street",
-      "city": "Chicago",
-      "state": "IL",
-      "zipCode": "60601",
+      "street": "1105 Main St",
+      "city": "Philadelphia",
+      "state": "PA",
+      "zipCode": "91005",
       "country": "USA"
     },
-    "profilePicture": "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=300&h=300&fit=crop&crop=face",
-    "bio": "Marketing executive working on improving work-life balance and health habits.",
+    "profilePicture": "https://randomuser.me/api/portraits/men/55.jpg",
+    "bio": "Patient focused on wellness and preventive care.",
     "patientInfo": {
       "emergencyContact": {
-        "name": "Susan Williams",
-        "relationship": "Sister",
-        "phone": "(555) 333-4445",
-        "email": "susan.williams@email.com"
-      },
-      "insurance": {
-        "provider": "Aetna",
-        "policyNumber": "AET345678",
-        "groupNumber": "GRP003"
-      },
-      "bloodType": "B+",
-      "height": {
-        "feet": 6,
-        "inches": 1
-      },
-      "weight": 190,
-      "medicalHistory": [
-        {
-          "condition": "High Cholesterol",
-          "diagnosedDate": "2021-08-20",
-          "status": "managed",
-          "notes": "Controlled with diet and exercise"
-        }
-      ],
-      "allergies": [],
-      "currentMedications": [],
-      "familyHistory": [
-        {
-          "relation": "Father",
-          "condition": "Heart Disease",
-          "ageAtDiagnosis": 58
-        }
-      ],
-      "socialHistory": {
-        "smoking": "former",
-        "alcohol": "moderate",
-        "exercise": "light"
-      },
-      "isActive": true
+        "name": "Jane Doe",
+        "relationship": "Spouse",
+        "phone": "5553053595",
+        "email": "jane5@email.com"
+      }
+    }
+  },
+  {
+    "firstName": "Susan",
+    "lastName": "Wilson",
+    "email": "susan.wilson6@email.com",
+    "password": "patient123",
+    "phone": "5552062632",
+    "dateOfBirth": "1986-07-07",
+    "gender": "female",
+    "address": {
+      "street": "1106 Main St",
+      "city": "San Antonio",
+      "state": "TX",
+      "zipCode": "91006",
+      "country": "USA"
+    },
+    "profilePicture": "https://randomuser.me/api/portraits/women/56.jpg",
+    "bio": "Patient focused on wellness and preventive care.",
+    "patientInfo": {
+      "emergencyContact": {
+        "name": "John Doe",
+        "relationship": "Spouse",
+        "phone": "5553063612",
+        "email": "john6@email.com"
+      }
+    }
+  },
+  {
+    "firstName": "Charles",
+    "lastName": "Rodriguez",
+    "email": "charles.rodriguez7@email.com",
+    "password": "patient123",
+    "phone": "5552072739",
+    "dateOfBirth": "1987-08-08",
+    "gender": "male",
+    "address": {
+      "street": "1107 Main St",
+      "city": "San Diego",
+      "state": "CA",
+      "zipCode": "91007",
+      "country": "USA"
+    },
+    "profilePicture": "https://randomuser.me/api/portraits/men/57.jpg",
+    "bio": "Patient focused on wellness and preventive care.",
+    "patientInfo": {
+      "emergencyContact": {
+        "name": "Jane Doe",
+        "relationship": "Spouse",
+        "phone": "5553073719",
+        "email": "jane7@email.com"
+      }
+    }
+  },
+  {
+    "firstName": "Karen",
+    "lastName": "Brown",
+    "email": "karen.brown8@email.com",
+    "password": "patient123",
+    "phone": "5552082846",
+    "dateOfBirth": "1988-09-09",
+    "gender": "female",
+    "address": {
+      "street": "1108 Main St",
+      "city": "Dallas",
+      "state": "TX",
+      "zipCode": "91008",
+      "country": "USA"
+    },
+    "profilePicture": "https://randomuser.me/api/portraits/women/58.jpg",
+    "bio": "Patient focused on wellness and preventive care.",
+    "patientInfo": {
+      "emergencyContact": {
+        "name": "John Doe",
+        "relationship": "Spouse",
+        "phone": "5553083826",
+        "email": "john8@email.com"
+      }
+    }
+  },
+  {
+    "firstName": "Michael",
+    "lastName": "Martin",
+    "email": "michael.martin9@email.com",
+    "password": "patient123",
+    "phone": "5552092953",
+    "dateOfBirth": "1989-10-10",
+    "gender": "male",
+    "address": {
+      "street": "1109 Main St",
+      "city": "San Jose",
+      "state": "CA",
+      "zipCode": "91009",
+      "country": "USA"
+    },
+    "profilePicture": "https://randomuser.me/api/portraits/men/59.jpg",
+    "bio": "Patient focused on wellness and preventive care.",
+    "patientInfo": {
+      "emergencyContact": {
+        "name": "Jane Doe",
+        "relationship": "Spouse",
+        "phone": "5553093933",
+        "email": "jane9@email.com"
+      }
+    }
+  },
+  {
+    "firstName": "Emily",
+    "lastName": "Brown",
+    "email": "emily.brown10@email.com",
+    "password": "patient123",
+    "phone": "5552103060",
+    "dateOfBirth": "1990-11-11",
+    "gender": "female",
+    "address": {
+      "street": "1110 Main St",
+      "city": "New York",
+      "state": "NY",
+      "zipCode": "91010",
+      "country": "USA"
+    },
+    "profilePicture": "https://randomuser.me/api/portraits/women/60.jpg",
+    "bio": "Patient focused on wellness and preventive care.",
+    "patientInfo": {
+      "emergencyContact": {
+        "name": "John Doe",
+        "relationship": "Spouse",
+        "phone": "5553104040",
+        "email": "john10@email.com"
+      }
+    }
+  },
+  {
+    "firstName": "Richard",
+    "lastName": "Jones",
+    "email": "richard.jones11@email.com",
+    "password": "patient123",
+    "phone": "5552113167",
+    "dateOfBirth": "1991-12-12",
+    "gender": "male",
+    "address": {
+      "street": "1111 Main St",
+      "city": "Los Angeles",
+      "state": "CA",
+      "zipCode": "91011",
+      "country": "USA"
+    },
+    "profilePicture": "https://randomuser.me/api/portraits/men/61.jpg",
+    "bio": "Patient focused on wellness and preventive care.",
+    "patientInfo": {
+      "emergencyContact": {
+        "name": "Jane Doe",
+        "relationship": "Spouse",
+        "phone": "5553114147",
+        "email": "jane11@email.com"
+      }
+    }
+  },
+  {
+    "firstName": "Ashley",
+    "lastName": "Williams",
+    "email": "ashley.williams12@email.com",
+    "password": "patient123",
+    "phone": "5552123274",
+    "dateOfBirth": "1992-01-13",
+    "gender": "female",
+    "address": {
+      "street": "1112 Main St",
+      "city": "Chicago",
+      "state": "IL",
+      "zipCode": "91012",
+      "country": "USA"
+    },
+    "profilePicture": "https://randomuser.me/api/portraits/women/62.jpg",
+    "bio": "Patient focused on wellness and preventive care.",
+    "patientInfo": {
+      "emergencyContact": {
+        "name": "John Doe",
+        "relationship": "Spouse",
+        "phone": "5553124254",
+        "email": "john12@email.com"
+      }
+    }
+  },
+  {
+    "firstName": "Mark",
+    "lastName": "Jones",
+    "email": "mark.jones13@email.com",
+    "password": "patient123",
+    "phone": "5552133381",
+    "dateOfBirth": "1993-02-14",
+    "gender": "male",
+    "address": {
+      "street": "1113 Main St",
+      "city": "Houston",
+      "state": "TX",
+      "zipCode": "91013",
+      "country": "USA"
+    },
+    "profilePicture": "https://randomuser.me/api/portraits/men/63.jpg",
+    "bio": "Patient focused on wellness and preventive care.",
+    "patientInfo": {
+      "emergencyContact": {
+        "name": "Jane Doe",
+        "relationship": "Spouse",
+        "phone": "5553134361",
+        "email": "jane13@email.com"
+      }
+    }
+  },
+  {
+    "firstName": "Sarah",
+    "lastName": "Davis",
+    "email": "sarah.davis14@email.com",
+    "password": "patient123",
+    "phone": "5552143488",
+    "dateOfBirth": "1994-03-15",
+    "gender": "female",
+    "address": {
+      "street": "1114 Main St",
+      "city": "Phoenix",
+      "state": "AZ",
+      "zipCode": "91014",
+      "country": "USA"
+    },
+    "profilePicture": "https://randomuser.me/api/portraits/women/64.jpg",
+    "bio": "Patient focused on wellness and preventive care.",
+    "patientInfo": {
+      "emergencyContact": {
+        "name": "John Doe",
+        "relationship": "Spouse",
+        "phone": "5553144468",
+        "email": "john14@email.com"
+      }
+    }
+  },
+  {
+    "firstName": "Joseph",
+    "lastName": "Williams",
+    "email": "joseph.williams15@email.com",
+    "password": "patient123",
+    "phone": "5552153595",
+    "dateOfBirth": "1995-04-16",
+    "gender": "male",
+    "address": {
+      "street": "1115 Main St",
+      "city": "Philadelphia",
+      "state": "PA",
+      "zipCode": "91015",
+      "country": "USA"
+    },
+    "profilePicture": "https://randomuser.me/api/portraits/men/65.jpg",
+    "bio": "Patient focused on wellness and preventive care.",
+    "patientInfo": {
+      "emergencyContact": {
+        "name": "Jane Doe",
+        "relationship": "Spouse",
+        "phone": "5553154575",
+        "email": "jane15@email.com"
+      }
+    }
+  },
+  {
+    "firstName": "Nancy",
+    "lastName": "Thomas",
+    "email": "nancy.thomas16@email.com",
+    "password": "patient123",
+    "phone": "5552163612",
+    "dateOfBirth": "1996-05-17",
+    "gender": "female",
+    "address": {
+      "street": "1116 Main St",
+      "city": "San Antonio",
+      "state": "TX",
+      "zipCode": "91016",
+      "country": "USA"
+    },
+    "profilePicture": "https://randomuser.me/api/portraits/women/66.jpg",
+    "bio": "Patient focused on wellness and preventive care.",
+    "patientInfo": {
+      "emergencyContact": {
+        "name": "John Doe",
+        "relationship": "Spouse",
+        "phone": "5553164682",
+        "email": "john16@email.com"
+      }
+    }
+  },
+  {
+    "firstName": "Joshua",
+    "lastName": "Brown",
+    "email": "joshua.brown17@email.com",
+    "password": "patient123",
+    "phone": "5552173719",
+    "dateOfBirth": "1997-06-18",
+    "gender": "male",
+    "address": {
+      "street": "1117 Main St",
+      "city": "San Diego",
+      "state": "CA",
+      "zipCode": "91017",
+      "country": "USA"
+    },
+    "profilePicture": "https://randomuser.me/api/portraits/men/67.jpg",
+    "bio": "Patient focused on wellness and preventive care.",
+    "patientInfo": {
+      "emergencyContact": {
+        "name": "Jane Doe",
+        "relationship": "Spouse",
+        "phone": "5553174789",
+        "email": "jane17@email.com"
+      }
+    }
+  },
+  {
+    "firstName": "Betty",
+    "lastName": "Miller",
+    "email": "betty.miller18@email.com",
+    "password": "patient123",
+    "phone": "5552183826",
+    "dateOfBirth": "1998-07-19",
+    "gender": "female",
+    "address": {
+      "street": "1118 Main St",
+      "city": "Dallas",
+      "state": "TX",
+      "zipCode": "91018",
+      "country": "USA"
+    },
+    "profilePicture": "https://randomuser.me/api/portraits/women/68.jpg",
+    "bio": "Patient focused on wellness and preventive care.",
+    "patientInfo": {
+      "emergencyContact": {
+        "name": "John Doe",
+        "relationship": "Spouse",
+        "phone": "5553184896",
+        "email": "john18@email.com"
+      }
+    }
+  },
+  {
+    "firstName": "William",
+    "lastName": "Martin",
+    "email": "william.martin19@email.com",
+    "password": "patient123",
+    "phone": "5552193933",
+    "dateOfBirth": "1999-08-20",
+    "gender": "male",
+    "address": {
+      "street": "1119 Main St",
+      "city": "San Jose",
+      "state": "CA",
+      "zipCode": "91019",
+      "country": "USA"
+    },
+    "profilePicture": "https://randomuser.me/api/portraits/men/69.jpg",
+    "bio": "Patient focused on wellness and preventive care.",
+    "patientInfo": {
+      "emergencyContact": {
+        "name": "Jane Doe",
+        "relationship": "Spouse",
+        "phone": "5553194913",
+        "email": "jane19@email.com"
+      }
+    }
+  },
+  {
+    "firstName": "Emily",
+    "lastName": "Williams",
+    "email": "emily.williams20@email.com",
+    "password": "patient123",
+    "phone": "5552204040",
+    "dateOfBirth": "2000-09-21",
+    "gender": "female",
+    "address": {
+      "street": "1120 Main St",
+      "city": "New York",
+      "state": "NY",
+      "zipCode": "91020",
+      "country": "USA"
+    },
+    "profilePicture": "https://randomuser.me/api/portraits/women/70.jpg",
+    "bio": "Patient focused on wellness and preventive care.",
+    "patientInfo": {
+      "emergencyContact": {
+        "name": "John Doe",
+        "relationship": "Spouse",
+        "phone": "5553205020",
+        "email": "john20@email.com"
+      }
+    }
+  },
+  {
+    "firstName": "Paul",
+    "lastName": "Martin",
+    "email": "paul.martin21@email.com",
+    "password": "patient123",
+    "phone": "5552214147",
+    "dateOfBirth": "2001-10-22",
+    "gender": "male",
+    "address": {
+      "street": "1121 Main St",
+      "city": "Los Angeles",
+      "state": "CA",
+      "zipCode": "91021",
+      "country": "USA"
+    },
+    "profilePicture": "https://randomuser.me/api/portraits/men/71.jpg",
+    "bio": "Patient focused on wellness and preventive care.",
+    "patientInfo": {
+      "emergencyContact": {
+        "name": "Jane Doe",
+        "relationship": "Spouse",
+        "phone": "5553215127",
+        "email": "jane21@email.com"
+      }
+    }
+  },
+  {
+    "firstName": "Susan",
+    "lastName": "Smith",
+    "email": "susan.smith22@email.com",
+    "password": "patient123",
+    "phone": "5552224254",
+    "dateOfBirth": "2002-11-23",
+    "gender": "female",
+    "address": {
+      "street": "1122 Main St",
+      "city": "Chicago",
+      "state": "IL",
+      "zipCode": "91022",
+      "country": "USA"
+    },
+    "profilePicture": "https://randomuser.me/api/portraits/women/72.jpg",
+    "bio": "Patient focused on wellness and preventive care.",
+    "patientInfo": {
+      "emergencyContact": {
+        "name": "John Doe",
+        "relationship": "Spouse",
+        "phone": "5553225234",
+        "email": "john22@email.com"
+      }
+    }
+  },
+  {
+    "firstName": "Daniel",
+    "lastName": "Thomas",
+    "email": "daniel.thomas23@email.com",
+    "password": "patient123",
+    "phone": "5552234361",
+    "dateOfBirth": "2003-12-24",
+    "gender": "male",
+    "address": {
+      "street": "1123 Main St",
+      "city": "Houston",
+      "state": "TX",
+      "zipCode": "91023",
+      "country": "USA"
+    },
+    "profilePicture": "https://randomuser.me/api/portraits/men/73.jpg",
+    "bio": "Patient focused on wellness and preventive care.",
+    "patientInfo": {
+      "emergencyContact": {
+        "name": "Jane Doe",
+        "relationship": "Spouse",
+        "phone": "5553235341",
+        "email": "jane23@email.com"
+      }
+    }
+  },
+  {
+    "firstName": "Jessica",
+    "lastName": "Taylor",
+    "email": "jessica.taylor24@email.com",
+    "password": "patient123",
+    "phone": "5552244468",
+    "dateOfBirth": "2004-01-25",
+    "gender": "female",
+    "address": {
+      "street": "1124 Main St",
+      "city": "Phoenix",
+      "state": "AZ",
+      "zipCode": "91024",
+      "country": "USA"
+    },
+    "profilePicture": "https://randomuser.me/api/portraits/women/74.jpg",
+    "bio": "Patient focused on wellness and preventive care.",
+    "patientInfo": {
+      "emergencyContact": {
+        "name": "John Doe",
+        "relationship": "Spouse",
+        "phone": "5553245448",
+        "email": "john24@email.com"
+      }
+    }
+  },
+  {
+    "firstName": "Kenneth",
+    "lastName": "Hernandez",
+    "email": "kenneth.hernandez25@email.com",
+    "password": "patient123",
+    "phone": "5552254575",
+    "dateOfBirth": "2005-02-26",
+    "gender": "male",
+    "address": {
+      "street": "1125 Main St",
+      "city": "Philadelphia",
+      "state": "PA",
+      "zipCode": "91025",
+      "country": "USA"
+    },
+    "profilePicture": "https://randomuser.me/api/portraits/men/75.jpg",
+    "bio": "Patient focused on wellness and preventive care.",
+    "patientInfo": {
+      "emergencyContact": {
+        "name": "Jane Doe",
+        "relationship": "Spouse",
+        "phone": "5553255555",
+        "email": "jane25@email.com"
+      }
+    }
+  },
+  {
+    "firstName": "Michelle",
+    "lastName": "Anderson",
+    "email": "michelle.anderson26@email.com",
+    "password": "patient123",
+    "phone": "5552264682",
+    "dateOfBirth": "2006-03-27",
+    "gender": "female",
+    "address": {
+      "street": "1126 Main St",
+      "city": "San Antonio",
+      "state": "TX",
+      "zipCode": "91026",
+      "country": "USA"
+    },
+    "profilePicture": "https://randomuser.me/api/portraits/women/76.jpg",
+    "bio": "Patient focused on wellness and preventive care.",
+    "patientInfo": {
+      "emergencyContact": {
+        "name": "John Doe",
+        "relationship": "Spouse",
+        "phone": "5553265662",
+        "email": "john26@email.com"
+      }
+    }
+  },
+  {
+    "firstName": "Paul",
+    "lastName": "Jones",
+    "email": "paul.jones27@email.com",
+    "password": "patient123",
+    "phone": "5552274789",
+    "dateOfBirth": "2007-04-28",
+    "gender": "male",
+    "address": {
+      "street": "1127 Main St",
+      "city": "San Diego",
+      "state": "CA",
+      "zipCode": "91027",
+      "country": "USA"
+    },
+    "profilePicture": "https://randomuser.me/api/portraits/men/77.jpg",
+    "bio": "Patient focused on wellness and preventive care.",
+    "patientInfo": {
+      "emergencyContact": {
+        "name": "Jane Doe",
+        "relationship": "Spouse",
+        "phone": "5553275769",
+        "email": "jane27@email.com"
+      }
+    }
+  },
+  {
+    "firstName": "Patricia",
+    "lastName": "Anderson",
+    "email": "patricia.anderson28@email.com",
+    "password": "patient123",
+    "phone": "5552284896",
+    "dateOfBirth": "2008-05-01",
+    "gender": "female",
+    "address": {
+      "street": "1128 Main St",
+      "city": "Dallas",
+      "state": "TX",
+      "zipCode": "91028",
+      "country": "USA"
+    },
+    "profilePicture": "https://randomuser.me/api/portraits/women/78.jpg",
+    "bio": "Patient focused on wellness and preventive care.",
+    "patientInfo": {
+      "emergencyContact": {
+        "name": "John Doe",
+        "relationship": "Spouse",
+        "phone": "5553285876",
+        "email": "john28@email.com"
+      }
+    }
+  },
+  {
+    "firstName": "Joseph",
+    "lastName": "Martinez",
+    "email": "joseph.martinez29@email.com",
+    "password": "patient123",
+    "phone": "5552294913",
+    "dateOfBirth": "2009-06-02",
+    "gender": "male",
+    "address": {
+      "street": "1129 Main St",
+      "city": "San Jose",
+      "state": "CA",
+      "zipCode": "91029",
+      "country": "USA"
+    },
+    "profilePicture": "https://randomuser.me/api/portraits/men/79.jpg",
+    "bio": "Patient focused on wellness and preventive care.",
+    "patientInfo": {
+      "emergencyContact": {
+        "name": "Jane Doe",
+        "relationship": "Spouse",
+        "phone": "5553295983",
+        "email": "jane29@email.com"
+      }
+    }
+  },
+  {
+    "firstName": "Sandra",
+    "lastName": "Garcia",
+    "email": "sandra.garcia30@email.com",
+    "password": "patient123",
+    "phone": "5552305020",
+    "dateOfBirth": "1980-07-03",
+    "gender": "female",
+    "address": {
+      "street": "1130 Main St",
+      "city": "New York",
+      "state": "NY",
+      "zipCode": "91030",
+      "country": "USA"
+    },
+    "profilePicture": "https://randomuser.me/api/portraits/women/80.jpg",
+    "bio": "Patient focused on wellness and preventive care.",
+    "patientInfo": {
+      "emergencyContact": {
+        "name": "John Doe",
+        "relationship": "Spouse",
+        "phone": "5553306090",
+        "email": "john30@email.com"
+      }
+    }
+  },
+  {
+    "firstName": "Anthony",
+    "lastName": "Jones",
+    "email": "anthony.jones31@email.com",
+    "password": "patient123",
+    "phone": "5552315127",
+    "dateOfBirth": "1981-08-04",
+    "gender": "male",
+    "address": {
+      "street": "1131 Main St",
+      "city": "Los Angeles",
+      "state": "CA",
+      "zipCode": "91031",
+      "country": "USA"
+    },
+    "profilePicture": "https://randomuser.me/api/portraits/men/81.jpg",
+    "bio": "Patient focused on wellness and preventive care.",
+    "patientInfo": {
+      "emergencyContact": {
+        "name": "Jane Doe",
+        "relationship": "Spouse",
+        "phone": "5553316197",
+        "email": "jane31@email.com"
+      }
+    }
+  },
+  {
+    "firstName": "Ashley",
+    "lastName": "Anderson",
+    "email": "ashley.anderson32@email.com",
+    "password": "patient123",
+    "phone": "5552325234",
+    "dateOfBirth": "1982-09-05",
+    "gender": "female",
+    "address": {
+      "street": "1132 Main St",
+      "city": "Chicago",
+      "state": "IL",
+      "zipCode": "91032",
+      "country": "USA"
+    },
+    "profilePicture": "https://randomuser.me/api/portraits/women/82.jpg",
+    "bio": "Patient focused on wellness and preventive care.",
+    "patientInfo": {
+      "emergencyContact": {
+        "name": "John Doe",
+        "relationship": "Spouse",
+        "phone": "5553326214",
+        "email": "john32@email.com"
+      }
+    }
+  },
+  {
+    "firstName": "Daniel",
+    "lastName": "Moore",
+    "email": "daniel.moore33@email.com",
+    "password": "patient123",
+    "phone": "5552335341",
+    "dateOfBirth": "1983-10-06",
+    "gender": "male",
+    "address": {
+      "street": "1133 Main St",
+      "city": "Houston",
+      "state": "TX",
+      "zipCode": "91033",
+      "country": "USA"
+    },
+    "profilePicture": "https://randomuser.me/api/portraits/men/83.jpg",
+    "bio": "Patient focused on wellness and preventive care.",
+    "patientInfo": {
+      "emergencyContact": {
+        "name": "Jane Doe",
+        "relationship": "Spouse",
+        "phone": "5553336321",
+        "email": "jane33@email.com"
+      }
+    }
+  },
+  {
+    "firstName": "Karen",
+    "lastName": "Brown",
+    "email": "karen.brown34@email.com",
+    "password": "patient123",
+    "phone": "5552345448",
+    "dateOfBirth": "1984-11-07",
+    "gender": "female",
+    "address": {
+      "street": "1134 Main St",
+      "city": "Phoenix",
+      "state": "AZ",
+      "zipCode": "91034",
+      "country": "USA"
+    },
+    "profilePicture": "https://randomuser.me/api/portraits/women/84.jpg",
+    "bio": "Patient focused on wellness and preventive care.",
+    "patientInfo": {
+      "emergencyContact": {
+        "name": "John Doe",
+        "relationship": "Spouse",
+        "phone": "5553346428",
+        "email": "john34@email.com"
+      }
+    }
+  },
+  {
+    "firstName": "Andrew",
+    "lastName": "Martin",
+    "email": "andrew.martin35@email.com",
+    "password": "patient123",
+    "phone": "5552355555",
+    "dateOfBirth": "1985-12-08",
+    "gender": "male",
+    "address": {
+      "street": "1135 Main St",
+      "city": "Philadelphia",
+      "state": "PA",
+      "zipCode": "91035",
+      "country": "USA"
+    },
+    "profilePicture": "https://randomuser.me/api/portraits/men/85.jpg",
+    "bio": "Patient focused on wellness and preventive care.",
+    "patientInfo": {
+      "emergencyContact": {
+        "name": "Jane Doe",
+        "relationship": "Spouse",
+        "phone": "5553356535",
+        "email": "jane35@email.com"
+      }
+    }
+  },
+  {
+    "firstName": "Barbara",
+    "lastName": "Jones",
+    "email": "barbara.jones36@email.com",
+    "password": "patient123",
+    "phone": "5552365662",
+    "dateOfBirth": "1986-01-09",
+    "gender": "female",
+    "address": {
+      "street": "1136 Main St",
+      "city": "San Antonio",
+      "state": "TX",
+      "zipCode": "91036",
+      "country": "USA"
+    },
+    "profilePicture": "https://randomuser.me/api/portraits/women/86.jpg",
+    "bio": "Patient focused on wellness and preventive care.",
+    "patientInfo": {
+      "emergencyContact": {
+        "name": "John Doe",
+        "relationship": "Spouse",
+        "phone": "5553366642",
+        "email": "john36@email.com"
+      }
+    }
+  },
+  {
+    "firstName": "Matthew",
+    "lastName": "Hernandez",
+    "email": "matthew.hernandez37@email.com",
+    "password": "patient123",
+    "phone": "5552375769",
+    "dateOfBirth": "1987-02-10",
+    "gender": "male",
+    "address": {
+      "street": "1137 Main St",
+      "city": "San Diego",
+      "state": "CA",
+      "zipCode": "91037",
+      "country": "USA"
+    },
+    "profilePicture": "https://randomuser.me/api/portraits/men/87.jpg",
+    "bio": "Patient focused on wellness and preventive care.",
+    "patientInfo": {
+      "emergencyContact": {
+        "name": "Jane Doe",
+        "relationship": "Spouse",
+        "phone": "5553376749",
+        "email": "jane37@email.com"
+      }
     }
   },
   {
     "firstName": "Jennifer",
-    "lastName": "Brown",
-    "email": "jennifer.brown@email.com",
+    "lastName": "Johnson",
+    "email": "jennifer.johnson38@email.com",
     "password": "patient123",
-    "phone": "(555) 444-5555",
-    "dateOfBirth": "1992-09-07",
+    "phone": "5552385876",
+    "dateOfBirth": "1988-03-11",
     "gender": "female",
     "address": {
-      "street": "321 Elm Drive",
-      "city": "Houston",
+      "street": "1138 Main St",
+      "city": "Dallas",
       "state": "TX",
-      "zipCode": "77001",
+      "zipCode": "91038",
       "country": "USA"
     },
-    "profilePicture": "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=300&h=300&fit=crop&crop=face",
-    "bio": "Nurse practitioner committed to preventive care and healthy living.",
+    "profilePicture": "https://randomuser.me/api/portraits/women/88.jpg",
+    "bio": "Patient focused on wellness and preventive care.",
     "patientInfo": {
       "emergencyContact": {
-        "name": "Michael Brown",
-        "relationship": "Brother",
-        "phone": "(555) 444-5556",
-        "email": "michael.brown@email.com"
-      },
-      "insurance": {
-        "provider": "UnitedHealthcare",
-        "policyNumber": "UHC901234",
-        "groupNumber": "GRP004"
-      },
-      "bloodType": "AB+",
-      "height": {
-        "feet": 5,
-        "inches": 6
-      },
-      "weight": 140,
-      "medicalHistory": [],
-      "allergies": [
-        {
-          "allergen": "Latex",
-          "severity": "mild",
-          "reaction": "Contact dermatitis"
-        }
-      ],
-      "currentMedications": [
-        {
-          "name": "Birth Control",
-          "dosage": "1 pill",
-          "frequency": "daily",
-          "prescribedBy": "Dr. Rodriguez",
-          "startDate": "2022-01-15"
-        }
-      ],
-      "familyHistory": [
-        {
-          "relation": "Grandmother",
-          "condition": "Osteoporosis",
-          "ageAtDiagnosis": 70
-        }
-      ],
-      "socialHistory": {
-        "smoking": "never",
-        "alcohol": "rare",
-        "exercise": "regular"
-      },
-      "isActive": true
+        "name": "John Doe",
+        "relationship": "Spouse",
+        "phone": "5553386856",
+        "email": "john38@email.com"
+      }
     }
   },
   {
-    "firstName": "David",
-    "lastName": "Jones",
-    "email": "david.jones@email.com",
+    "firstName": "Thomas",
+    "lastName": "Taylor",
+    "email": "thomas.taylor39@email.com",
     "password": "patient123",
-    "phone": "(555) 555-6666",
-    "dateOfBirth": "1965-12-03",
+    "phone": "5552395983",
+    "dateOfBirth": "1989-04-12",
     "gender": "male",
     "address": {
-      "street": "654 Cedar Lane",
-      "city": "Phoenix",
-      "state": "AZ",
-      "zipCode": "85001",
+      "street": "1139 Main St",
+      "city": "San Jose",
+      "state": "CA",
+      "zipCode": "91039",
       "country": "USA"
     },
-    "profilePicture": "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=300&h=300&fit=crop&crop=face",
-    "bio": "Retired firefighter focused on maintaining health in golden years.",
+    "profilePicture": "https://randomuser.me/api/portraits/men/89.jpg",
+    "bio": "Patient focused on wellness and preventive care.",
     "patientInfo": {
       "emergencyContact": {
-        "name": "Linda Jones",
-        "relationship": "Wife",
-        "phone": "(555) 555-6667",
-        "email": "linda.jones@email.com"
-      },
-      "insurance": {
-        "provider": "Medicare",
-        "policyNumber": "MED567890",
-        "groupNumber": "GRP005"
-      },
-      "bloodType": "O-",
-      "height": {
-        "feet": 5,
-        "inches": 11
-      },
-      "weight": 180,
-      "medicalHistory": [
-        {
-          "condition": "Arthritis",
-          "diagnosedDate": "2019-06-15",
-          "status": "managed",
-          "notes": "Joint pain managed with medication"
-        },
-        {
-          "condition": "Sleep Apnea",
-          "diagnosedDate": "2020-11-10",
-          "status": "treated",
-          "notes": "Using CPAP machine"
-        }
-      ],
-      "allergies": [
-        {
-          "allergen": "Aspirin",
-          "severity": "moderate",
-          "reaction": "Stomach irritation"
-        }
-      ],
-      "currentMedications": [
-        {
-          "name": "Ibuprofen",
-          "dosage": "400mg",
-          "frequency": "as needed",
-          "prescribedBy": "Dr. Thompson",
-          "startDate": "2019-07-01"
-        }
-      ],
-      "familyHistory": [
-        {
-          "relation": "Father",
-          "condition": "Stroke",
-          "ageAtDiagnosis": 72
-        }
-      ],
-      "socialHistory": {
-        "smoking": "former",
-        "alcohol": "occasional",
-        "exercise": "light"
-      },
-      "isActive": true
+        "name": "Jane Doe",
+        "relationship": "Spouse",
+        "phone": "5553396963",
+        "email": "jane39@email.com"
+      }
+    }
+  },
+  {
+    "firstName": "Jessica",
+    "lastName": "Moore",
+    "email": "jessica.moore40@email.com",
+    "password": "patient123",
+    "phone": "5552406090",
+    "dateOfBirth": "1990-05-13",
+    "gender": "female",
+    "address": {
+      "street": "1140 Main St",
+      "city": "New York",
+      "state": "NY",
+      "zipCode": "91040",
+      "country": "USA"
+    },
+    "profilePicture": "https://randomuser.me/api/portraits/women/90.jpg",
+    "bio": "Patient focused on wellness and preventive care.",
+    "patientInfo": {
+      "emergencyContact": {
+        "name": "John Doe",
+        "relationship": "Spouse",
+        "phone": "5553407070",
+        "email": "john40@email.com"
+      }
+    }
+  },
+  {
+    "firstName": "Steven",
+    "lastName": "Jones",
+    "email": "steven.jones41@email.com",
+    "password": "patient123",
+    "phone": "5552416197",
+    "dateOfBirth": "1991-06-14",
+    "gender": "male",
+    "address": {
+      "street": "1141 Main St",
+      "city": "Los Angeles",
+      "state": "CA",
+      "zipCode": "91041",
+      "country": "USA"
+    },
+    "profilePicture": "https://randomuser.me/api/portraits/men/91.jpg",
+    "bio": "Patient focused on wellness and preventive care.",
+    "patientInfo": {
+      "emergencyContact": {
+        "name": "Jane Doe",
+        "relationship": "Spouse",
+        "phone": "5553417177",
+        "email": "jane41@email.com"
+      }
+    }
+  },
+  {
+    "firstName": "Susan",
+    "lastName": "Davis",
+    "email": "susan.davis42@email.com",
+    "password": "patient123",
+    "phone": "5552426214",
+    "dateOfBirth": "1992-07-15",
+    "gender": "female",
+    "address": {
+      "street": "1142 Main St",
+      "city": "Chicago",
+      "state": "IL",
+      "zipCode": "91042",
+      "country": "USA"
+    },
+    "profilePicture": "https://randomuser.me/api/portraits/women/92.jpg",
+    "bio": "Patient focused on wellness and preventive care.",
+    "patientInfo": {
+      "emergencyContact": {
+        "name": "John Doe",
+        "relationship": "Spouse",
+        "phone": "5553427284",
+        "email": "john42@email.com"
+      }
+    }
+  },
+  {
+    "firstName": "Joshua",
+    "lastName": "Jones",
+    "email": "joshua.jones43@email.com",
+    "password": "patient123",
+    "phone": "5552436321",
+    "dateOfBirth": "1993-08-16",
+    "gender": "male",
+    "address": {
+      "street": "1143 Main St",
+      "city": "Houston",
+      "state": "TX",
+      "zipCode": "91043",
+      "country": "USA"
+    },
+    "profilePicture": "https://randomuser.me/api/portraits/men/93.jpg",
+    "bio": "Patient focused on wellness and preventive care.",
+    "patientInfo": {
+      "emergencyContact": {
+        "name": "Jane Doe",
+        "relationship": "Spouse",
+        "phone": "5553437391",
+        "email": "jane43@email.com"
+      }
+    }
+  },
+  {
+    "firstName": "Betty",
+    "lastName": "Johnson",
+    "email": "betty.johnson44@email.com",
+    "password": "patient123",
+    "phone": "5552446428",
+    "dateOfBirth": "1994-09-17",
+    "gender": "female",
+    "address": {
+      "street": "1144 Main St",
+      "city": "Phoenix",
+      "state": "AZ",
+      "zipCode": "91044",
+      "country": "USA"
+    },
+    "profilePicture": "https://randomuser.me/api/portraits/women/94.jpg",
+    "bio": "Patient focused on wellness and preventive care.",
+    "patientInfo": {
+      "emergencyContact": {
+        "name": "John Doe",
+        "relationship": "Spouse",
+        "phone": "5553447498",
+        "email": "john44@email.com"
+      }
+    }
+  },
+  {
+    "firstName": "Mark",
+    "lastName": "Moore",
+    "email": "mark.moore45@email.com",
+    "password": "patient123",
+    "phone": "5552456535",
+    "dateOfBirth": "1995-10-18",
+    "gender": "male",
+    "address": {
+      "street": "1145 Main St",
+      "city": "Philadelphia",
+      "state": "PA",
+      "zipCode": "91045",
+      "country": "USA"
+    },
+    "profilePicture": "https://randomuser.me/api/portraits/men/95.jpg",
+    "bio": "Patient focused on wellness and preventive care.",
+    "patientInfo": {
+      "emergencyContact": {
+        "name": "Jane Doe",
+        "relationship": "Spouse",
+        "phone": "5553457515",
+        "email": "jane45@email.com"
+      }
+    }
+  },
+  {
+    "firstName": "Donna",
+    "lastName": "Gonzalez",
+    "email": "donna.gonzalez46@email.com",
+    "password": "patient123",
+    "phone": "5552466642",
+    "dateOfBirth": "1996-11-19",
+    "gender": "female",
+    "address": {
+      "street": "1146 Main St",
+      "city": "San Antonio",
+      "state": "TX",
+      "zipCode": "91046",
+      "country": "USA"
+    },
+    "profilePicture": "https://randomuser.me/api/portraits/women/96.jpg",
+    "bio": "Patient focused on wellness and preventive care.",
+    "patientInfo": {
+      "emergencyContact": {
+        "name": "John Doe",
+        "relationship": "Spouse",
+        "phone": "5553467622",
+        "email": "john46@email.com"
+      }
+    }
+  },
+  {
+    "firstName": "Donald",
+    "lastName": "Martinez",
+    "email": "donald.martinez47@email.com",
+    "password": "patient123",
+    "phone": "5552476749",
+    "dateOfBirth": "1997-12-20",
+    "gender": "male",
+    "address": {
+      "street": "1147 Main St",
+      "city": "San Diego",
+      "state": "CA",
+      "zipCode": "91047",
+      "country": "USA"
+    },
+    "profilePicture": "https://randomuser.me/api/portraits/men/97.jpg",
+    "bio": "Patient focused on wellness and preventive care.",
+    "patientInfo": {
+      "emergencyContact": {
+        "name": "Jane Doe",
+        "relationship": "Spouse",
+        "phone": "5553477729",
+        "email": "jane47@email.com"
+      }
+    }
+  },
+  {
+    "firstName": "Margaret",
+    "lastName": "Moore",
+    "email": "margaret.moore48@email.com",
+    "password": "patient123",
+    "phone": "5552486856",
+    "dateOfBirth": "1998-01-21",
+    "gender": "female",
+    "address": {
+      "street": "1148 Main St",
+      "city": "Dallas",
+      "state": "TX",
+      "zipCode": "91048",
+      "country": "USA"
+    },
+    "profilePicture": "https://randomuser.me/api/portraits/women/98.jpg",
+    "bio": "Patient focused on wellness and preventive care.",
+    "patientInfo": {
+      "emergencyContact": {
+        "name": "John Doe",
+        "relationship": "Spouse",
+        "phone": "5553487836",
+        "email": "john48@email.com"
+      }
+    }
+  },
+  {
+    "firstName": "Andrew",
+    "lastName": "Jackson",
+    "email": "andrew.jackson49@email.com",
+    "password": "patient123",
+    "phone": "5552496963",
+    "dateOfBirth": "1999-02-22",
+    "gender": "male",
+    "address": {
+      "street": "1149 Main St",
+      "city": "San Jose",
+      "state": "CA",
+      "zipCode": "91049",
+      "country": "USA"
+    },
+    "profilePicture": "https://randomuser.me/api/portraits/men/99.jpg",
+    "bio": "Patient focused on wellness and preventive care.",
+    "patientInfo": {
+      "emergencyContact": {
+        "name": "Jane Doe",
+        "relationship": "Spouse",
+        "phone": "5553497943",
+        "email": "jane49@email.com"
+      }
     }
   }
 ]

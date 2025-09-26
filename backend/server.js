@@ -37,14 +37,20 @@ app.use(helmet({
   crossOriginEmbedderPolicy: false
 }));
 
-// CORS configuration
+// CORS configuration - more permissive for development
 const corsOptions = {
   origin: function (origin, callback) {
+    console.log(`🌐 CORS request from origin: ${origin || 'no-origin'}`);
+    
     // Allow requests with no origin (mobile apps, curl, etc.)
-    if (!origin) return callback(null, true);
+    if (!origin) {
+      console.log('✅ Allowing request with no origin');
+      return callback(null, true);
+    }
 
-    // In development, allow any origin to simplify local testing
+    // In development, be very permissive
     if ((process.env.NODE_ENV || 'development') !== 'production') {
+      console.log('✅ Development mode: allowing all origins');
       return callback(null, true);
     }
 
@@ -52,21 +58,46 @@ const corsOptions = {
       process.env.CLIENT_URL || 'http://localhost:3000',
       'http://localhost:3000',
       'http://localhost:5173', // Vite default port
+      'http://localhost:8080', // Alternative Vite port  
+      'http://localhost:8081', // Alternative Vite port
       'http://127.0.0.1:3000',
-      'http://127.0.0.1:5173'
+      'http://127.0.0.1:5173',
+      'http://127.0.0.1:8080',
+      'http://127.0.0.1:8081',
+      // Add more permissive patterns
+      'http://localhost',
+      'http://127.0.0.1'
     ];
 
-    if (allowedOrigins.includes(origin)) {
+    // Check if origin matches any allowed origin or is a localhost variation
+    const isAllowed = allowedOrigins.some(allowed => 
+      origin === allowed || 
+      origin.startsWith('http://localhost:') || 
+      origin.startsWith('http://127.0.0.1:')
+    );
+
+    if (isAllowed) {
+      console.log(`✅ CORS allowing origin: ${origin}`);
       return callback(null, true);
     } else {
-      console.warn(`CORS blocked origin: ${origin}`);
+      console.warn(`❌ CORS blocked origin: ${origin}`);
       return callback(new Error('Not allowed by CORS'));
     }
   },
   credentials: true,
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Origin', 'Accept', 'Content-Type', 'Authorization', 'X-Requested-With'],
-  exposedHeaders: ['X-New-Token'] // For token refresh
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'HEAD', 'PATCH'],
+  allowedHeaders: [
+    'Origin', 
+    'Accept', 
+    'Content-Type', 
+    'Authorization', 
+    'X-Requested-With',
+    'Access-Control-Allow-Credentials',
+    'Access-Control-Allow-Origin'
+  ],
+  exposedHeaders: ['X-New-Token'], // For token refresh
+  preflightContinue: false,
+  optionsSuccessStatus: 204
 };
 
 app.use(cors(corsOptions));

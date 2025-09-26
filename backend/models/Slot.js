@@ -14,23 +14,7 @@ const slotSchema = new mongoose.Schema({
     required: [true, 'Date and time is required']
   },
   
-  endTime: {
-    type: String,
-    required: [true, 'End time is required'],
-    validate: {
-      validator: function(v) {
-        return /^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/.test(v);
-      },
-      message: 'End time must be in HH:MM format'
-    }
-  },
-  
-  // Type of appointment
-  type: {
-    type: String,
-    enum: ['consultation', 'follow-up', 'check-up', 'procedure', 'telemedicine'],
-    default: 'consultation'
-  },
+  // Duration in minutes (no endTime needed - calculated from dateTime + duration)
   
   // Duration in minutes
   duration: {
