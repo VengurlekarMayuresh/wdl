@@ -655,6 +655,15 @@ export const appointmentsAPI = {
     }
     throw new Error(response.message || 'Failed to reschedule appointment');
   },
+
+  // Doctor: Get patients who have appointments with current doctor
+  async getDoctorPatients() {
+    const response = await apiRequest('/appointments/doctor/patients');
+    if (response.success && response.data) {
+      return response.data;
+    }
+    throw new Error(response.message || 'Failed to fetch doctor patients');
+  },
 };
 
 // Get stored user

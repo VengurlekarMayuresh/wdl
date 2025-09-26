@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Textarea } from '@/components/ui/textarea';
-import { Calendar, Clock, User, Stethoscope, MapPin, Phone, AlertCircle, CheckCircle, XCircle, MessageCircle, RefreshCw, Edit } from 'lucide-react';
+import { Calendar, Clock, User, Stethoscope, MapPin, Phone, AlertCircle, CheckCircle, XCircle, MessageCircle, RefreshCw, Edit, Video, Heart, Activity, FileText, Star } from 'lucide-react';
 import { appointmentsAPI } from '@/services/api';
 import RescheduleModal from '@/components/appointment/RescheduleModal';
 
@@ -162,12 +162,40 @@ const DoctorAppointmentsPage = () => {
     const { date, time } = formatDateTime(slot.dateTime);
     const currentAction = actionLoading[appointment._id];
     
+    const getCardGradient = (status) => {
+      switch (status) {
+        case 'pending': return 'from-yellow-50 to-orange-50 border-yellow-200';
+        case 'confirmed': return 'from-blue-50 to-indigo-50 border-blue-200';
+        case 'completed': return 'from-green-50 to-emerald-50 border-green-200';
+        case 'cancelled': case 'rejected': return 'from-red-50 to-pink-50 border-red-200';
+        default: return 'from-gray-50 to-slate-50 border-gray-200';
+      }
+    };
+    
+    const getStatusIcon = (status) => {
+      switch (status) {
+        case 'pending': return Clock;
+        case 'confirmed': return CheckCircle;
+        case 'completed': return Star;
+        case 'cancelled': case 'rejected': return XCircle;
+        default: return AlertCircle;
+      }
+    };
+    
+    const StatusIcon = getStatusIcon(appointment.status);
+    
     return (
-      <Card className="border-none shadow-soft hover:shadow-medium transition-all duration-300">
-        <CardContent className="p-6">
-          <div className="flex justify-between items-start mb-4">
-            <div className="flex items-center gap-3">
-              <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center">
+      <Card className={`border-2 shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-1 bg-gradient-to-br ${getCardGradient(appointment.status)} overflow-hidden group`}>
+        <CardHeader className="pb-4 relative">
+          <div className="absolute top-4 right-4">
+            <div className={`p-2 rounded-full ${appointment.status === 'pending' ? 'bg-yellow-100' : appointment.status === 'confirmed' ? 'bg-blue-100' : appointment.status === 'completed' ? 'bg-green-100' : 'bg-red-100'}`}>
+              <StatusIcon className={`h-5 w-5 ${appointment.status === 'pending' ? 'text-yellow-600' : appointment.status === 'confirmed' ? 'text-blue-600' : appointment.status === 'completed' ? 'text-green-600' : 'text-red-600'}`} />
+            </div>
+          </div>
+          
+          <div className="flex items-start gap-4">
+            <div className="relative">
+              <div className="w-16 h-16 rounded-full bg-gradient-to-br from-primary to-primary-dark flex items-center justify-center shadow-lg">
                 {patient.userId.profilePicture ? (
                   <img 
                     src={patient.userId.profilePicture} 
@@ -175,84 +203,115 @@ const DoctorAppointmentsPage = () => {
                     className="w-full h-full object-cover rounded-full"
                   />
                 ) : (
-                  <User className="h-6 w-6 text-primary" />
+                  <User className="h-8 w-8 text-white" />
                 )}
               </div>
-              <div>
-                <h3 className="font-semibold">
+              {appointment.status === 'confirmed' && (
+                <div className="absolute -bottom-1 -right-1 w-6 h-6 bg-green-500 rounded-full flex items-center justify-center">
+                  <Activity className="h-3 w-3 text-white" />
+                </div>
+              )}
+            </div>
+            
+            <div className="flex-1">
+              <div className="flex items-center gap-2 mb-1">
+                <h3 className="text-xl font-bold text-foreground group-hover:text-primary transition-colors">
                   {patient.userId.firstName} {patient.userId.lastName}
                 </h3>
-                <p className="text-sm text-muted-foreground">{patient.userId.email}</p>
-                {patient.userId.phone && (
-                  <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                    <Phone className="h-3 w-3" />
-                    <span>{patient.userId.phone}</span>
-                  </div>
+                {appointment.status === 'completed' && (
+                  <Star className="h-4 w-4 text-yellow-500 fill-current" />
                 )}
               </div>
-            </div>
-            {getStatusBadge(appointment.status)}
-          </div>
-
-          <div className="grid grid-cols-2 gap-4 mb-4">
-            <div className="flex items-center gap-2 text-sm">
-              <Calendar className="h-4 w-4 text-muted-foreground" />
-              <span>{date}</span>
-            </div>
-            <div className="flex items-center gap-2 text-sm">
-              <Clock className="h-4 w-4 text-muted-foreground" />
-              <span>{time}</span>
+              <p className="text-sm text-muted-foreground mb-2 flex items-center gap-2">
+                <Phone className="h-3 w-3" />
+                {patient.userId.phone || 'No phone provided'}
+              </p>
+              <p className="text-sm text-muted-foreground">{patient.userId.email}</p>
             </div>
           </div>
-
-          {appointment.reason && (
-            <div className="mb-4 p-3 bg-blue-50 border border-blue-200 rounded-md">
-              <div className="flex items-center gap-2 mb-1">
-                <MessageCircle className="h-4 w-4 text-blue-600" />
-                <span className="text-sm font-medium text-blue-700">Reason for Visit:</span>
+        </CardHeader>
+        
+        <CardContent className="pt-0">
+          {/* Date and Time */}
+          <div className="grid grid-cols-2 gap-4 mb-6">
+            <div className="flex items-center gap-3 p-3 bg-white/70 rounded-lg">
+              <div className="p-2 bg-primary/10 rounded-lg">
+                <Calendar className="h-4 w-4 text-primary" />
               </div>
-              <p className="text-sm text-blue-600">{appointment.reason}</p>
+              <div>
+                <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">Date</p>
+                <p className="font-semibold text-foreground">{date}</p>
+              </div>
             </div>
-          )}
-
+            <div className="flex items-center gap-3 p-3 bg-white/70 rounded-lg">
+              <div className="p-2 bg-primary/10 rounded-lg">
+                <Clock className="h-4 w-4 text-primary" />
+              </div>
+              <div>
+                <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">Time</p>
+                <p className="font-semibold text-foreground">{time}</p>
+              </div>
+            </div>
+          </div>
+          
+          {/* Appointment Type */}
           {slot.type && (
             <div className="mb-4">
-              <Badge variant="outline" className="text-xs">
+              <div className="flex items-center gap-2 mb-2">
+                <Stethoscope className="h-4 w-4 text-muted-foreground" />
+                <span className="text-sm font-medium text-muted-foreground">Appointment Type</span>
+              </div>
+              <Badge variant="outline" className="bg-white/50">
+                {slot.type === 'video' && <Video className="h-3 w-3 mr-1" />}
                 {slot.type}
               </Badge>
             </div>
           )}
 
+          {/* Reason for Visit */}
+          {appointment.reason && (
+            <div className="mb-4 p-4 bg-white/50 border border-primary/20 rounded-lg">
+              <div className="flex items-center gap-2 mb-2">
+                <Heart className="h-4 w-4 text-primary" />
+                <span className="text-sm font-semibold text-primary">Reason for Visit</span>
+              </div>
+              <p className="text-sm text-foreground leading-relaxed">{appointment.reason}</p>
+            </div>
+          )}
+
+          {/* Doctor Notes */}
           {appointment.doctorNotes && (
-            <div className="mb-4 p-3 bg-green-50 border border-green-200 rounded-md">
-              <div className="flex items-center gap-2 mb-1">
-                <MessageCircle className="h-4 w-4 text-green-600" />
-                <span className="text-sm font-medium text-green-700">Your Notes:</span>
+            <div className="mb-4 p-4 bg-green-50/70 border border-green-200/50 rounded-lg">
+              <div className="flex items-center gap-2 mb-2">
+                <FileText className="h-4 w-4 text-green-600" />
+                <span className="text-sm font-semibold text-green-700">Consultation Notes</span>
               </div>
-              <p className="text-sm text-green-600">{appointment.doctorNotes}</p>
+              <p className="text-sm text-green-700 leading-relaxed">{appointment.doctorNotes}</p>
             </div>
           )}
 
+          {/* Rejection Reason */}
           {appointment.rejectionReason && (
-            <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-md">
-              <div className="flex items-center gap-2 mb-1">
+            <div className="mb-4 p-4 bg-red-50/70 border border-red-200/50 rounded-lg">
+              <div className="flex items-center gap-2 mb-2">
                 <XCircle className="h-4 w-4 text-red-600" />
-                <span className="text-sm font-medium text-red-700">Rejection Reason:</span>
+                <span className="text-sm font-semibold text-red-700">Rejection Reason</span>
               </div>
-              <p className="text-sm text-red-600">{appointment.rejectionReason}</p>
+              <p className="text-sm text-red-700 leading-relaxed">{appointment.rejectionReason}</p>
             </div>
           )}
 
+          {/* Action Buttons */}
           {showActions && (
-            <div className="pt-4 border-t">
+            <div className="pt-6 mt-6 border-t border-primary/10">
               {appointment.status === 'pending' && (
-                <div className="flex gap-2">
+                <div className="flex gap-3">
                   <Button
-                    variant="medical"
+                    variant="default"
                     size="sm"
                     onClick={() => handleApproveAppointment(appointment._id)}
                     disabled={currentAction}
-                    className="flex-1"
+                    className="flex-1 bg-green-600 hover:bg-green-700 text-white shadow-md hover:shadow-lg transition-all"
                   >
                     {currentAction === 'approving' ? (
                       <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2" />
@@ -266,7 +325,7 @@ const DoctorAppointmentsPage = () => {
                     size="sm"
                     onClick={() => handleRejectAppointment(appointment._id)}
                     disabled={currentAction}
-                    className="flex-1"
+                    className="flex-1 border-red-200 text-red-600 hover:bg-red-50 hover:border-red-300 shadow-sm hover:shadow-md transition-all"
                   >
                     {currentAction === 'rejecting' ? (
                       <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-current mr-2" />
@@ -279,13 +338,13 @@ const DoctorAppointmentsPage = () => {
               )}
               
               {appointment.status === 'confirmed' && new Date(slot.dateTime) > new Date() && (
-                <div className="flex gap-2">
+                <div className="flex gap-3">
                   <Button
                     variant="outline"
                     size="sm"
                     onClick={() => handleRescheduleAppointment(appointment)}
                     disabled={currentAction}
-                    className="flex-1"
+                    className="flex-1 border-blue-200 text-blue-600 hover:bg-blue-50 hover:border-blue-300 shadow-sm hover:shadow-md transition-all"
                   >
                     <Edit className="h-4 w-4 mr-2" />
                     Reschedule
@@ -295,11 +354,11 @@ const DoctorAppointmentsPage = () => {
               
               {appointment.status === 'confirmed' && new Date(slot.dateTime) <= new Date() && (
                 <Button
-                  variant="medical"
+                  variant="default"
                   size="sm"
                   onClick={() => handleCompleteAppointment(appointment._id)}
                   disabled={currentAction}
-                  className="w-full"
+                  className="w-full bg-primary hover:bg-primary/90 text-white shadow-md hover:shadow-lg transition-all"
                 >
                   {currentAction === 'completing' ? (
                     <>

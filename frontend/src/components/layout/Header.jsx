@@ -11,7 +11,8 @@ import {
   Home,
   MapPin,
   Heart,
-  Stethoscope 
+  Stethoscope,
+  Users 
 } from "lucide-react";
 import { useState, useEffect } from "react";
 import logoImg from "@/assets/logo.png";
@@ -37,12 +38,40 @@ export const Header = ({
   const toggleMobileMenu = () => setIsMobileMenuOpen(!isMobileMenuOpen);
   const toggleUserMenu = () => setIsUserMenuOpen(!isUserMenuOpen);
 
-  const navLinks = [
-    { to: "/", label: "Home", icon: Home },
-    { to: "/find-care", label: "Find Care", icon: MapPin },
-    { to: "/healthy-living", label: "Health Tips", icon: Heart },
-    { to: "/doctors", label: "Doctors", icon: Stethoscope },
+  // Filter navigation links based on user type
+  const allNavLinks = [
+    { to: "/", label: "Home", icon: Home, allowedFor: ['all'] },
+    { to: "/find-care", label: "Find Care", icon: MapPin, allowedFor: ['patient', 'careprovider', 'guest'] },
+    { to: "/healthy-living", label: "Health Tips", icon: Heart, allowedFor: ['all'] },
+    { to: "/doctors", label: "Doctors", icon: Stethoscope, allowedFor: ['patient', 'careprovider', 'guest'] },
+    { to: "/doctor-patients", label: "Patients", icon: Users, allowedFor: ['doctor'] },
   ];
+
+  // Filter links based on user type (doctors should not see Find Care and Doctors)
+  const navLinks = allNavLinks.filter(link => {
+    if (link.allowedFor.includes('all')) {
+      return true;
+    }
+    
+    // For unauthenticated users, show guest-allowed links
+    if (!isAuthenticated) {
+      return link.allowedFor.includes('guest');
+    }
+    
+    // For authenticated users, check their user type
+    return link.allowedFor.includes(userType);
+  });
+
+  // Debug logging (can be removed in production)
+  useEffect(() => {
+    console.log('🧭 Navigation Filter Debug:', {
+      isAuthenticated,
+      userType,
+      totalLinks: allNavLinks.length,
+      visibleLinks: navLinks.length,
+      visibleLinkLabels: navLinks.map(link => link.label)
+    });
+  }, [isAuthenticated, userType, navLinks]);
 
   return (
     <header className="bg-gradient-primary text-white sticky top-0 z-50 shadow-strong">

@@ -825,6 +825,136 @@ router.put('/:appointmentId/reschedule', authenticate, async (req, res) => {
   }
 });
 
+// @route   GET /api/appointments/doctor/patients
+// @desc    Get patients who have appointments with current doctor
+// @access  Private (Doctor only)
+router.get('/doctor/patients', authenticate, authorize('doctor'), async (req, res) => {
+  try {
+    let doctor = await Doctor.findOne({ userId: req.user._id });
+    
+    // Development mode: Create mock doctor if needed
+    if (!doctor && process.env.NODE_ENV === 'development' && req.user._id === 'doctor_123456') {
+      console.log('🔧 Development mode: Creating mock doctor profile for patients');
+      doctor = await Doctor.create({
+        userId: req.user._id,
+        medicalLicenseNumber: 'DEV123456',
+        licenseState: 'NY',
+        primarySpecialty: 'Cardiology',
+        consultationFee: 100
+      });
+    }
+    
+    if (!doctor) {
+      return res.status(404).json({
+        success: false,
+        message: 'Doctor profile not found'
+      });
+    }
+
+    // Find all unique patients who have appointments with this doctor
+    const appointments = await Appointment.find({ doctorId: doctor._id })
+      .populate({
+        path: 'patientId',
+        populate: {
+          path: 'userId',
+          select: 'firstName lastName email phone profilePicture'
+        }
+      })
+      .sort({ createdAt: -1 });
+
+    // Create a unique patients map with their appointment statistics
+    const patientsMap = new Map();
+    
+    appointments.forEach(appointment => {
+      const patient = appointment.patientId;
+      const patientKey = patient._id.toString();
+      
+      if (!patientsMap.has(patientKey)) {
+        patientsMap.set(patientKey, {
+          _id: patient._id,
+          userId: patient.userId,
+          dateOfBirth: patient.dateOfBirth,
+          gender: patient.gender,
+          address: patient.address,
+          emergencyContact: patient.emergencyContact,
+          medicalHistory: patient.medicalHistory,
+          currentMedications: patient.currentMedications,
+          allergies: patient.allergies,
+          createdAt: patient.createdAt,
+          stats: {
+            totalAppointments: 0,
+            completedAppointments: 0,
+            pendingAppointments: 0,
+            cancelledAppointments: 0,
+            lastAppointment: null,
+            nextAppointment: null
+          }
+        });
+      }
+      
+      const patientData = patientsMap.get(patientKey);
+      patientData.stats.totalAppointments++;
+      
+      // Count by status
+      switch (appointment.status) {
+        case 'completed':
+          patientData.stats.completedAppointments++;
+          break;
+        case 'pending':
+          patientData.stats.pendingAppointments++;
+          break;
+        case 'cancelled':
+        case 'rejected':
+          patientData.stats.cancelledAppointments++;
+          break;
+      }
+      
+      // Track last and next appointments
+      const appointmentDate = new Date(appointment.appointmentDate);
+      const now = new Date();
+      
+      if (appointmentDate < now) {
+        // Past appointment - check if it's more recent than current lastAppointment
+        if (!patientData.stats.lastAppointment || appointmentDate > new Date(patientData.stats.lastAppointment.appointmentDate)) {
+          patientData.stats.lastAppointment = {
+            _id: appointment._id,
+            appointmentDate: appointment.appointmentDate,
+            status: appointment.status,
+            reasonForVisit: appointment.reasonForVisit
+          };
+        }
+      } else {
+        // Future appointment - check if it's sooner than current nextAppointment
+        if (!patientData.stats.nextAppointment || appointmentDate < new Date(patientData.stats.nextAppointment.appointmentDate)) {
+          patientData.stats.nextAppointment = {
+            _id: appointment._id,
+            appointmentDate: appointment.appointmentDate,
+            status: appointment.status,
+            reasonForVisit: appointment.reasonForVisit
+          };
+        }
+      }
+    });
+
+    const patients = Array.from(patientsMap.values());
+
+    res.json({
+      success: true,
+      data: {
+        patients,
+        totalPatients: patients.length
+      }
+    });
+
+  } catch (error) {
+    console.error('Get doctor patients error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Server error fetching patients'
+    });
+  }
+});
+
 // @route   DELETE /api/appointments/slots/all
 // @desc    Delete all slots for the current doctor (Admin cleanup)
 // @access  Private (Doctor only) - for admin cleanup
