@@ -26,16 +26,6 @@ const appointmentSchema = new mongoose.Schema({
     required: true
   },
   
-  appointmentTime: {
-    type: String,
-    required: true
-  },
-  
-  endTime: {
-    type: String,
-    required: true
-  },
-  
   // Duration in minutes
   duration: {
     type: Number,
@@ -54,7 +44,7 @@ const appointmentSchema = new mongoose.Schema({
   // Status of the appointment
   status: {
     type: String,
-    enum: ['pending', 'confirmed', 'cancelled', 'completed', 'no-show', 'rescheduled'],
+    enum: ['pending', 'confirmed', 'cancelled', 'completed', 'no-show', 'rescheduled', 'rejected'],
     default: 'pending'
   },
   
@@ -224,6 +214,9 @@ const appointmentSchema = new mongoose.Schema({
   // Cancellation details
   cancellationReason: String,
   
+  // Rejection details (for when doctor rejects appointment request)
+  rejectionReason: String,
+  
   cancelledBy: {
     type: String,
     enum: ['patient', 'doctor', 'admin']
@@ -293,13 +286,11 @@ appointmentSchema.index({ doctorId: 1, appointmentDate: 1 });
 appointmentSchema.index({ patientId: 1, appointmentDate: 1 });
 appointmentSchema.index({ slotId: 1 });
 appointmentSchema.index({ status: 1, appointmentDate: 1 });
-appointmentSchema.index({ appointmentDate: 1, appointmentTime: 1 });
+// Removed appointmentTime index as field no longer exists
 
 // Virtual to check if appointment is in the past
 appointmentSchema.virtual('isPast').get(function() {
   const appointmentDateTime = new Date(this.appointmentDate);
-  const [hours, minutes] = this.appointmentTime.split(':');
-  appointmentDateTime.setHours(parseInt(hours), parseInt(minutes));
   return appointmentDateTime < new Date();
 });
 
@@ -313,8 +304,6 @@ appointmentSchema.virtual('isToday').get(function() {
 // Virtual to check if appointment is upcoming (within next 7 days)
 appointmentSchema.virtual('isUpcoming').get(function() {
   const appointmentDateTime = new Date(this.appointmentDate);
-  const [hours, minutes] = this.appointmentTime.split(':');
-  appointmentDateTime.setHours(parseInt(hours), parseInt(minutes));
   const sevenDaysFromNow = new Date();
   sevenDaysFromNow.setDate(sevenDaysFromNow.getDate() + 7);
   return appointmentDateTime > new Date() && appointmentDateTime <= sevenDaysFromNow;
@@ -323,7 +312,7 @@ appointmentSchema.virtual('isUpcoming').get(function() {
 // Virtual for formatted appointment date and time
 appointmentSchema.virtual('formattedDateTime').get(function() {
   const date = new Date(this.appointmentDate);
-  return `${date.toLocaleDateString()} at ${this.appointmentTime}`;
+  return date.toLocaleDateString();
 });
 
 // Method to confirm appointment
@@ -354,11 +343,10 @@ appointmentSchema.methods.complete = async function(doctorNotes, diagnosis, trea
 };
 
 // Method to reschedule appointment
-appointmentSchema.methods.reschedule = async function(newSlotId, newDate, newTime, rescheduledBy, reason) {
+appointmentSchema.methods.reschedule = async function(newSlotId, newDate, rescheduledBy, reason) {
   // Store original appointment details
   this.rescheduledFrom = {
     originalDate: this.appointmentDate,
-    originalTime: this.appointmentTime,
     rescheduledBy: rescheduledBy,
     rescheduledAt: new Date(),
     reason: reason
@@ -367,7 +355,6 @@ appointmentSchema.methods.reschedule = async function(newSlotId, newDate, newTim
   // Update with new details
   this.slotId = newSlotId;
   this.appointmentDate = newDate;
-  this.appointmentTime = newTime;
   this.status = 'rescheduled';
   
   return await this.save();
@@ -384,7 +371,7 @@ appointmentSchema.statics.findForDoctorInRange = function(doctorId, startDate, e
   })
   .populate('patientId', 'firstName lastName phone email')
   .populate('slotId')
-  .sort({ appointmentDate: 1, appointmentTime: 1 });
+  .sort({ appointmentDate: 1 });
 };
 
 // Static method to find appointments for a patient

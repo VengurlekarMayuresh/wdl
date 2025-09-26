@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 600px;
+            margin: 50px auto;
+            padding: 20px;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        input, button {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        button {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        .result {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 4px;
+            white-space: pre-wrap;
+            font-family: monospace;
+        }
+        .success {
+            background-color: #d4edda;
+            border: 1px solid #c3e6cb;
+            color: #155724;
+        }
+        .error {
+            background-color: #f8d7da;
+            border: 1px solid #f5c6cb;
+            color: #721c24;
+        }
+    </style>
+</head>
+<body>
+    <h1>Direct API Login Test</h1>
+    <p>This page tests the login API directly without going through the React app.</p>
+    
+    <form id="loginForm">
+        <div class="form-group">
+            <label for="email">Email:</label>
+            <input type="email" id="email" value="andrew.williams40@healthcenter.com" required>
+        </div>
+        <div class="form-group">
+            <label for="password">Password:</label>
+            <input type="password" id="password" value="doctor123" required>
+        </div>
+        <button type="submit">Test Login</button>
+    </form>
+    
+    <div id="result"></div>
+
+    <script>
+        const API_BASE_URL = 'http://localhost:5000/api';
+        
+        document.getElementById('loginForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            const resultDiv = document.getElementById('result');
+            
+            try {
+                resultDiv.innerHTML = 'Testing login...';
+                resultDiv.className = 'result';
+                
+                console.log('Making login request to:', `${API_BASE_URL}/auth/login`);
+                console.log('With data:', { email, password });
+                
+                const response = await fetch(`${API_BASE_URL}/auth/login`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ email, password })
+                });
+                
+                console.log('Response status:', response.status);
+                console.log('Response headers:', [...response.headers.entries()]);
+                
+                const data = await response.json();
+                console.log('Response data:', data);
+                
+                if (response.ok && data.success) {
+                    resultDiv.innerHTML = `✅ SUCCESS!
+                    
+Status: ${response.status}
+Message: ${data.message}
+
+User Data:
+- Name: ${data.data.user.firstName} ${data.data.user.lastName}
+- Email: ${data.data.user.email}
+- User Type: ${data.data.user.userType}
+
+Doctor Profile:
+- Specialty: ${data.data.profile?.primarySpecialty}
+- License: ${data.data.profile?.medicalLicenseNumber}
+- Status: ${data.data.profile?.status}
+
+Token: ${data.data.token ? 'Generated ✅' : 'Missing ❌'}`;
+                    resultDiv.className = 'result success';
+                    
+                    // Test storing in localStorage
+                    localStorage.setItem('token', data.data.token);
+                    localStorage.setItem('user', JSON.stringify(data.data.user));
+                    console.log('Data stored in localStorage');
+                    
+                } else {
+                    resultDiv.innerHTML = `❌ LOGIN FAILED
+                    
+Status: ${response.status}
+Message: ${data.message || 'Unknown error'}
+Success: ${data.success}
+
+Full Response:
+${JSON.stringify(data, null, 2)}`;
+                    resultDiv.className = 'result error';
+                }
+                
+            } catch (error) {
+                console.error('Login test error:', error);
+                resultDiv.innerHTML = `❌ NETWORK ERROR
+                
+Error: ${error.message}
+Stack: ${error.stack}`;
+                resultDiv.className = 'result error';
+            }
+        });
+    </script>
+</body>
+</html>

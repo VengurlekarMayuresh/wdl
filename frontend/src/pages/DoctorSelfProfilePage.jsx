@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { Header } from "@/components/layout/Header";
 import { useAuth } from "@/contexts/AuthContext";
-import { doctorAPI, authAPI } from "@/services/api";
+import { doctorAPI, authAPI, appointmentsAPI, slotsAPI } from "@/services/api";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -30,10 +30,160 @@ import {
   Plus,
   Trash2,
   Save,
-  Camera
+  Camera,
+  XCircle,
+  AlertCircle
 } from "lucide-react";
+import toast from 'react-hot-toast';
 import ProfileImageUpload from "@/components/ui/ProfileImageUpload";
-import SimpleSlotManager from "@/components/appointment/SimpleSlotManager";
+import SlotManager from "@/components/appointment/SlotManager";
+
+// Simple appointment card that actually works
+const AppointmentCard = ({ appointment, onApprove, onReject, isLoading, showActions = false }) => {
+  console.log('📋 Rendering appointment:', appointment);
+  
+  if (!appointment || !appointment._id) {
+    return (
+      <Card className="border border-gray-200">
+        <CardContent className="p-4 text-center text-gray-500">
+          <p>Invalid appointment data</p>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  const patient = appointment.patientId || {};
+  const slot = appointment.slotId || {};
+  
+  // Safe date formatting
+  const formatDateTime = (dateTime) => {
+    try {
+      const date = new Date(dateTime);
+      return {
+        date: date.toLocaleDateString(),
+        time: date.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })
+      };
+    } catch (e) {
+      return { date: 'Invalid Date', time: 'Invalid Time' };
+    }
+  };
+  
+  const { date, time } = formatDateTime(slot.dateTime || appointment.appointmentDate || new Date());
+  
+  // Status badge
+  const getStatusBadge = (status) => {
+    const statusColors = {
+      pending: 'bg-yellow-100 text-yellow-800',
+      confirmed: 'bg-green-100 text-green-800',
+      completed: 'bg-blue-100 text-blue-800',
+      rejected: 'bg-red-100 text-red-800',
+      cancelled: 'bg-gray-100 text-gray-800'
+    };
+    
+    return (
+      <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+        statusColors[status] || statusColors.pending
+      }`}>
+        {status || 'pending'}
+      </span>
+    );
+  };
+
+  return (
+    <Card className="border border-gray-200 hover:shadow-md transition-shadow">
+      <CardContent className="p-6">
+        {/* Header */}
+        <div className="flex justify-between items-start mb-4">
+          <div>
+            <h3 className="font-semibold text-lg">
+              {patient?.userId?.firstName || patient?.firstName || 'Patient'} {patient?.userId?.lastName || patient?.lastName || ''}
+            </h3>
+            <p className="text-sm text-gray-600">
+              {patient?.userId?.email || patient?.email || 'No email provided'}
+            </p>
+            {(patient?.userId?.phone || patient?.phone) && (
+              <p className="text-sm text-gray-600">
+                📞 {patient?.userId?.phone || patient?.phone}
+              </p>
+            )}
+          </div>
+          {getStatusBadge(appointment.status)}
+        </div>
+
+        {/* Date and Time */}
+        <div className="grid grid-cols-2 gap-4 mb-4">
+          <div className="flex items-center gap-2">
+            <Calendar className="h-4 w-4 text-gray-400" />
+            <span className="text-sm">{date}</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <Clock className="h-4 w-4 text-gray-400" />
+            <span className="text-sm">{time}</span>
+          </div>
+        </div>
+
+        {/* Reason for visit */}
+        {appointment.reasonForVisit && (
+          <div className="mb-4 p-3 bg-blue-50 border-l-4 border-blue-400">
+            <p className="text-sm text-blue-800">
+              <strong>Reason:</strong> {appointment.reasonForVisit}
+            </p>
+          </div>
+        )}
+
+        {/* Rejection reason */}
+        {appointment.rejectionReason && (
+          <div className="mb-4 p-3 bg-red-50 border-l-4 border-red-400">
+            <p className="text-sm text-red-800">
+              <strong>Rejection Reason:</strong> {appointment.rejectionReason}
+            </p>
+          </div>
+        )}
+
+        {/* Action buttons */}
+        {showActions && appointment.status === 'pending' && (
+          <div className="flex gap-3 pt-4 border-t">
+            <Button
+              onClick={() => {
+                console.log('✅ Approving appointment:', appointment._id);
+                onApprove(appointment._id);
+              }}
+              disabled={isLoading === 'approving'}
+              className="flex-1 bg-green-600 hover:bg-green-700 text-white"
+            >
+              {isLoading === 'approving' ? (
+                <div className="flex items-center justify-center">
+                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2" />
+                  Approving...
+                </div>
+              ) : (
+                <>✅ Approve</>
+              )}
+            </Button>
+            <Button
+              onClick={() => {
+                console.log('❌ Rejecting appointment:', appointment._id);
+                onReject(appointment._id);
+              }}
+              disabled={isLoading === 'rejecting'}
+              variant="outline"
+              className="flex-1 border-red-300 text-red-700 hover:bg-red-50"
+            >
+              {isLoading === 'rejecting' ? (
+                <div className="flex items-center justify-center">
+                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-red-600 mr-2" />
+                  Rejecting...
+                </div>
+              ) : (
+                <>❌ Reject</>
+              )}
+            </Button>
+          </div>
+        )}
+      </CardContent>
+    </Card>
+  );
+};
 
 const DoctorSelfProfilePage = () => {
   const { user, isAuthenticated, logout, refreshUser } = useAuth();
@@ -44,9 +194,18 @@ const DoctorSelfProfilePage = () => {
   
   // Dynamic data states
   const [reviews, setReviews] = useState([]);
-  const [bookedAppointments, setBookedAppointments] = useState([]);
   const [loadingReviews, setLoadingReviews] = useState(false);
-  const [loadingAppointments, setLoadingAppointments] = useState(false);
+  
+  // Appointment management state
+  const [appointments, setAppointments] = useState({
+    pending: [],
+    upcoming: [],
+    completed: [],
+    cancelled: []
+  });
+  const [appointmentsLoading, setAppointmentsLoading] = useState(false);
+  const [actionLoading, setActionLoading] = useState({});
+  const [selectedApptTab, setSelectedApptTab] = useState('pending');
   
   // Form states for different sections
   const [aboutForm, setAboutForm] = useState("");
@@ -115,53 +274,15 @@ const DoctorSelfProfilePage = () => {
   
   // Extended API functions for missing endpoints
   const extendedAPI = {
-    // Fetch doctor reviews (mock API call)
+    // Note: Review data should come from actual patient reviews
+    // For now, we'll show placeholder data until review system is implemented
     async getReviews() {
-      // In real implementation, this would call '/doctors/reviews/me'
-      console.log('🔄 Fetching doctor reviews from backend...');
-      await new Promise(resolve => setTimeout(resolve, 1000)); // Simulate API delay
-      
-      // Mock data for demonstration - replace with real API call
-      return [
-        {
-          id: 1,
-          patientName: "Sarah M.",
-          rating: 5,
-          date: "2 weeks ago",
-          comment: "Excellent care and very professional. Highly recommend!",
-          createdAt: new Date().toISOString()
-        },
-        {
-          id: 2,
-          patientName: "John D.",
-          rating: 5,
-          date: "1 month ago",
-          comment: "Very knowledgeable doctor with great bedside manner.",
-          createdAt: new Date().toISOString()
-        }
-      ];
+      console.log('🔄 Reviews are now managed dynamically (placeholder)');
+      return []; // Return empty array - no static data
     },
     
-    // Fetch doctor appointments (mock API call)
-    async getAppointments() {
-      console.log('🔄 Fetching booked appointments from backend...');
-      await new Promise(resolve => setTimeout(resolve, 800)); // Simulate API delay
-      
-      // Mock data - replace with real API call to '/doctors/appointments'
-      return [
-        {
-          id: 1,
-          patientName: "Sarah Johnson",
-          patientEmail: "sarah@example.com",
-          date: new Date(Date.now() + 86400000).toLocaleDateString(), // Tomorrow
-          time: "10:00 AM",
-          type: "Consultation",
-          status: "Confirmed",
-          reason: "Regular checkup",
-          phone: "+1 (555) 123-4567"
-        }
-      ];
-    },
+    // Note: Appointment data is now managed in the dedicated appointments pages
+    // This static data has been removed to use real dynamic appointment management
     
   };
 
@@ -274,11 +395,8 @@ const DoctorSelfProfilePage = () => {
           });
         }
         
-        // Fetch reviews and appointments in parallel
-        const [reviewsData, appointmentsData] = await Promise.allSettled([
-          fetchReviews(),
-          fetchAppointments()
-        ]);
+        // Fetch reviews (appointments are now managed separately)
+        await fetchReviews();
         
         console.log('✅ All data fetched successfully!');
         
@@ -308,20 +426,120 @@ const DoctorSelfProfilePage = () => {
     }
   };
   
-  // Fetch appointments
-  const fetchAppointments = async () => {
-    setLoadingAppointments(true);
+  // Simple appointment management functions that actually work
+  const loadAppointments = async () => {
     try {
-      const data = await extendedAPI.getAppointments();
-      console.log('✅ Appointments loaded:', data.length, 'appointments');
-      setBookedAppointments(data);
-    } catch (e) {
-      console.error('❌ Error fetching appointments:', e);
-      setBookedAppointments([]);
+      setAppointmentsLoading(true);
+      console.log('🔄 Loading appointments from API...');
+      
+      const response = await appointmentsAPI.getDoctorAppointments();
+      console.log('📋 API Response:', response);
+      
+      // Handle both array and object responses
+      const allAppointments = Array.isArray(response) ? response : (response.appointments || []);
+      console.log('📋 Appointments array:', allAppointments);
+      
+      if (!Array.isArray(allAppointments)) {
+        console.error('❌ Invalid appointments data format:', allAppointments);
+        setAppointments({ pending: [], upcoming: [], completed: [], cancelled: [] });
+        return;
+      }
+      
+      // Simple categorization
+      const categorized = {
+        pending: allAppointments.filter(apt => apt?.status === 'pending'),
+        upcoming: allAppointments.filter(apt => apt?.status === 'confirmed'),
+        completed: allAppointments.filter(apt => apt?.status === 'completed'),
+        cancelled: allAppointments.filter(apt => apt?.status === 'cancelled' || apt?.status === 'rejected')
+      };
+      
+      console.log('📊 Categorized appointments:', categorized);
+      setAppointments(categorized);
+      
+    } catch (error) {
+      console.error('❌ Error loading appointments:', error);
+      toast.error('Failed to load appointments: ' + error.message, {
+        icon: '❌',
+        duration: 5000,
+      });
+      setAppointments({ pending: [], upcoming: [], completed: [], cancelled: [] });
     } finally {
-      setLoadingAppointments(false);
+      setAppointmentsLoading(false);
     }
   };
+
+  const handleApproveAppointment = async (appointmentId) => {
+    console.log('🔄 Starting approve for ID:', appointmentId);
+    
+    try {
+      setActionLoading(prev => ({ ...prev, [appointmentId]: 'approving' }));
+      
+      const result = await appointmentsAPI.approveAppointment(appointmentId);
+      console.log('✅ Approve result:', result);
+      
+      toast.success('✅ Appointment approved successfully!', {
+        duration: 3000,
+      });
+      
+      // Reload appointments
+      await loadAppointments();
+      
+    } catch (error) {
+      console.error('❌ Error approving appointment:', error);
+      toast.error('❌ Failed to approve: ' + error.message, {
+        duration: 5000,
+      });
+    } finally {
+      setActionLoading(prev => {
+        const newState = { ...prev };
+        delete newState[appointmentId];
+        return newState;
+      });
+    }
+  };
+
+  const handleRejectAppointment = async (appointmentId) => {
+    console.log('🔄 Starting reject for ID:', appointmentId);
+    
+    const reason = prompt('Enter rejection reason:');
+    if (!reason) {
+      toast.error('Rejection reason is required', { duration: 3000 });
+      return;
+    }
+    
+    try {
+      setActionLoading(prev => ({ ...prev, [appointmentId]: 'rejecting' }));
+      
+      const result = await appointmentsAPI.rejectAppointment(appointmentId, reason);
+      console.log('✅ Reject result:', result);
+      
+      toast.success('✅ Appointment rejected successfully!', {
+        duration: 3000,
+      });
+      
+      // Reload appointments
+      await loadAppointments();
+      
+    } catch (error) {
+      console.error('❌ Error rejecting appointment:', error);
+      toast.error('❌ Failed to reject: ' + error.message, {
+        duration: 5000,
+      });
+    } finally {
+      setActionLoading(prev => {
+        const newState = { ...prev };
+        delete newState[appointmentId];
+        return newState;
+      });
+    }
+  };
+
+  // Load appointments when component mounts
+  useEffect(() => {
+    if (isAuthenticated && user) {
+      loadAppointments();
+    }
+  }, [isAuthenticated, user]);
 
   // Save functions
   const saveAbout = async () => {
@@ -1145,91 +1363,148 @@ const DoctorSelfProfilePage = () => {
             <TabsContent value="appointments" className="space-y-6">
               <Card className="shadow-soft border-0">
                 <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Calendar className="h-5 w-5 text-primary" />
-                    My Appointments
-                    {loadingAppointments && <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-primary ml-2"></div>}
+                  <CardTitle className="flex items-center justify-between">
+                    <span className="flex items-center gap-2">
+                      <Calendar className="h-5 w-5 text-primary" />
+                      My Appointments
+                    </span>
+                    <Button onClick={loadAppointments} disabled={appointmentsLoading} size="sm">
+                      {appointmentsLoading ? (
+                        <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-current mr-2" />
+                      ) : (
+                        <Clock className="h-4 w-4 mr-2" />
+                      )}
+                      Refresh
+                    </Button>
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  {loadingAppointments ? (
+                  {appointmentsLoading ? (
                     <div className="flex items-center justify-center py-8">
-                      <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-                      <span className="ml-2 text-muted-foreground">Loading appointments...</span>
+                      <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary" />
+                      <span className="ml-2">Loading appointments...</span>
                     </div>
                   ) : (
-                    <div className="space-y-4">
-                      {bookedAppointments.length === 0 ? (
-                        <div className="text-center py-8 text-muted-foreground">
-                          <Calendar className="h-16 w-16 mx-auto mb-4 opacity-50" />
-                          <p>No appointments scheduled yet.</p>
-                        </div>
-                      ) : (
-                        bookedAppointments.map((appointment) => (
-                          <div key={appointment.id} className="border rounded-lg p-4 hover:shadow-md transition-shadow">
-                            <div className="flex justify-between items-start mb-3">
-                              <div>
-                                <h3 className="font-semibold text-lg">{appointment.patientName}</h3>
-                                <p className="text-sm text-muted-foreground">{appointment.patientEmail}</p>
-                                <p className="text-sm text-muted-foreground">{appointment.phone}</p>
-                              </div>
-                              <div className="text-right">
-                                <div className="font-medium">{appointment.date}</div>
-                                <div className="text-sm text-muted-foreground">{appointment.time}</div>
-                                <Badge 
-                                  variant={appointment.status === 'Confirmed' ? 'default' : 'secondary'}
-                                  className="mt-1"
-                                >
-                                  {appointment.status}
-                                </Badge>
-                              </div>
-                            </div>
-                            <div className="space-y-2">
-                              <div className="flex items-center gap-2">
-                                <Badge variant="outline">{appointment.type}</Badge>
-                              </div>
-                              <div>
-                                <p className="text-sm"><strong>Reason:</strong> {appointment.reason}</p>
-                              </div>
-                              <div className="flex gap-2 mt-3">
-                                <Button size="sm" variant="outline">
-                                  View Details
-                                </Button>
-                                <Button size="sm" variant="outline">
-                                  Reschedule
-                                </Button>
-                                {appointment.status === 'Pending' && (
-                                  <>
-                                    <Button size="sm" variant="default">
-                                      Confirm
-                                    </Button>
-                                    <Button size="sm" variant="destructive">
-                                      Decline
-                                    </Button>
-                                  </>
-                                )}
-                              </div>
-                            </div>
+                    <Tabs defaultValue="pending" className="space-y-4">
+                      <div className="flex items-center justify-center mb-6">
+                        <TabsList className="grid grid-cols-4 w-auto">
+                          <TabsTrigger value="pending" className="text-xs px-3">
+                            Pending ({appointments.pending.length})
+                          </TabsTrigger>
+                          <TabsTrigger value="upcoming" className="text-xs px-3">
+                            Upcoming ({appointments.upcoming.length})
+                          </TabsTrigger>
+                          <TabsTrigger value="completed" className="text-xs px-3">
+                            Completed ({appointments.completed.length})
+                          </TabsTrigger>
+                          <TabsTrigger value="cancelled" className="text-xs px-3">
+                            Cancelled ({appointments.cancelled.length})
+                          </TabsTrigger>
+                        </TabsList>
+                      </div>
+
+                      {/* Pending Appointments Tab */}
+                      <TabsContent value="pending" className="space-y-4">
+                        {appointments.pending.length === 0 ? (
+                          <div className="text-center py-8 text-muted-foreground">
+                            <Clock className="h-16 w-16 mx-auto mb-4 opacity-50" />
+                            <p>No pending appointment requests</p>
+                            <p className="text-sm">Patient requests will appear here for your approval</p>
                           </div>
-                        ))
-                      )}
-                    </div>
+                        ) : (
+                          <div className="space-y-4">
+                            <h3 className="font-medium text-sm text-muted-foreground">PENDING APPROVAL ({appointments.pending.length})</h3>
+                            {appointments.pending.map((appointment) => (
+                              <AppointmentCard 
+                                key={appointment._id} 
+                                appointment={appointment}
+                                onApprove={() => handleApproveAppointment(appointment._id)}
+                                onReject={() => handleRejectAppointment(appointment._id)}
+                                isLoading={actionLoading[appointment._id]}
+                                showActions={true}
+                              />
+                            ))}
+                          </div>
+                        )}
+                      </TabsContent>
+
+                      {/* Upcoming Appointments Tab */}
+                      <TabsContent value="upcoming" className="space-y-4">
+                        {appointments.upcoming.length === 0 ? (
+                          <div className="text-center py-8 text-muted-foreground">
+                            <Calendar className="h-16 w-16 mx-auto mb-4 opacity-50" />
+                            <p>No upcoming appointments</p>
+                            <p className="text-sm">Confirmed appointments will appear here</p>
+                          </div>
+                        ) : (
+                          <div className="space-y-4">
+                            <h3 className="font-medium text-sm text-muted-foreground">UPCOMING APPOINTMENTS ({appointments.upcoming.length})</h3>
+                            {appointments.upcoming.map((appointment) => (
+                              <AppointmentCard key={appointment._id} appointment={appointment} />
+                            ))}
+                          </div>
+                        )}
+                      </TabsContent>
+
+                      {/* Completed Appointments Tab */}
+                      <TabsContent value="completed" className="space-y-4">
+                        {appointments.completed.length === 0 ? (
+                          <div className="text-center py-8 text-muted-foreground">
+                            <CheckCircle className="h-16 w-16 mx-auto mb-4 opacity-50" />
+                            <p>No completed appointments</p>
+                            <p className="text-sm">Completed appointments will appear here</p>
+                          </div>
+                        ) : (
+                          <div className="space-y-4">
+                            <h3 className="font-medium text-sm text-muted-foreground">COMPLETED ({appointments.completed.length})</h3>
+                            {appointments.completed.map((appointment) => (
+                              <AppointmentCard key={appointment._id} appointment={appointment} />
+                            ))}
+                          </div>
+                        )}
+                      </TabsContent>
+
+                      {/* Cancelled/Rejected Appointments Tab */}
+                      <TabsContent value="cancelled" className="space-y-4">
+                        {appointments.cancelled.length === 0 ? (
+                          <div className="text-center py-8 text-muted-foreground">
+                            <XCircle className="h-16 w-16 mx-auto mb-4 opacity-50" />
+                            <p>No cancelled appointments</p>
+                            <p className="text-sm">Cancelled or rejected appointments will appear here</p>
+                          </div>
+                        ) : (
+                          <div className="space-y-4">
+                            <h3 className="font-medium text-sm text-muted-foreground">CANCELLED/REJECTED ({appointments.cancelled.length})</h3>
+                            {appointments.cancelled.map((appointment) => (
+                              <AppointmentCard key={appointment._id} appointment={appointment} />
+                            ))}
+                          </div>
+                        )}
+                      </TabsContent>
+                    </Tabs>
                   )}
                 </CardContent>
               </Card>
             </TabsContent>
 
             <TabsContent value="slots" className="space-y-6">
-              <Card className="shadow-soft border-0 mb-4">
-                <CardContent className="p-4">
-                  <div className="text-sm text-muted-foreground">
-                    <strong>Debug Info:</strong> Doctor ID: {user?.id || user?._id || 'Not found'} | 
-                    User Type: {user?.userType || 'Unknown'} | 
-                    Name: {user?.firstName} {user?.lastName}
+              <Card className="shadow-soft border-0">
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Calendar className="h-5 w-5 text-primary" />
+                    Manage Your Available Slots
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="mb-4 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                    <h4 className="font-medium text-blue-900 mb-2">📅 Slot Management</h4>
+                    <p className="text-blue-800 text-sm">
+                      Create time slots when you're available for appointments. Patients can book these slots, and you can approve or reject their requests.
+                    </p>
                   </div>
+                  <SlotManager doctorId={user?.id || user?._id} />
                 </CardContent>
               </Card>
-              <SimpleSlotManager doctorId={user?.id || user?._id} />
             </TabsContent>
 
           </Tabs>

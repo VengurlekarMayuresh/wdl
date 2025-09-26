@@ -46,14 +46,22 @@ const userSchema = new mongoose.Schema({
   },
   
   // Contact Information
+  countryCode: {
+    type: String,
+    default: '+1',
+    enum: ['+1', '+91', '+44', '+33', '+49', '+86', '+81', '+61', '+55', '+52', '+39', '+34', '+7', '+90', '+82', '+31', '+46', '+47', '+45', '+358', '+41', '+43', '+32', '+30', '+48', '+420', '+36', '+40', '+421', '+385', '+386', '+385', '+381', '+382', '+383', '+385', '+387', '+354', '+372', '+371', '+370'],
+    trim: true
+  },
   phone: {
     type: String,
     validate: {
       validator: function(v) {
-        return !v || validator.isMobilePhone(v, 'any');
+        // Allow empty or validate 10-15 digits
+        return !v || /^[0-9]{10,15}$/.test(v);
       },
-      message: 'Please enter a valid phone number'
-    }
+      message: 'Please enter a valid phone number (10-15 digits)'
+    },
+    trim: true
   },
   dateOfBirth: {
     type: Date
@@ -133,6 +141,12 @@ userSchema.virtual('age').get(function() {
     age--;
   }
   return age;
+});
+
+// Virtual for full phone number
+userSchema.virtual('fullPhoneNumber').get(function() {
+  if (!this.phone) return null;
+  return `${this.countryCode || '+1'}${this.phone}`;
 });
 
 // Index for better query performance

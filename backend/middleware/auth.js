@@ -40,6 +40,21 @@ export const authenticate = async (req, res, next) => {
       });
     }
 
+    // Development mode: Handle mock tokens
+    if (process.env.NODE_ENV === 'development' && token.startsWith('eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJkb2N0b3JfMTIzNDU2')) {
+      console.log('🔧 Development mode: Using mock authentication');
+      // Create mock user for development
+      req.user = {
+        _id: 'doctor_123456',
+        firstName: 'Dr. John',
+        lastName: 'Smith',
+        email: 'doctor@test.com',
+        userType: 'doctor',
+        isActive: true
+      };
+      return next();
+    }
+
     // Verify token
     const decoded = verifyToken(token);
     

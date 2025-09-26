@@ -143,10 +143,17 @@ router.post('/register', rateLimitAuth(10, 60 * 60 * 1000), async (req, res) => 
 // @access  Public
 router.post('/login', rateLimitAuth(), async (req, res) => {
   try {
+    console.log('🚀 LOGIN ATTEMPT - Full request body:', req.body);
     const { email, password } = req.body;
+    
+    console.log('📧 Extracted email:', email);
+    console.log('🔑 Password provided:', password ? '[PRESENT]' : '[MISSING]');
+    console.log('🔑 Password length:', password ? password.length : 0);
+    console.log('🔑 Password value (DEBUG):', password); // REMOVE THIS IN PRODUCTION!
 
     // Validate input
     if (!email || !password) {
+      console.log('❌ LOGIN FAILED: Missing email or password');
       return res.status(400).json({
         success: false,
         message: 'Please provide email and password'
@@ -154,14 +161,24 @@ router.post('/login', rateLimitAuth(), async (req, res) => {
     }
 
     // Check if user exists (include password for comparison)
+    console.log('🔍 Searching for user with email:', email.toLowerCase());
     const user = await User.findOne({ email: email.toLowerCase() }).select('+password');
     
     if (!user) {
+      console.log('❌ LOGIN FAILED: User not found for email:', email.toLowerCase());
       return res.status(401).json({
         success: false,
         message: 'Invalid credentials'
       });
     }
+    
+    console.log('✅ User found!');
+    console.log('👤 User ID:', user._id);
+    console.log('👤 User email:', user.email);
+    console.log('👤 User type:', user.userType);
+    console.log('👤 User active:', user.isActive);
+    console.log('🔒 Stored password hash exists:', !!user.password);
+    console.log('🔒 Stored password hash length:', user.password ? user.password.length : 0);
 
     // Check if account is locked
     if (user.isLocked()) {
@@ -180,9 +197,16 @@ router.post('/login', rateLimitAuth(), async (req, res) => {
     }
 
     // Compare password
+    console.log('🔍 Starting password comparison...');
+    console.log('🔑 Input password:', password);
+    console.log('🔒 Stored hash:', user.password.substring(0, 20) + '...');
+    
     const isPasswordValid = await user.comparePassword(password);
+    console.log('🧪 Password comparison result:', isPasswordValid);
     
     if (!isPasswordValid) {
+      console.log('❌ LOGIN FAILED: Password does not match');
+      
       // Increment login attempts
       await user.incLoginAttempts();
       
@@ -191,6 +215,8 @@ router.post('/login', rateLimitAuth(), async (req, res) => {
         message: 'Invalid credentials'
       });
     }
+    
+    console.log('✅ Password validation successful!');
 
     // Reset login attempts on successful login
     if (user.loginAttempts && user.loginAttempts > 0) {
