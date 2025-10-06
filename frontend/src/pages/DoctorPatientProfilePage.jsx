@@ -439,9 +439,7 @@ const DoctorPatientProfilePage = () => {
                       <div className="flex gap-2 items-center">
                         <Badge variant={m.isActive ? 'success' : 'secondary'}>{m.isActive ? 'Active' : 'Inactive'}</Badge>
                         <Button size="sm" variant="outline" onClick={() => startEditMedication(m)}>Edit</Button>
-                        {doctorProfile && m.createdByDoctorId && (m.createdByDoctorId === doctorProfile._id || m.createdByDoctorId?.toString?.() === doctorProfile._id?.toString?.()) ? (
-                          <Button size="sm" variant="destructive" onClick={() => deleteMedication(m._id)}>Delete</Button>
-                        ) : null}
+                        <Button size="sm" variant="destructive" onClick={() => deleteMedication(m._id)}>Delete</Button>
                       </div>
                     </div>
                   )}

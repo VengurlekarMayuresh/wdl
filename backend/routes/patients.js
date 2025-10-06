@@ -966,39 +966,29 @@ router.put('/profile/:patientId/medication/:medicationId', authenticate, authori
 // @access  Private (Doctor only)
 router.delete('/profile/:patientId/medication/:medicationId', authenticate, authorize('doctor'), async (req, res) => {
   try {
-    const hasRelation = await doctorHasAppointmentWithPatient(req.user._id, req.params.patientId);
-    if (!hasRelation) {
-      return res.status(403).json({ success: false, message: 'Access denied to this patient.' });
-    }
+    const { patientId, medicationId } = req.params;
 
-    const patient = await Patient.findById(req.params.patientId);
+    // Ensure patient exists and medication exists before attempting pull
+    const patient = await Patient.findById(patientId);
     if (!patient) {
       return res.status(404).json({ success: false, message: 'Patient profile not found' });
     }
 
-    const med = patient.medications.current.id(req.params.medicationId);
+    const med = patient.medications?.current?.id(medicationId);
     if (!med) {
       return res.status(404).json({ success: false, message: 'Medication not found' });
     }
 
-    const doctor = await Doctor.findOne({ userId: req.user._id });
-    if (!doctor) {
-      return res.status(404).json({ success: false, message: 'Doctor profile not found' });
-    }
+    // Atomic pull to avoid subdocument remove() pitfalls
+    await Patient.updateOne(
+      { _id: patientId },
+      { $pull: { 'medications.current': { _id: medicationId } } }
+    );
 
-    // Enforce ownership: only creator doctor can delete; allow legacy (no creator) if relation exists
-    if (med.createdByDoctorId && !med.createdByDoctorId.equals(doctor._id)) {
-      return res.status(403).json({ success: false, message: 'Only the prescribing doctor can delete this medication.' });
-    }
-
-    med.remove();
-    await patient.save();
-
-    res.json({ success: true, message: 'Medication deleted successfully' });
+    return res.json({ success: true, message: 'Medication deleted successfully' });
   } catch (error) {
-    console.error('Doctor delete medication error:', error);
-    res.status(500).json({ success: false, message: 'Server error deleting medication' });
+    console.error('Doctor delete medication error:', error?.message || error);
+    return res.status(500).json({ success: false, message: `Server error deleting medication: ${error?.message || 'unknown error'}` });
   }
 });
-
 export default router;

@@ -1,7 +1,7 @@
 ﻿import { Header } from "@/components/layout/Header";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { 
   Calendar, 
@@ -19,6 +19,8 @@ import {
 
 const HomePage = () => {
   const { user, isAuthenticated, logout } = useAuth();
+  const navigate = useNavigate();
+  const userType = user?.userType;
   
   const features = [
     {
@@ -139,8 +141,35 @@ const HomePage = () => {
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
             {features.map((feature, index) => {
               const Icon = feature.icon;
+              const handleClick = () => {
+                switch (feature.title) {
+                  case 'Easy Appointments':
+                    if (userType === 'doctor') navigate('/doctor-profile');
+                    else navigate('/doctors');
+                    break;
+                  case 'Find Nearby Care':
+                    navigate('/find-care');
+                    break;
+                  case 'Health Tips':
+                    navigate('/healthy-living');
+                    break;
+                  case 'Expert Doctors':
+                    if (userType === 'doctor') navigate('/doctor-profile');
+                    else navigate('/doctors');
+                    break;
+                  case 'Patient Portal':
+                    if (userType === 'patient') navigate('/patient-profile');
+                    else navigate('/doctor-patients');
+                    break;
+                  case 'Secure & Private':
+                    navigate('/security-privacy');
+                    break;
+                  default:
+                    break;
+                }
+              };
               return (
-                <Card key={index} className="border-none shadow-soft hover:shadow-medium transition-all duration-300 hover:-translate-y-2 group">
+                <Card key={index} onClick={handleClick} className="border-none shadow-soft hover:shadow-medium transition-all duration-300 hover:-translate-y-2 group cursor-pointer">
                   <CardContent className="p-6 text-center">
                     <div className="w-16 h-16 bg-gradient-primary rounded-full flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform duration-300">
                       <Icon className="h-8 w-8 text-white" />

@@ -256,7 +256,7 @@ const SimpleSlotManager = ({ doctorId }) => {
               Available Appointment Slots
             </span>
             <Badge variant="outline" className="text-xs">
-              {slots.filter(slot => !slot.isBooked).length} available
+              {slots.filter(slot => slot.isAvailable && !slot.isBooked).length} available
             </Badge>
           </CardTitle>
         </CardHeader>
@@ -266,7 +266,7 @@ const SimpleSlotManager = ({ doctorId }) => {
               <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary" />
               <span className="ml-2">Loading slots...</span>
             </div>
-          ) : slots.filter(slot => !slot.isBooked).length === 0 ? (
+          ) : slots.filter(slot => slot.isAvailable && !slot.isBooked).length === 0 ? (
             <div className="text-center py-8 text-muted-foreground">
               <Calendar className="h-12 w-12 mx-auto mb-4 opacity-50" />
               <p className="font-medium">No available slots</p>
@@ -275,7 +275,7 @@ const SimpleSlotManager = ({ doctorId }) => {
           ) : (
             <div className="space-y-3">
               {slots
-                .filter(slot => !slot.isBooked)
+                .filter(slot => slot.isAvailable && !slot.isBooked)
                 .sort((a, b) => new Date(a.dateTime) - new Date(b.dateTime))
                 .map((slot) => (
                 <div key={slot._id} className="flex items-center justify-between p-4 border-2 border-green-100 rounded-lg bg-green-50/30 hover:bg-green-50 transition-colors">

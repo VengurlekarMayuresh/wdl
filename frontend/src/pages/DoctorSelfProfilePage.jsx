@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { Header } from "@/components/layout/Header";
 import { useAuth } from "@/contexts/AuthContext";
 import { doctorAPI, authAPI, appointmentsAPI, slotsAPI } from "@/services/api";
+import { reviewsAPI } from "@/services/api";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -195,6 +196,31 @@ const DoctorSelfProfilePage = () => {
   // Dynamic data states
   const [reviews, setReviews] = useState([]);
   const [loadingReviews, setLoadingReviews] = useState(false);
+  const [doctorProfile, setDoctorProfile] = useState(null);
+  
+  // Load my doctor profile and reviews
+  useEffect(() => {
+    (async () => {
+      try {
+        const d = await doctorAPI.getProfile();
+        setDoctorProfile(d);
+        setLoadingReviews(true);
+        try {
+          const res = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:5000/api'}/doctors/${d._id}/reviews`, {
+            headers: { 'Accept': 'application/json', ...(localStorage.getItem('token') ? { Authorization: `Bearer ${localStorage.getItem('token')}` } : {}) }
+          });
+          const data = await res.json();
+          if (data?.success && data?.data?.reviews) setReviews(data.data.reviews);
+        } catch (e) {
+          console.log('Load reviews failed', e);
+        } finally {
+          setLoadingReviews(false);
+        }
+      } catch (e) {
+        console.log('Load doctor profile failed', e);
+      }
+    })();
+  }, []);
   
   // Appointment management state
   const [appointments, setAppointments] = useState({
@@ -1302,47 +1328,29 @@ const DoctorSelfProfilePage = () => {
             <TabsContent value="reviews" className="space-y-6">
               <Card className="shadow-soft border-0">
                 <CardHeader>
-                  <CardTitle className="flex items-center justify-between">
-                    <span className="flex items-center gap-2">
-                      <Star className="h-5 w-5 text-primary" />
-                      Patient Reviews
-                    </span>
-                    <div className="flex items-center gap-2">
-                      <div className="flex items-center gap-1 text-yellow-500">
-                        <Star className="h-4 w-4 fill-current" />
-                        <span className="font-medium">{doctorData.rating}</span>
-                      </div>
-                      <span className="text-muted-foreground">({doctorData.reviews} reviews)</span>
-                    </div>
+                  <CardTitle className="flex items-center gap-2">
+                    <Star className="h-5 w-5 text-yellow-500" />
+                    Patient Reviews
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
                   {loadingReviews ? (
-                    <div className="flex items-center justify-center py-8">
-                      <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-                      <span className="ml-2 text-muted-foreground">Loading reviews...</span>
-                    </div>
+                    <div className="py-8 text-center text-muted-foreground">Loading reviews...</div>
                   ) : reviews.length === 0 ? (
-                    <div className="text-center py-8 text-muted-foreground">
-                      <Star className="h-16 w-16 mx-auto mb-4 opacity-50" />
-                      <p>No reviews yet. Keep providing excellent care!</p>
-                    </div>
+                    <div className="py-8 text-center text-muted-foreground">No reviews yet</div>
                   ) : (
-                    <div className="space-y-6">
-                      {reviews.map((review) => (
-                        <div key={review.id} className="border-b border-border last:border-0 pb-6 last:pb-0">
-                          <div className="flex justify-between items-start mb-2">
-                            <div>
-                              <div className="font-medium">{review.patientName}</div>
-                              <div className="flex items-center gap-1 text-yellow-500">
-                                {[...Array(review.rating)].map((_, i) => (
-                                  <Star key={i} className="h-3 w-3 fill-current" />
-                                ))}
-                              </div>
+                    <div className="space-y-3">
+                      {reviews.map((r, idx) => (
+                        <div key={idx} className="p-4 border rounded-md">
+                          <div className="flex items-center justify-between mb-1">
+                            <div className="text-sm font-medium">{r.patientName || 'Patient'}</div>
+                            <div className="flex items-center gap-1 text-yellow-500">
+                              <Star className="h-4 w-4" />
+                              <span className="text-sm">{r.rating}.0</span>
                             </div>
-                            <span className="text-sm text-muted-foreground">{review.date}</span>
                           </div>
-                          <p className="text-muted-foreground">{review.comment}</p>
+                          {r.comment && <div className="text-sm text-muted-foreground">{r.comment}</div>}
+                          <div className="text-xs text-muted-foreground mt-1">{new Date(r.date).toLocaleDateString()}</div>
                         </div>
                       ))}
                     </div>

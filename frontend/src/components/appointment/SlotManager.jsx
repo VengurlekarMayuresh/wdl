@@ -160,6 +160,9 @@ const SlotManager = ({ doctorId }) => {
     );
   }
 
+  // Only show slots that are available; hide slots marked as unavailable
+  const visibleSlots = Array.isArray(slots) ? slots.filter((slot) => slot.isAvailable) : [];
+
   return (
     <div className="space-y-6">
       <Card>
@@ -259,14 +262,14 @@ const SlotManager = ({ doctorId }) => {
 
           {/* Slots List */}
           <div className="space-y-4">
-            {slots.length === 0 ? (
+            {visibleSlots.length === 0 ? (
               <div className="text-center py-8 text-muted-foreground">
                 <Calendar className="h-12 w-12 mx-auto mb-4 opacity-50" />
                 <p>No appointment slots created yet.</p>
                 <p className="text-sm">Add your first slot to start accepting appointments.</p>
               </div>
             ) : (
-              slots.map((slot) => {
+              visibleSlots.map((slot) => {
                 const status = getSlotStatus(slot);
                 return (
                   <Card key={slot._id} className="border-none shadow-sm">

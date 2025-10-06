@@ -19,6 +19,7 @@ import DoctorAppointmentsPage from "./pages/DoctorAppointmentsPage";
 import PatientAppointmentsPage from "./pages/PatientAppointmentsPage";
 import DoctorPatientsPage from "./pages/DoctorPatientsPage";
 import DoctorPatientProfilePage from "./pages/DoctorPatientProfilePage";
+import SecurityPrivacyPage from "./pages/SecurityPrivacyPage";
 import BlogPostPage from "./pages/BlogPostPage";
 import NotFound from "./pages/NotFound";
 
@@ -45,6 +46,7 @@ const App = () => (
             <Route path="/patient-appointments" element={<PatientAppointmentsPage />} />
             <Route path="/doctor-patients" element={<DoctorPatientsPage />} />
             <Route path="/doctor-patient/:patientId" element={<DoctorPatientProfilePage />} />
+            <Route path="/security-privacy" element={<SecurityPrivacyPage />} />
             <Route path="/healthy-living" element={<HealthyLivingPage />} />
             <Route path="/blog/:id" element={<BlogPostPage />} />
             <Route path="/test-slots" element={<TestSlotsPage />} />
