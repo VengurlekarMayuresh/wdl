@@ -1,8 +1,6 @@
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { 
-  Search, 
   User, 
   Menu, 
   X, 
@@ -18,7 +16,6 @@ import { useState, useEffect } from "react";
 import logoImg from "@/assets/logo.png";
 
 export const Header = ({ 
-  showSearch = true, 
   isAuthenticated = false, 
   userInitial = "U",
   userType = 'patient',
@@ -94,25 +91,8 @@ export const Header = ({
           </Link>
 
           {/* Desktop Navigation */}
-          <div className="hidden lg:flex items-center gap-4 flex-1 justify-end animate-slideInRight">
-            {showSearch && (
-              <div className="relative flex-1 max-w-md">
-                <Input
-                  type="text"
-                  placeholder="Search doctors, specialties..."
-                  className="bg-white/10 border-white/30 text-white placeholder:text-white/70 pr-10 focus:bg-white/20"
-                />
-                <Button
-                  size="icon"
-                  variant="ghost"
-                  className="absolute right-2 top-1/2 -translate-y-1/2 h-6 w-6 text-white hover:text-white/80"
-                >
-                  <Search className="h-4 w-4" />
-                </Button>
-              </div>
-            )}
-
-            <nav className="flex items-center gap-2">
+          <div className="hidden lg:flex items-center gap-6 flex-1 justify-end animate-slideInRight">
+            <nav className="flex items-center gap-4">
               {navLinks.map(({ to, label, icon: Icon }) => {
                 const isActive = location.pathname === to;
                 return (
@@ -121,7 +101,7 @@ export const Header = ({
                       variant="ghost"
                       className={`text-white hover:bg-white/20 transition-all ${
                         isActive ? "bg-white/20" : ""
-                      }`}
+                      } px-3 py-2`}
                     >
                       <Icon className="h-4 w-4" />
                       {label}
@@ -197,23 +177,6 @@ export const Header = ({
         {/* Mobile Menu */}
         {isMobileMenuOpen && (
           <div className="lg:hidden bg-primary-dark border-t border-white/20 py-4">
-            {showSearch && (
-              <div className="relative mb-4">
-                <Input
-                  type="text"
-                  placeholder="Search..."
-                  className="bg-white/10 border-white/30 text-white placeholder:text-white/70 pr-10"
-                />
-                <Button
-                  size="icon"
-                  variant="ghost"
-                  className="absolute right-2 top-1/2 -translate-y-1/2 h-6 w-6 text-white"
-                >
-                  <Search className="h-4 w-4" />
-                </Button>
-              </div>
-            )}
-            
             <nav className="flex flex-col gap-2 mb-4">
               {navLinks.map(({ to, label, icon: Icon }) => {
                 const isActive = location.pathname === to;

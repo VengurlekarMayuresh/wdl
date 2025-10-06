@@ -17,7 +17,16 @@ const appointmentSchema = new mongoose.Schema({
   slotId: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Slot',
-    required: true
+    required: false
+  },
+  
+  // If the patient requests a custom date/time (no slot)
+  isCustomRequest: {
+    type: Boolean,
+    default: false
+  },
+  requestedDateTime: {
+    type: Date
   },
   
   // Appointment details

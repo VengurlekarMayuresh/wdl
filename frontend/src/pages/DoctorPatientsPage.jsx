@@ -22,6 +22,8 @@ import {
   MessageSquare
 } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
+import { appointmentsAPI } from '@/services/api';
+import PatientProfileDialog from '@/components/patient/PatientProfileDialog';
 
 const DoctorPatientsPage = () => {
   const { user, isAuthenticated, logout } = useAuth();
@@ -29,95 +31,47 @@ const DoctorPatientsPage = () => {
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedFilter, setSelectedFilter] = useState('all');
+  const [error, setError] = useState('');
+  const [profileOpen, setProfileOpen] = useState(false);
+  const [profilePatientId, setProfilePatientId] = useState(null);
 
-  // Mock data for patients - replace with API call
-  const mockPatients = [
-    {
-      id: 1,
-      firstName: 'Sarah',
-      lastName: 'Johnson',
-      email: 'sarah.johnson@email.com',
-      phone: '+1 (555) 123-4567',
-      profilePicture: null,
-      dateOfBirth: '1985-03-15',
-      lastAppointment: '2024-01-15',
-      nextAppointment: '2024-02-10',
-      totalAppointments: 8,
-      status: 'active',
-      priority: 'high',
-      conditions: ['Hypertension', 'Diabetes Type 2'],
-      lastVisitNotes: 'Patient responding well to treatment. Continue current medication.',
-      contactPreference: 'email'
-    },
-    {
-      id: 2,
-      firstName: 'Michael',
-      lastName: 'Chen',
-      email: 'michael.chen@email.com',
-      phone: '+1 (555) 234-5678',
-      profilePicture: null,
-      dateOfBirth: '1978-07-22',
-      lastAppointment: '2024-01-20',
-      nextAppointment: null,
-      totalAppointments: 12,
-      status: 'active',
-      priority: 'medium',
-      conditions: ['Anxiety', 'Insomnia'],
-      lastVisitNotes: 'Patient reports improvement in sleep patterns. Reduce medication dosage.',
-      contactPreference: 'phone'
-    },
-    {
-      id: 3,
-      firstName: 'Emily',
-      lastName: 'Rodriguez',
-      email: 'emily.rodriguez@email.com',
-      phone: '+1 (555) 345-6789',
-      profilePicture: null,
-      dateOfBirth: '1992-11-08',
-      lastAppointment: '2024-01-25',
-      nextAppointment: '2024-02-15',
-      totalAppointments: 3,
-      status: 'new',
-      priority: 'low',
-      conditions: ['Allergies', 'Asthma'],
-      lastVisitNotes: 'New patient. Established care plan and prescribed inhaler.',
-      contactPreference: 'email'
-    },
-    {
-      id: 4,
-      firstName: 'David',
-      lastName: 'Park',
-      email: 'david.park@email.com',
-      phone: '+1 (555) 456-7890',
-      profilePicture: null,
-      dateOfBirth: '1970-12-03',
-      lastAppointment: '2024-01-10',
-      nextAppointment: '2024-02-05',
-      totalAppointments: 15,
-      status: 'active',
-      priority: 'high',
-      conditions: ['Cardiovascular Disease', 'High Cholesterol'],
-      lastVisitNotes: 'Patient requires more frequent monitoring. Schedule follow-up in 2 weeks.',
-      contactPreference: 'phone'
-    }
-  ];
+  // Transform backend patient structure to UI-friendly shape
+  const transformPatient = (p) => {
+    const ui = {
+      id: p._id,
+      firstName: p.userId?.firstName || 'Patient',
+      lastName: p.userId?.lastName || '',
+      email: p.userId?.email || 'N/A',
+      phone: p.userId?.phone || 'N/A',
+      profilePicture: p.userId?.profilePicture || null,
+      dateOfBirth: p.dateOfBirth || null,
+      totalAppointments: p.stats?.totalAppointments || 0,
+      lastAppointment: p.stats?.lastAppointment?.appointmentDate || null,
+      nextAppointment: p.stats?.nextAppointment?.appointmentDate || null,
+      conditions: (p.medicalHistory?.currentConditions || []).map(c => c?.condition).filter(Boolean),
+    };
+    // Derive status and priority
+    ui.status = ui.totalAppointments > 0 ? 'active' : 'new';
+    const pending = p.stats?.pendingAppointments || 0;
+    const completed = p.stats?.completedAppointments || 0;
+    ui.priority = pending > 0 ? 'high' : (completed > 5 ? 'medium' : 'low');
+    // Last visit notes not available from this endpoint; fallback to reasonForVisit
+    ui.lastVisitNotes = p.stats?.lastAppointment?.reasonForVisit || '';
+    return ui;
+  };
 
   useEffect(() => {
-    // Simulate API call
     const fetchPatients = async () => {
       setLoading(true);
+      setError('');
       try {
-        // Replace with actual API call
-        // const response = await patientAPI.getDoctorPatients();
-        // setPatients(response.data);
-        
-        // For now, use mock data
-        setTimeout(() => {
-          setPatients(mockPatients);
-          setLoading(false);
-        }, 1000);
+        const data = await appointmentsAPI.getDoctorPatients();
+        const items = (data.patients || []).map(transformPatient);
+        setPatients(items);
       } catch (error) {
         console.error('Error fetching patients:', error);
+        setError(error.message || 'Failed to load patients');
+      } finally {
         setLoading(false);
       }
     };
@@ -161,8 +115,10 @@ const DoctorPatientsPage = () => {
   };
 
   const calculateAge = (dateOfBirth) => {
-    const today = new Date();
+    if (!dateOfBirth) return '-';
     const birthDate = new Date(dateOfBirth);
+    if (isNaN(birthDate.getTime())) return '-';
+    const today = new Date();
     let age = today.getFullYear() - birthDate.getFullYear();
     const monthDiff = today.getMonth() - birthDate.getMonth();
     
@@ -218,6 +174,14 @@ const DoctorPatientsPage = () => {
             </div>
           </div>
 
+          {error && (
+            <Card className="mb-6 border-red-200">
+              <CardContent className="p-4">
+                <div className="text-sm text-red-600">{error}</div>
+              </CardContent>
+            </Card>
+          )}
+
           {/* Stats Cards */}
           <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-6">
             <Card className="border-none shadow-soft">
@@ -258,7 +222,7 @@ const DoctorPatientsPage = () => {
                   </div>
                   <div>
                     <p className="text-2xl font-bold text-foreground">
-                      {patients.filter(p => p.nextAppointment).length}
+                      {patients.filter(p => !!p.nextAppointment).length}
                     </p>
                     <p className="text-sm text-muted-foreground">Upcoming Appointments</p>
                   </div>
@@ -417,14 +381,19 @@ const DoctorPatientsPage = () => {
 
                 {/* Action Buttons */}
                 <div className="flex gap-2 mt-4">
-                  <Button variant="outline" className="flex-1" size="sm">
+                  <Button 
+                    variant="outline" 
+                    className="flex-1" 
+                    size="sm"
+                    onClick={() => { setProfilePatientId(patient.id); setProfileOpen(true); }}
+                  >
                     <Eye className="h-4 w-4 mr-2" />
                     View Profile
                   </Button>
                   <Button variant="outline" size="sm">
                     <MessageSquare className="h-4 w-4" />
                   </Button>
-                  <Button variant="outline" size="sm">
+                  <Button variant="outline" size="sm" onClick={() => window.location.assign('/doctor-appointments')}>
                     <Calendar className="h-4 w-4" />
                   </Button>
                 </div>
@@ -460,6 +429,13 @@ const DoctorPatientsPage = () => {
           </div>
         )}
       </div>
+
+      {/* Patient Profile Dialog */}
+      <PatientProfileDialog 
+        open={profileOpen} 
+        onClose={() => setProfileOpen(false)} 
+        patientId={profilePatientId}
+      />
     </div>
   );
 };

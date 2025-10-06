@@ -666,6 +666,54 @@ export const appointmentsAPI = {
   },
 };
 
+// Doctor-Patients API (doctor authorized access to patient profiles)
+export const doctorPatientsAPI = {
+  // Get a patient's profile by ID (doctor-only)
+  async getPatientProfile(patientId) {
+    const response = await apiRequest(`/patients/profile/by-id/${patientId}`);
+    if (response.success && response.data) {
+      return response.data.patient;
+    }
+    throw new Error(response.message || 'Failed to fetch patient profile');
+  },
+
+  // Update patient's health overview (doctor-only)
+  async updateHealthOverview(patientId, healthData) {
+    const response = await apiRequest(`/patients/profile/${patientId}/health-overview`, {
+      method: 'PUT',
+      body: JSON.stringify(healthData),
+    });
+    if (response.success && response.data) {
+      return response.data;
+    }
+    throw new Error(response.message || 'Failed to update health overview');
+  },
+
+  // Add a medication to patient's current medications (doctor-only)
+  async addMedication(patientId, medication) {
+    const response = await apiRequest(`/patients/profile/${patientId}/medication`, {
+      method: 'POST',
+      body: JSON.stringify(medication),
+    });
+    if (response.success && response.data) {
+      return response.data.medication;
+    }
+    throw new Error(response.message || 'Failed to add medication');
+  },
+
+  // Update an existing medication (doctor-only)
+  async updateMedication(patientId, medicationId, updates) {
+    const response = await apiRequest(`/patients/profile/${patientId}/medication/${medicationId}`, {
+      method: 'PUT',
+      body: JSON.stringify(updates),
+    });
+    if (response.success && response.data) {
+      return response.data.medication;
+    }
+    throw new Error(response.message || 'Failed to update medication');
+  },
+};
+
 // Get stored user
 export const getStoredUser = () => {
   const userStr = localStorage.getItem('user');
