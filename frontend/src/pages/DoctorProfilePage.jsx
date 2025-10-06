@@ -9,6 +9,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Separator } from '@/components/ui/separator';
 import { Calendar, Stethoscope, Award, Clock, Star, MapPin, Phone, Mail, UserCircle2, BookOpen, Heart, Shield, Users, MessageCircle, Share2, ArrowLeft, CheckCircle, Video, Building, GraduationCap, Languages, DollarSign, AlertCircle } from 'lucide-react';
 import { doctorAPI, slotsAPI, appointmentsAPI } from '@/services/api';
+import { toast } from '@/components/ui/sonner';
 
 const DoctorProfilePage = () => {
   const { user, isAuthenticated, logout } = useAuth();
@@ -19,6 +20,7 @@ const DoctorProfilePage = () => {
   const [error, setError] = useState('');
   const [showBookingModal, setShowBookingModal] = useState(false);
   const [selectedTab, setSelectedTab] = useState('overview');
+  const [reviews, setReviews] = useState([]);
   const [doctorSlots, setDoctorSlots] = useState([]);
   const [slotsLoading, setSlotsLoading] = useState(false);
   const [selectedSlot, setSelectedSlot] = useState(null);
@@ -34,8 +36,14 @@ const DoctorProfilePage = () => {
         setLoading(true);
         const doc = await doctorAPI.getById(id);
         setDoctor(doc);
-        // Load slots after doctor is loaded
+        // Load slots and reviews after doctor is loaded
         loadDoctorSlots();
+        try {
+          const r = await doctorAPI.getReviews(id);
+          setReviews(r);
+        } catch (re) {
+          console.log('Reviews load error', re.message);
+        }
       } catch (e) {
         setError(e.message || 'Failed to load doctor');
       } finally {
@@ -468,19 +476,21 @@ const DoctorProfilePage = () => {
                     <CardTitle>Patient Reviews</CardTitle>
                   </CardHeader>
                   <CardContent className="space-y-4">
-                    {mockReviews.map((r) => (
-                      <div key={r.id} className="p-4 rounded-md border">
+                    {reviews.length === 0 ? (
+                      <div className="text-sm text-muted-foreground">No reviews yet</div>
+                    ) : reviews.map((r, idx) => (
+                      <div key={idx} className="p-4 rounded-md border">
                         <div className="flex items-center justify-between mb-1">
                           <div className="flex items-center gap-2">
                             <Users className="h-4 w-4" />
-                            <span className="font-medium">{r.patientName}</span>
+                            <span className="font-medium">{r.patientName || 'Patient'}</span>
                           </div>
                           <div className="flex items-center gap-1 text-yellow-500">
                             <Star className="h-4 w-4" />
                             <span className="text-sm">{r.rating}.0</span>
                           </div>
                         </div>
-                        <p className="text-sm text-muted-foreground">{r.comment}</p>
+                        {r.comment && <p className="text-sm text-muted-foreground">{r.comment}</p>}
                         <div className="text-xs text-muted-foreground mt-2">{new Date(r.date).toLocaleDateString()}</div>
                       </div>
                     ))}

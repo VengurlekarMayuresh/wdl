@@ -142,6 +142,15 @@ const patientSchema = new mongoose.Schema({
       },
       dosage: String,
       frequency: String,
+      // Detailed schedule based on frequency
+      schedule: [{
+        time: String, // e.g., "08:00"
+        mealRelation: {
+          type: String,
+          enum: ['pre-breakfast','post-breakfast','pre-lunch','post-lunch','pre-dinner','post-dinner','with-meal','empty-stomach','other'],
+        },
+        quantity: String // e.g., "1 tablet" or "5 ml"
+      }],
       route: {
         type: String,
         enum: ['oral', 'injection', 'topical', 'inhalation', 'other'],
@@ -154,7 +163,8 @@ const patientSchema = new mongoose.Schema({
       isActive: {
         type: Boolean,
         default: true
-      }
+      },
+      createdByDoctorId: { type: mongoose.Schema.Types.ObjectId, ref: 'Doctor' }
     }],
     
     past: [{

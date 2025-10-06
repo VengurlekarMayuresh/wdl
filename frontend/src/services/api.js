@@ -237,6 +237,15 @@ export const doctorAPI = {
     throw new Error(response.message || 'Failed to fetch doctor');
   },
 
+  // Get doctor reviews (public)
+  async getReviews(id) {
+    const response = await apiRequest(`/doctors/${id}/reviews`);
+    if (response.success && response.data) {
+      return response.data.reviews || response.data;
+    }
+    throw new Error(response.message || 'Failed to fetch doctor reviews');
+  },
+
   // Update doctor profile
   async updateProfile(updates) {
     const response = await apiRequest('/doctors/profile/me', {
@@ -666,6 +675,18 @@ export const appointmentsAPI = {
   },
 };
 
+// Reviews API additions
+export const reviewsAPI = {
+  async submitAppointmentReview(appointmentId, rating, feedback) {
+    const response = await apiRequest(`/appointments/${appointmentId}/review`, {
+      method: 'PUT',
+      body: JSON.stringify({ rating, feedback }),
+    });
+    if (!response.success) throw new Error(response.message || 'Failed to submit review');
+    return true;
+  },
+};
+
 // Doctor-Patients API (doctor authorized access to patient profiles)
 export const doctorPatientsAPI = {
   // Get a patient's profile by ID (doctor-only)
@@ -711,6 +732,17 @@ export const doctorPatientsAPI = {
       return response.data.medication;
     }
     throw new Error(response.message || 'Failed to update medication');
+  },
+
+  // Delete a medication (doctor-only)
+  async deleteMedication(patientId, medicationId) {
+    const response = await apiRequest(`/patients/profile/${patientId}/medication/${medicationId}`, {
+      method: 'DELETE',
+    });
+    if (response.success) {
+      return true;
+    }
+    throw new Error(response.message || 'Failed to delete medication');
   },
 };
 

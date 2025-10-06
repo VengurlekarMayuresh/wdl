@@ -880,7 +880,7 @@ router.post('/profile/:patientId/medication', authenticate, authorize('doctor'),
       return res.status(403).json({ success: false, message: 'Access denied to this patient.' });
     }
 
-    const { name, dosage, frequency, route, startDate, prescribedBy, reason, notes } = req.body;
+    const { name, dosage, frequency, route, startDate, prescribedBy, reason, notes, schedule } = req.body;
     if (!name) {
       return res.status(400).json({ success: false, message: 'Medication name is required' });
     }
@@ -890,16 +890,20 @@ router.post('/profile/:patientId/medication', authenticate, authorize('doctor'),
       return res.status(404).json({ success: false, message: 'Patient profile not found' });
     }
 
+    const doctor = await Doctor.findOne({ userId: req.user._id });
+
     patient.medications.current.push({
       name,
       dosage,
       frequency,
+      schedule: Array.isArray(schedule) ? schedule : [],
       route: route || 'oral',
       startDate: startDate ? new Date(startDate) : new Date(),
       prescribedBy,
       reason,
       notes,
-      isActive: true
+      isActive: true,
+      createdByDoctorId: doctor?._id
     });
 
     await patient.save();
@@ -935,11 +939,13 @@ router.put('/profile/:patientId/medication/:medicationId', authenticate, authori
       return res.status(404).json({ success: false, message: 'Medication not found' });
     }
 
-    const allowedFields = ['name', 'dosage', 'frequency', 'route', 'startDate', 'prescribedBy', 'reason', 'notes', 'isActive'];
+    const allowedFields = ['name', 'dosage', 'frequency', 'route', 'startDate', 'prescribedBy', 'reason', 'notes', 'isActive', 'schedule'];
     Object.keys(req.body).forEach(key => {
       if (allowedFields.includes(key)) {
         if (key === 'startDate' && req.body[key]) {
           medication[key] = new Date(req.body[key]);
+        } else if (key === 'schedule' && Array.isArray(req.body[key])) {
+          medication.schedule = req.body[key];
         } else {
           medication[key] = req.body[key];
         }
@@ -952,6 +958,46 @@ router.put('/profile/:patientId/medication/:medicationId', authenticate, authori
   } catch (error) {
     console.error('Doctor update medication error:', error);
     res.status(500).json({ success: false, message: 'Server error updating medication' });
+  }
+});
+
+// @route   DELETE /api/patients/profile/:patientId/medication/:medicationId
+// @desc    Doctor deletes a current medication
+// @access  Private (Doctor only)
+router.delete('/profile/:patientId/medication/:medicationId', authenticate, authorize('doctor'), async (req, res) => {
+  try {
+    const hasRelation = await doctorHasAppointmentWithPatient(req.user._id, req.params.patientId);
+    if (!hasRelation) {
+      return res.status(403).json({ success: false, message: 'Access denied to this patient.' });
+    }
+
+    const patient = await Patient.findById(req.params.patientId);
+    if (!patient) {
+      return res.status(404).json({ success: false, message: 'Patient profile not found' });
+    }
+
+    const med = patient.medications.current.id(req.params.medicationId);
+    if (!med) {
+      return res.status(404).json({ success: false, message: 'Medication not found' });
+    }
+
+    const doctor = await Doctor.findOne({ userId: req.user._id });
+    if (!doctor) {
+      return res.status(404).json({ success: false, message: 'Doctor profile not found' });
+    }
+
+    // Enforce ownership: only creator doctor can delete; allow legacy (no creator) if relation exists
+    if (med.createdByDoctorId && !med.createdByDoctorId.equals(doctor._id)) {
+      return res.status(403).json({ success: false, message: 'Only the prescribing doctor can delete this medication.' });
+    }
+
+    med.remove();
+    await patient.save();
+
+    res.json({ success: true, message: 'Medication deleted successfully' });
+  } catch (error) {
+    console.error('Doctor delete medication error:', error);
+    res.status(500).json({ success: false, message: 'Server error deleting medication' });
   }
 });
 

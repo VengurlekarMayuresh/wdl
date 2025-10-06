@@ -963,15 +963,6 @@ const DoctorSelfProfilePage = () => {
                         </Button>
                       </div>
                       
-                      {/* Debug button for testing backend */}
-                      <Button 
-                        variant="secondary" 
-                        size="sm" 
-                        className="w-full mt-2"
-                        onClick={testBackendConnection}
-                      >
-                        🧪 Test Backend
-                      </Button>
                     </div>
                   </div>
                 </div>

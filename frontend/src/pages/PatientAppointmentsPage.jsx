@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Header } from '@/components/layout/Header';
+import { reviewsAPI } from '@/services/api';
+import { toast } from '@/components/ui/sonner';
 import { useAuth } from '@/contexts/AuthContext';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -21,6 +23,8 @@ const PatientAppointmentsPage = () => {
   const [error, setError] = useState('');
   const [activeTab, setActiveTab] = useState('upcoming');
   const [rescheduleModal, setRescheduleModal] = useState({ isOpen: false, appointment: null });
+  const [ratingById, setRatingById] = useState({});
+  const [feedbackById, setFeedbackById] = useState({});
 
   useEffect(() => {
     loadAppointments();
@@ -30,6 +34,15 @@ const PatientAppointmentsPage = () => {
     try {
       setLoading(true);
       const allAppointments = await appointmentsAPI.getMyAppointments();
+      // Initialize rating/feedback state from server values if present
+      const rb = {};
+      const fb = {};
+      (allAppointments || []).forEach(a => {
+        if (a.appointmentRating) rb[a._id] = a.appointmentRating;
+        if (a.patientFeedback) fb[a._id] = a.patientFeedback;
+      });
+      setRatingById(rb);
+      setFeedbackById(fb);
       
       // Categorize appointments (slot may be null for custom requests)
       const now = new Date();
@@ -338,7 +351,7 @@ const PatientAppointmentsPage = () => {
           </TabsContent>
 
           <TabsContent value="completed" className="mt-6">
-            <div className="space-y-4">
+            <div className="space-y-6">
               {appointments.completed.length === 0 ? (
                 <Card>
                   <CardContent className="p-8 text-center">
@@ -349,7 +362,54 @@ const PatientAppointmentsPage = () => {
                 </Card>
               ) : (
                 appointments.completed.map((appointment) => (
-                  <AppointmentCard key={appointment._id} appointment={appointment} />
+                  <div key={appointment._id} className="space-y-3">
+                    <AppointmentCard appointment={appointment} />
+                    <Card>
+                      <CardContent className="p-4">
+                        <div className="flex items-center justify-between mb-2">
+                          <div className="text-sm font-medium">Rate your experience</div>
+                          <div className="flex items-center gap-1">
+                            {[1,2,3,4,5].map(star => (
+                              <button
+                                key={star}
+                                onClick={() => setRatingById(prev => ({ ...prev, [appointment._id]: star }))}
+                                className={`text-xl ${star <= (ratingById[appointment._id] || 0) ? 'text-yellow-500' : 'text-muted-foreground'}`}
+                                aria-label={`Rate ${star}`}
+                              >
+                                {star <= (ratingById[appointment._id] || 0) ? '★' : '☆'}
+                              </button>
+                            ))}
+                          </div>
+                        </div>
+                        <div className="space-y-2">
+                          <textarea
+                            rows={3}
+                            className="w-full px-3 py-2 border rounded-md text-sm"
+                            placeholder="Share your feedback (optional)"
+                            value={feedbackById[appointment._id] || ''}
+                            onChange={(e) => setFeedbackById(prev => ({ ...prev, [appointment._id]: e.target.value }))}
+                          />
+                          <div className="flex justify-end">
+                            <Button
+                              size="sm"
+                              onClick={async () => {
+                                try {
+                                  const rating = ratingById[appointment._id];
+                                  if (!rating) { toast.error('Please select a rating'); return; }
+                                  await reviewsAPI.submitAppointmentReview(appointment._id, rating, feedbackById[appointment._id]);
+                                  toast.success('Review submitted');
+                                } catch (e) {
+                                  toast.error(e.message || 'Failed to submit review');
+                                }
+                              }}
+                            >
+                              Submit Review
+                            </Button>
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </div>
                 ))
               )}
             </div>
@@ -386,5 +446,18 @@ const PatientAppointmentsPage = () => {
     </div>
   );
 };
+
+// Add review UI for completed appointments
+// NOTE: This patch assumes there is a completed appointments map rendering. Add snippet where you render completed items.
+// Example integration (pseudo within map):
+// <div>
+//   <div className="flex items-center gap-2">
+//     {[1,2,3,4,5].map(star => (
+//       <button key={star} onClick={() => setRatingFor(apt._id, star)}>{star <= (ratingById[apt._id]||0) ? '★' : '☆'}</button>
+//     ))}
+//   </div>
+//   <textarea value={feedbackById[apt._id]||''} onChange={(e)=> setFeedbackById(prev=>({...prev,[apt._id]: e.target.value}))} />
+//   <button onClick={async ()=>{try{await reviewsAPI.submitAppointmentReview(apt._id, ratingById[apt._id], feedbackById[apt._id]); toast.success('Review submitted');} catch(e){ toast.error(e.message);} }}>Submit Review</button>
+// </div>
 
 export default PatientAppointmentsPage;

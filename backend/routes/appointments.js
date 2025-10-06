@@ -1057,4 +1057,51 @@ router.delete('/slots/all', authenticate, authorize('doctor'), async (req, res) 
   }
 });
 
+// @route   PUT /api/appointments/:appointmentId/review
+// @desc    Patient adds/updates a review for a completed appointment; recompute doctor rating
+// @access  Private (Patient only)
+router.put('/:appointmentId/review', authenticate, authorize('patient'), async (req, res) => {
+  try {
+    const { rating, feedback } = req.body;
+    if (!rating || rating < 1 || rating > 5) {
+      return res.status(400).json({ success: false, message: 'Rating must be between 1 and 5' });
+    }
+
+    const patient = await Patient.findOne({ userId: req.user._id });
+    if (!patient) {
+      return res.status(404).json({ success: false, message: 'Patient profile not found' });
+    }
+
+    const appointment = await Appointment.findOne({ _id: req.params.appointmentId, patientId: patient._id }).populate('doctorId');
+    if (!appointment) {
+      return res.status(404).json({ success: false, message: 'Appointment not found' });
+    }
+
+    if (appointment.status !== 'completed') {
+      return res.status(400).json({ success: false, message: 'You can only review completed appointments' });
+    }
+
+    // Save review on appointment
+    appointment.appointmentRating = rating;
+    appointment.patientFeedback = feedback || appointment.patientFeedback;
+    await appointment.save();
+
+    // Recompute doctor averages
+    const agg = await Appointment.aggregate([
+      { $match: { doctorId: appointment.doctorId._id, appointmentRating: { $gte: 1 } } },
+      { $group: { _id: '$doctorId', avg: { $avg: '$appointmentRating' }, total: { $sum: 1 } } }
+    ]);
+
+    if (agg.length > 0) {
+      const [{ avg, total }] = agg;
+      await Doctor.findByIdAndUpdate(appointment.doctorId._id, { averageRating: avg, totalReviews: total }, { new: true });
+    }
+
+    res.json({ success: true, message: 'Review submitted successfully' });
+  } catch (error) {
+    console.error('Submit review error:', error);
+    res.status(500).json({ success: false, message: 'Server error submitting review' });
+  }
+});
+
 export default router;
