@@ -2,6 +2,8 @@ import express from 'express';
 import { authenticate, authorize, checkOwnership } from '../middleware/auth.js';
 import Patient from '../models/Patient.js';
 import User from '../models/User.js';
+import Doctor from '../models/Doctor.js';
+import Appointment from '../models/Appointment.js';
 
 const router = express.Router();
 
@@ -753,5 +755,204 @@ function getLastVitalSignsUpdate(vitalSigns) {
 
   return dates.length > 0 ? new Date(Math.max(...dates)) : null;
 }
+
+// ==========================
+// DOCTOR ACCESS ENDPOINTS
+// ==========================
+
+// Helper to verify the doctor has a relationship (any appointment) with the patient
+async function doctorHasAppointmentWithPatient(doctorUserId, patientId) {
+  const doctor = await Doctor.findOne({ userId: doctorUserId });
+  if (!doctor) return false;
+  const appt = await Appointment.findOne({ doctorId: doctor._id, patientId });
+  return !!appt;
+}
+
+// @route   GET /api/patients/profile/by-id/:patientId
+// @desc    Get patient profile by ID for doctors (requires appointment relationship)
+// @access  Private (Doctor only)
+router.get('/profile/by-id/:patientId', authenticate, authorize('doctor'), async (req, res) => {
+  try {
+    const hasRelation = await doctorHasAppointmentWithPatient(req.user._id, req.params.patientId);
+    if (!hasRelation) {
+      return res.status(403).json({ success: false, message: 'Access denied to this patient.' });
+    }
+
+    const patient = await Patient.findById(req.params.patientId)
+      .populate({
+        path: 'userId',
+        select: 'firstName lastName email phone dateOfBirth gender address profilePicture bio'
+      });
+
+    if (!patient) {
+      return res.status(404).json({ success: false, message: 'Patient profile not found' });
+    }
+
+    res.json({ success: true, data: { patient } });
+  } catch (error) {
+    console.error('Doctor get patient by id error:', error);
+    res.status(500).json({ success: false, message: 'Server error fetching patient profile' });
+  }
+});
+
+// @route   PUT /api/patients/profile/:patientId/health-overview
+// @desc    Doctor updates patient health overview (vital signs)
+// @access  Private (Doctor only)
+router.put('/profile/:patientId/health-overview', authenticate, authorize('doctor'), async (req, res) => {
+  try {
+    const hasRelation = await doctorHasAppointmentWithPatient(req.user._id, req.params.patientId);
+    if (!hasRelation) {
+      return res.status(403).json({ success: false, message: 'Access denied to this patient.' });
+    }
+
+    const patient = await Patient.findById(req.params.patientId);
+    if (!patient) {
+      return res.status(404).json({ success: false, message: 'Patient profile not found' });
+    }
+
+    const currentTime = new Date();
+
+    if (req.body.bloodPressureSystolic && req.body.bloodPressureDiastolic) {
+      patient.vitalSigns.bloodPressure = {
+        systolic: parseInt(req.body.bloodPressureSystolic),
+        diastolic: parseInt(req.body.bloodPressureDiastolic),
+        lastUpdated: currentTime
+      };
+    }
+
+    if (req.body.heartRate) {
+      patient.vitalSigns.heartRate = {
+        value: parseInt(req.body.heartRate),
+        lastUpdated: currentTime
+      };
+    }
+
+    if (req.body.weight) {
+      patient.vitalSigns.weight = {
+        value: parseFloat(req.body.weight),
+        unit: patient.vitalSigns?.weight?.unit || 'kg',
+        lastUpdated: currentTime
+      };
+    }
+
+    if (req.body.height) {
+      patient.vitalSigns.height = {
+        value: parseFloat(req.body.height),
+        unit: patient.vitalSigns?.height?.unit || 'cm',
+        lastUpdated: currentTime
+      };
+    }
+
+    if (req.body.bloodSugar) {
+      if (!patient.customVitals) patient.customVitals = {};
+      patient.customVitals.bloodSugar = {
+        value: parseFloat(req.body.bloodSugar),
+        unit: 'mg/dL',
+        lastUpdated: currentTime
+      };
+    }
+
+    await patient.save();
+
+    res.json({
+      success: true,
+      message: 'Health overview updated successfully',
+      data: {
+        vitalSigns: patient.vitalSigns,
+        customVitals: patient.customVitals,
+        bmi: patient.bmi,
+        bmiCategory: patient.bmiCategory
+      }
+    });
+  } catch (error) {
+    console.error('Doctor update health overview error:', error);
+    res.status(500).json({ success: false, message: 'Server error updating health overview' });
+  }
+});
+
+// @route   POST /api/patients/profile/:patientId/medication
+// @desc    Doctor adds a current medication to patient
+// @access  Private (Doctor only)
+router.post('/profile/:patientId/medication', authenticate, authorize('doctor'), async (req, res) => {
+  try {
+    const hasRelation = await doctorHasAppointmentWithPatient(req.user._id, req.params.patientId);
+    if (!hasRelation) {
+      return res.status(403).json({ success: false, message: 'Access denied to this patient.' });
+    }
+
+    const { name, dosage, frequency, route, startDate, prescribedBy, reason, notes } = req.body;
+    if (!name) {
+      return res.status(400).json({ success: false, message: 'Medication name is required' });
+    }
+
+    const patient = await Patient.findById(req.params.patientId);
+    if (!patient) {
+      return res.status(404).json({ success: false, message: 'Patient profile not found' });
+    }
+
+    patient.medications.current.push({
+      name,
+      dosage,
+      frequency,
+      route: route || 'oral',
+      startDate: startDate ? new Date(startDate) : new Date(),
+      prescribedBy,
+      reason,
+      notes,
+      isActive: true
+    });
+
+    await patient.save();
+
+    res.status(201).json({
+      success: true,
+      message: 'Medication added successfully',
+      data: { medication: patient.medications.current[patient.medications.current.length - 1] }
+    });
+  } catch (error) {
+    console.error('Doctor add medication error:', error);
+    res.status(500).json({ success: false, message: 'Server error adding medication' });
+  }
+});
+
+// @route   PUT /api/patients/profile/:patientId/medication/:medicationId
+// @desc    Doctor updates a current medication
+// @access  Private (Doctor only)
+router.put('/profile/:patientId/medication/:medicationId', authenticate, authorize('doctor'), async (req, res) => {
+  try {
+    const hasRelation = await doctorHasAppointmentWithPatient(req.user._id, req.params.patientId);
+    if (!hasRelation) {
+      return res.status(403).json({ success: false, message: 'Access denied to this patient.' });
+    }
+
+    const patient = await Patient.findById(req.params.patientId);
+    if (!patient) {
+      return res.status(404).json({ success: false, message: 'Patient profile not found' });
+    }
+
+    const medication = patient.medications.current.id(req.params.medicationId);
+    if (!medication) {
+      return res.status(404).json({ success: false, message: 'Medication not found' });
+    }
+
+    const allowedFields = ['name', 'dosage', 'frequency', 'route', 'startDate', 'prescribedBy', 'reason', 'notes', 'isActive'];
+    Object.keys(req.body).forEach(key => {
+      if (allowedFields.includes(key)) {
+        if (key === 'startDate' && req.body[key]) {
+          medication[key] = new Date(req.body[key]);
+        } else {
+          medication[key] = req.body[key];
+        }
+      }
+    });
+
+    await patient.save();
+
+    res.json({ success: true, message: 'Medication updated successfully', data: { medication } });
+  } catch (error) {
+    console.error('Doctor update medication error:', error);
+    res.status(500).json({ success: false, message: 'Server error updating medication' });
+  }
+});
 
 export default router;

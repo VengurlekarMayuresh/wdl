@@ -1,24 +1,18 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate, useSearchParams } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { Header } from '@/components/layout/Header';
 import { useAuth } from '@/contexts/AuthContext';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { 
-  MapPin, 
-  Stethoscope, 
-  Star, 
-  Search, 
-  Phone, 
+import {
+  MapPin,
+  Stethoscope,
+  Star,
+  Search,
+  Phone,
   Clock,
-  Heart,
-  Brain,
-  Eye,
-  Bone,
-  Baby,
-  Zap,
   ArrowLeft,
   Calendar,
   Award,
@@ -31,8 +25,6 @@ import { doctorAPI } from '@/services/api';
 const DoctorsPage = () => {
   const { user, isAuthenticated, logout } = useAuth();
   const navigate = useNavigate();
-  const [searchParams] = useSearchParams();
-  const specialty = searchParams.get('specialty') || '';
   
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedLocation, setSelectedLocation] = useState('');
@@ -46,77 +38,20 @@ const DoctorsPage = () => {
     return user.firstName?.[0]?.toUpperCase() || 'U';
   };
 
-  const getSpecialtyIcon = (specialtyName) => {
-    switch (specialtyName?.toLowerCase()) {
-      case 'cardiology':
-        return Heart;
-      case 'neurology':
-        return Brain;
-      case 'ophthalmology':
-        return Eye;
-      case 'orthopedics':
-        return Bone;
-      case 'pediatrics':
-        return Baby;
-      default:
-        return Stethoscope;
-    }
-  };
-
-  const getSpecialtyDisplayName = (specialtyId) => {
-    const specialtyMap = {
-      'cardiology': 'Cardiology',
-      'neurology': 'Neurology',
-      'ophthalmology': 'Ophthalmology',
-      'orthopedics': 'Orthopedics',
-      'pediatrics': 'Pediatrics',
-      'dermatology': 'Dermatology',
-      'endocrinology': 'Endocrinology',
-      'gastroenterology': 'Gastroenterology'
-    };
-    return specialtyMap[specialtyId] || specialtyId;
-  };
-
-  // Load doctors based on specialty
+  // Load all doctors on mount
   useEffect(() => {
-    if (specialty) {
-      loadDoctorsBySpecialty();
-    }
-  }, [specialty]);
+    loadAllDoctors();
+  }, []);
 
-  // Map API specialties to our category IDs (same mapping as in FindCarePage)
-  const getApiSpecialtiesForCategory = (categoryId) => {
-    const categoryToApiSpecialties = {
-      'cardiology': ['Cardiology', 'Pulmonology', 'Emergency Medicine'],
-      'neurology': ['Neurology', 'Radiology', 'Psychiatry'],
-      'ophthalmology': ['Ophthalmology'],
-      'orthopedics': ['Orthopedics', 'Rheumatology'],
-      'pediatrics': ['Pediatrics', 'Obstetrics', 'Family Medicine'],
-      'dermatology': ['Dermatology'],
-      'endocrinology': ['Endocrinology'],
-      'gastroenterology': ['Gastroenterology']
-    };
-    return categoryToApiSpecialties[categoryId] || [];
-  };
-
-  const loadDoctorsBySpecialty = async () => {
+  const loadAllDoctors = async () => {
     try {
       setLoading(true);
       setError(null);
-      
-      // Get all doctors first, then filter by specialty
-      const response = await doctorAPI.list({ limit: 100 });
+      const response = await doctorAPI.list({ limit: 200 });
       console.log('Doctors API response:', response);
       const allDoctors = response.doctors || response || [];
-      
-      // Filter doctors by the specialty category
-      const validSpecialties = getApiSpecialtiesForCategory(specialty);
-      const filteredBySpecialty = allDoctors.filter(doctor => 
-        validSpecialties.includes(doctor.primarySpecialty)
-      );
-      
-      setDoctors(filteredBySpecialty);
-      setFilteredDoctors(filteredBySpecialty);
+      setDoctors(allDoctors);
+      setFilteredDoctors(allDoctors);
     } catch (error) {
       console.error('Error loading doctors:', error);
       setError('Failed to load doctors');
@@ -160,7 +95,6 @@ const DoctorsPage = () => {
     navigate(`/doctor/${doctor._id}`);
   };
 
-  const SpecialtyIcon = getSpecialtyIcon(specialty);
 
   return (
     <div className="min-h-screen bg-gradient-light">
@@ -169,7 +103,6 @@ const DoctorsPage = () => {
         userInitial={getUserInitial()}
         userType={user?.userType || 'guest'}
         onLogout={logout}
-        showSearch={true}
       />
 
       <div className="max-w-6xl mx-auto px-4 py-8">
@@ -188,11 +121,11 @@ const DoctorsPage = () => {
 
           <div className="flex items-center gap-4 mb-4">
             <div className="w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center">
-              <SpecialtyIcon className="h-6 w-6 text-primary" />
+              <Stethoscope className="h-6 w-6 text-primary" />
             </div>
             <div>
-              <h1 className="text-3xl font-bold">{getSpecialtyDisplayName(specialty)} Doctors</h1>
-              <p className="text-muted-foreground">Find and book appointments with {getSpecialtyDisplayName(specialty).toLowerCase()} specialists</p>
+              <h1 className="text-3xl font-bold">All Doctors</h1>
+              <p className="text-muted-foreground">Browse and book appointments with doctors</p>
             </div>
           </div>
 
@@ -236,7 +169,7 @@ const DoctorsPage = () => {
         {error && (
           <div className="text-center py-12">
             <div className="w-24 h-24 bg-muted rounded-full flex items-center justify-center mx-auto mb-6">
-              <SpecialtyIcon className="h-12 w-12 text-muted-foreground" />
+              <Stethoscope className="h-12 w-12 text-muted-foreground" />
             </div>
             <h2 className="text-xl font-semibold mb-2">Error Loading Doctors</h2>
             <p className="text-muted-foreground mb-6">{error}</p>
@@ -252,9 +185,9 @@ const DoctorsPage = () => {
             {filteredDoctors.length === 0 ? (
               <div className="text-center py-12">
                 <div className="w-24 h-24 bg-muted rounded-full flex items-center justify-center mx-auto mb-6">
-                  <SpecialtyIcon className="h-12 w-12 text-muted-foreground" />
+                  <Stethoscope className="h-12 w-12 text-muted-foreground" />
                 </div>
-                <h2 className="text-xl font-semibold mb-2">No {getSpecialtyDisplayName(specialty)} doctors found</h2>
+                <h2 className="text-xl font-semibold mb-2">No doctors found</h2>
                 <p className="text-muted-foreground mb-6">Try adjusting your search criteria or location</p>
                 <Button onClick={() => navigate('/find-care')}>
                   Browse All Specialties

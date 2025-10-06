@@ -31,10 +31,11 @@ const PatientAppointmentsPage = () => {
       setLoading(true);
       const allAppointments = await appointmentsAPI.getMyAppointments();
       
-      // Categorize appointments
+      // Categorize appointments (slot may be null for custom requests)
+      const now = new Date();
       const categorized = {
         pending: allAppointments.filter(apt => apt.status === 'pending'),
-        upcoming: allAppointments.filter(apt => apt.status === 'confirmed' && new Date(apt.slotId.dateTime) > new Date()),
+        upcoming: allAppointments.filter(apt => apt.status === 'confirmed' && new Date(apt.appointmentDate) > now),
         completed: allAppointments.filter(apt => apt.status === 'completed'),
         cancelled: allAppointments.filter(apt => apt.status === 'cancelled' || apt.status === 'rejected')
       };
@@ -111,7 +112,9 @@ const PatientAppointmentsPage = () => {
   const AppointmentCard = ({ appointment, showActions = false }) => {
     const doctor = appointment.doctorId;
     const slot = appointment.slotId;
-    const { date, time } = formatDateTime(slot.dateTime);
+    const dateTime = appointment.appointmentDate || slot?.dateTime;
+    const safeDate = dateTime ? formatDateTime(dateTime) : { date: 'TBD', time: '' };
+    const { date, time } = safeDate;
     
     return (
       <Card className="border-none shadow-soft hover:shadow-medium transition-all duration-300">
@@ -159,18 +162,18 @@ const PatientAppointmentsPage = () => {
             </div>
           </div>
 
-          {appointment.reason && (
+          {appointment.reasonForVisit && (
             <div className="mb-4">
               <p className="text-sm text-muted-foreground">
-                <span className="font-medium">Reason:</span> {appointment.reason}
+                <span className="font-medium">Reason:</span> {appointment.reasonForVisit}
               </p>
             </div>
           )}
 
-          {slot.type && (
+          {(appointment.appointmentType || slot?.type) && (
             <div className="mb-4">
-              <Badge variant="outline" className="text-xs">
-                {slot.type}
+              <Badge variant="outline" className="text-xs capitalize">
+                {appointment.appointmentType || slot?.type}
               </Badge>
             </div>
           )}
@@ -207,7 +210,7 @@ const PatientAppointmentsPage = () => {
             </div>
           )}
 
-          {showActions && appointment.status === 'confirmed' && new Date(slot.dateTime) > new Date() && (
+          {showActions && appointment.status === 'confirmed' && dateTime && new Date(dateTime) > new Date() && (
             <div className="flex gap-2 pt-2 border-t">
               <Button
                 variant="outline"

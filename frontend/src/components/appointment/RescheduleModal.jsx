@@ -23,6 +23,9 @@ const RescheduleModal = ({
   const [loading, setLoading] = useState(false);
   const [slotsLoading, setSlotsLoading] = useState(false);
   const [error, setError] = useState('');
+  const [newDateTime, setNewDateTime] = useState('');
+  const [newDuration, setNewDuration] = useState(30);
+  const [creatingSlot, setCreatingSlot] = useState(false);
 
   useEffect(() => {
     if (isOpen && appointment) {
@@ -242,6 +245,64 @@ const RescheduleModal = ({
               </div>
             )}
           </div>
+
+          {/* Doctor: Create a new slot and reschedule */}
+          {userType === 'doctor' && (
+            <div className="space-y-3 pt-4 border-t">
+              <Label>Create a new slot (custom)</Label>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                <div className="md:col-span-2">
+                  <Label htmlFor="newDateTime" className="text-xs text-muted-foreground">Date & Time</Label>
+                  <Input 
+                    id="newDateTime" 
+                    type="datetime-local" 
+                    value={newDateTime} 
+                    onChange={(e) => setNewDateTime(e.target.value)}
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="newDuration" className="text-xs text-muted-foreground">Duration (min)</Label>
+                  <Input 
+                    id="newDuration" 
+                    type="number" 
+                    min={5}
+                    step={5}
+                    value={newDuration}
+                    onChange={(e) => setNewDuration(parseInt(e.target.value || '30'))}
+                  />
+                </div>
+              </div>
+              <div className="flex gap-2">
+                <Button 
+                  variant="outline"
+                  onClick={async () => {
+                    try {
+                      setCreatingSlot(true);
+                      setError('');
+                      if (!newDateTime) {
+                        setError('Please select a date and time to create a new slot');
+                        return;
+                      }
+                      // Create a new slot
+                      const slot = await slotsAPI.createSlot({ dateTime: newDateTime, duration: newDuration });
+                      // Immediately reschedule using this slot
+                      await appointmentsAPI.rescheduleAppointment(appointment._id, slot._id, reason);
+                      if (onReschedule) onReschedule();
+                      handleClose();
+                    } catch (e) {
+                      console.error('Error creating slot and rescheduling:', e);
+                      setError(e.message);
+                    } finally {
+                      setCreatingSlot(false);
+                    }
+                  }}
+                  disabled={creatingSlot || !newDateTime}
+                >
+                  {creatingSlot ? 'Creating slot...' : 'Create slot and reschedule'}
+                </Button>
+              </div>
+            </div>
+          )}
 
           {/* Action Buttons */}
           <div className="flex gap-3 pt-4 border-t">

@@ -24,6 +24,9 @@ const DoctorProfilePage = () => {
   const [selectedSlot, setSelectedSlot] = useState(null);
   const [bookingReason, setBookingReason] = useState('');
   const [bookingLoading, setBookingLoading] = useState(false);
+  const [requestMode, setRequestMode] = useState('slot'); // 'slot' or 'custom'
+  const [customDate, setCustomDate] = useState('');
+  const [customTime, setCustomTime] = useState('');
 
   useEffect(() => {
     const fetchDoctor = async () => {
@@ -85,26 +88,48 @@ const DoctorProfilePage = () => {
       return;
     }
     setSelectedSlot(slot);
+    setRequestMode(slot ? 'slot' : 'custom');
     setShowBookingModal(true);
   };
 
   const handleBookSlot = async () => {
-    if (!selectedSlot) return;
+    if (requestMode === 'slot' && !selectedSlot) return;
     
     try {
       setBookingLoading(true);
-      await appointmentsAPI.bookAppointment({
-        slotId: selectedSlot._id,
-        reasonForVisit: bookingReason || 'General consultation',
-        symptoms: '',
-        relevantMedicalHistory: '',
-        currentMedications: [],
-        allergies: [],
-        contactPreferences: {}
-      });
-      
-      // Show success message
-      alert('Appointment request sent successfully! The doctor will review and approve your request.');
+
+      if (requestMode === 'slot') {
+        await appointmentsAPI.bookAppointment({
+          slotId: selectedSlot._id,
+          reasonForVisit: bookingReason || 'General consultation',
+          symptoms: '',
+          relevantMedicalHistory: '',
+          currentMedications: [],
+          allergies: [],
+          contactPreferences: {}
+        });
+        // Immediate confirmation now
+        alert('Appointment booked and confirmed!');
+      } else {
+        // Custom request flow
+        if (!customDate || !customTime) {
+          alert('Please select a date and time for your request.');
+          return;
+        }
+        const iso = new Date(`${customDate}T${customTime}`).toISOString();
+        await appointmentsAPI.bookAppointment({
+          doctorId: doctor._id,
+          requestedDateTime: iso,
+          reasonForVisit: bookingReason || 'General consultation',
+          appointmentType: 'consultation',
+          symptoms: '',
+          relevantMedicalHistory: '',
+          currentMedications: [],
+          allergies: [],
+          contactPreferences: {}
+        });
+        alert('Appointment request sent! The doctor will review and approve or reject your request.');
+      }
       
       // Refresh slots to show updated availability
       loadDoctorSlots();
@@ -113,8 +138,10 @@ const DoctorProfilePage = () => {
       setShowBookingModal(false);
       setSelectedSlot(null);
       setBookingReason('');
+      setCustomDate('');
+      setCustomTime('');
     } catch (e) {
-      alert('Failed to book appointment: ' + e.message);
+      alert('Failed to submit: ' + e.message);
     } finally {
       setBookingLoading(false);
     }
@@ -465,11 +492,13 @@ const DoctorProfilePage = () => {
         )}
 
         {/* Booking Modal */}
-        {showBookingModal && selectedSlot && (
+        {showBookingModal && (
           <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50" onClick={() => {
             setShowBookingModal(false);
             setSelectedSlot(null);
             setBookingReason('');
+            setCustomDate('');
+            setCustomTime('');
           }}>
             <Card className="w-full max-w-md mx-4" onClick={(e) => e.stopPropagation()}>
               <CardHeader>
@@ -479,44 +508,89 @@ const DoctorProfilePage = () => {
                 </p>
               </CardHeader>
               <CardContent className="space-y-4">
-                {/* Selected Slot Info */}
-                <div className="p-3 bg-primary/5 border border-primary/20 rounded-md">
-                  <div className="flex items-center gap-2 mb-2">
-                    <CheckCircle className="h-4 w-4 text-primary" />
-                    <span className="font-medium text-sm">Selected Slot</span>
-                  </div>
-                  <div className="space-y-1">
-                    <div className="flex items-center gap-2 text-sm">
-                      <Calendar className="h-3 w-3" />
-                      <span>
-                        {new Date(selectedSlot.dateTime).toLocaleDateString('en-US', {
-                          weekday: 'long',
-                          year: 'numeric',
-                          month: 'long',
-                          day: 'numeric'
-                        })}
-                      </span>
-                    </div>
-                    <div className="flex items-center gap-2 text-sm">
-                      <Clock className="h-3 w-3" />
-                      <span>
-                        {new Date(selectedSlot.dateTime).toLocaleTimeString('en-US', {
-                          hour: '2-digit',
-                          minute: '2-digit'
-                        })}
-                        {selectedSlot.endTime && ` - ${new Date(`1970-01-01T${selectedSlot.endTime}`).toLocaleTimeString('en-US', {
-                          hour: '2-digit',
-                          minute: '2-digit'
-                        })}`}
-                      </span>
-                    </div>
-                    {selectedSlot.type && (
-                      <Badge variant="secondary" className="text-xs mt-2">
-                        {selectedSlot.type}
-                      </Badge>
-                    )}
-                  </div>
+                {/* Mode Toggle */}
+                <div className="flex gap-2">
+                  <Button 
+                    variant={requestMode === 'slot' ? 'medical' : 'outline'}
+                    size="sm"
+                    onClick={() => setRequestMode('slot')}
+                    disabled={!selectedSlot}
+                  >
+                    Use Selected Slot
+                  </Button>
+                  <Button 
+                    variant={requestMode === 'custom' ? 'medical' : 'outline'}
+                    size="sm"
+                    onClick={() => setRequestMode('custom')}
+                  >
+                    Request Specific Time
+                  </Button>
                 </div>
+
+                {/* Selected Slot Info (only if in slot mode and a slot is chosen) */}
+                {requestMode === 'slot' && selectedSlot && (
+                  <div className="p-3 bg-primary/5 border border-primary/20 rounded-md">
+                    <div className="flex items-center gap-2 mb-2">
+                      <CheckCircle className="h-4 w-4 text-primary" />
+                      <span className="font-medium text-sm">Selected Slot</span>
+                    </div>
+                    <div className="space-y-1">
+                      <div className="flex items-center gap-2 text-sm">
+                        <Calendar className="h-3 w-3" />
+                        <span>
+                          {new Date(selectedSlot.dateTime).toLocaleDateString('en-US', {
+                            weekday: 'long',
+                            year: 'numeric',
+                            month: 'long',
+                            day: 'numeric'
+                          })}
+                        </span>
+                      </div>
+                      <div className="flex items-center gap-2 text-sm">
+                        <Clock className="h-3 w-3" />
+                        <span>
+                          {new Date(selectedSlot.dateTime).toLocaleTimeString('en-US', {
+                            hour: '2-digit',
+                            minute: '2-digit'
+                          })}
+                          {selectedSlot.endTime && ` - ${new Date(`1970-01-01T${selectedSlot.endTime}`).toLocaleTimeString('en-US', {
+                            hour: '2-digit',
+                            minute: '2-digit'
+                          })}`}
+                        </span>
+                      </div>
+                      {selectedSlot.type && (
+                        <Badge variant="secondary" className="text-xs mt-2">
+                          {selectedSlot.type}
+                        </Badge>
+                      )}
+                    </div>
+                  </div>
+                )}
+
+                {/* Custom Date/Time Inputs (only if in custom mode) */}
+                {requestMode === 'custom' && (
+                  <div className="grid grid-cols-2 gap-3">
+                    <div>
+                      <label className="block text-sm font-medium mb-2">Preferred Date *</label>
+                      <input
+                        type="date"
+                        className="w-full px-3 py-2 border border-input rounded-md text-sm"
+                        value={customDate}
+                        onChange={(e) => setCustomDate(e.target.value)}
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium mb-2">Preferred Time *</label>
+                      <input
+                        type="time"
+                        className="w-full px-3 py-2 border border-input rounded-md text-sm"
+                        value={customTime}
+                        onChange={(e) => setCustomTime(e.target.value)}
+                      />
+                    </div>
+                  </div>
+                )}
 
                 {/* Consultation Fee */}
                 {doctor.consultationFee && (
@@ -539,13 +613,17 @@ const DoctorProfilePage = () => {
                   />
                 </div>
 
-                {/* Important Notice */}
+                {/* Notice */}
                 <div className="p-3 bg-amber-50 border border-amber-200 rounded-md">
                   <div className="flex items-start gap-2">
                     <AlertCircle className="h-4 w-4 text-amber-600 mt-0.5" />
                     <div className="text-xs text-amber-700">
                       <p className="font-medium mb-1">Please Note:</p>
-                      <p>Your appointment request will be sent to the doctor for approval. You will be notified once the doctor confirms your appointment.</p>
+                      {requestMode === 'slot' ? (
+                        <p>This slot will be booked immediately and confirmed.</p>
+                      ) : (
+                        <p>Your request will be sent to the doctor for approval.</p>
+                      )}
                     </div>
                   </div>
                 </div>
@@ -557,6 +635,8 @@ const DoctorProfilePage = () => {
                       setShowBookingModal(false);
                       setSelectedSlot(null);
                       setBookingReason('');
+                      setCustomDate('');
+                      setCustomTime('');
                     }} 
                     className="flex-1"
                     disabled={bookingLoading}
@@ -567,17 +647,17 @@ const DoctorProfilePage = () => {
                     variant="medical" 
                     className="flex-1" 
                     onClick={handleBookSlot}
-                    disabled={!bookingReason.trim() || bookingLoading}
+                    disabled={bookingLoading || !bookingReason.trim() || (requestMode === 'custom' && (!customDate || !customTime))}
                   >
                     {bookingLoading ? (
                       <>
                         <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2" />
-                        Booking...
+                        {requestMode === 'slot' ? 'Booking...' : 'Sending...'}
                       </>
                     ) : (
                       <>
                         <Calendar className="h-4 w-4 mr-2" />
-                        Send Request
+                        {requestMode === 'slot' ? 'Book Now' : 'Send Request'}
                       </>
                     )}
                   </Button>

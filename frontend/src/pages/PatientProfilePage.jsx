@@ -25,7 +25,7 @@ import {
 } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import ProfileImageUpload from "@/components/ui/ProfileImageUpload";
-import { patientAPI, authAPI } from "@/services/api";
+import { patientAPI, authAPI, appointmentsAPI } from "@/services/api";
 
 const PatientProfilePage = () => {
   const { user, isAuthenticated, logout, refreshUser } = useAuth();
@@ -43,6 +43,11 @@ const PatientProfilePage = () => {
     weight: '',
     bloodSugar: ''
   });
+  // Appointments state
+  const [upcomingAppointments, setUpcomingAppointments] = useState([]);
+  const [completedAppointments, setCompletedAppointments] = useState([]);
+  const [appointmentsLoading, setAppointmentsLoading] = useState(false);
+  const [appointmentsError, setAppointmentsError] = useState('');
 
   useEffect(() => {
     const fetchProfile = async () => {
@@ -63,7 +68,30 @@ const PatientProfilePage = () => {
         setLoading(false);
       }
     };
-    if (isAuthenticated) fetchProfile();
+    const fetchAppointments = async () => {
+      try {
+        setAppointmentsLoading(true);
+        setAppointmentsError('');
+        const myAppointments = await appointmentsAPI.getMyAppointments('all');
+        // Separate upcoming and completed
+        const now = new Date();
+        const upcoming = myAppointments.filter(a => ['pending','confirmed','rescheduled'].includes(a.status) && new Date(a.appointmentDate) >= now);
+        const completed = myAppointments.filter(a => a.status === 'completed');
+        setUpcomingAppointments(upcoming);
+        setCompletedAppointments(completed);
+      } catch (e) {
+        console.error('Appointments fetch error:', e);
+        setAppointmentsError(e.message || 'Failed to load appointments');
+        setUpcomingAppointments([]);
+        setCompletedAppointments([]);
+      } finally {
+        setAppointmentsLoading(false);
+      }
+    };
+    if (isAuthenticated) {
+      fetchProfile();
+      fetchAppointments();
+    }
   }, [isAuthenticated]);
 
   const primaryEmergency = useMemo(() => {
@@ -155,47 +183,7 @@ const PatientProfilePage = () => {
   // Fallback meds list
   const medications = activeMeds.length ? activeMeds.map(m => ({ name: m.name, dosage: m.dosage || "", frequency: m.frequency || "" })) : [];
 
-  const upcomingAppointments = [
-    {
-      id: 1,
-      doctor: "Dr. Sarah Johnson",
-      specialty: "Cardiology",
-      date: "Dec 15, 2024",
-      time: "2:00 PM",
-      type: "Follow-up",
-      location: "Heart Care Medical Center"
-    },
-    {
-      id: 2,
-      doctor: "Dr. Michael Chen",
-      specialty: "Endocrinology", 
-      date: "Dec 22, 2024",
-      time: "10:30 AM",
-      type: "Consultation",
-      location: "Diabetes Care Clinic"
-    }
-  ];
-
-  const recentAppointments = [
-    {
-      id: 1,
-      doctor: "Dr. Emily Rodriguez",
-      specialty: "General Medicine",
-      date: "Nov 28, 2024",
-      diagnosis: "Annual Physical Exam",
-      notes: "Patient in good health. Continue current medications.",
-      rating: 5
-    },
-    {
-      id: 2,
-      doctor: "Dr. David Park",
-      specialty: "Orthopedics",
-      date: "Oct 15, 2024",
-      diagnosis: "Knee Pain Assessment",
-      notes: "Recommended physical therapy. Follow up in 6 weeks.",
-      rating: 4
-    }
-  ];
+  // Removed static upcomingAppointments and recentAppointments; using dynamic data from API
 
   const labResults = [
     {
@@ -587,28 +575,38 @@ const PatientProfilePage = () => {
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
+                  {appointmentsError && (
+                    <div className="text-sm text-red-600 mb-3">{appointmentsError}</div>
+                  )}
                   <div className="space-y-4">
-                    {upcomingAppointments.map((appointment) => (
-                      <div key={appointment.id} className="flex items-center justify-between p-4 bg-accent/30 rounded-lg">
-                        <div className="flex items-center gap-4">
-                          <div className="w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center">
-                            <Stethoscope className="h-6 w-6 text-primary" />
+                    {appointmentsLoading ? (
+                      <div className="text-sm text-muted-foreground">Loading appointments...</div>
+                    ) : upcomingAppointments.length === 0 ? (
+                      <div className="text-sm text-muted-foreground">No upcoming appointments</div>
+                    ) : (
+                      upcomingAppointments.map((apt) => {
+                        const date = new Date(apt.appointmentDate);
+                        const doctorName = `Dr. ${apt.doctorId?.userId?.firstName || ''} ${apt.doctorId?.userId?.lastName || ''}`.trim();
+                        return (
+                          <div key={apt._id} className="flex items-center justify-between p-4 bg-accent/30 rounded-lg">
+                            <div className="flex items-center gap-4">
+                              <div className="w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center">
+                                <Stethoscope className="h-6 w-6 text-primary" />
+                              </div>
+                              <div>
+                                <div className="font-medium">{doctorName || 'Doctor'}</div>
+                                <div className="text-sm text-muted-foreground">{apt.doctorId?.primarySpecialty || 'Specialty'}</div>
+                              </div>
+                            </div>
+                            <div className="text-right">
+                              <div className="font-medium">{date.toLocaleDateString()}</div>
+                              <div className="text-sm text-muted-foreground">{date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</div>
+                              <Badge variant="secondary" className="mt-1 capitalize">{apt.appointmentType || 'consultation'}</Badge>
+                            </div>
                           </div>
-                          <div>
-                            <div className="font-medium">{appointment.doctor}</div>
-                            <div className="text-sm text-muted-foreground">{appointment.specialty}</div>
-                            <div className="text-sm text-muted-foreground">{appointment.location}</div>
-                          </div>
-                        </div>
-                        <div className="text-right">
-                          <div className="font-medium">{appointment.date}</div>
-                          <div className="text-sm text-muted-foreground">{appointment.time}</div>
-                          <Badge variant="secondary" className="mt-1">
-                            {appointment.type}
-                          </Badge>
-                        </div>
-                      </div>
-                    ))}
+                        );
+                      })
+                    )}
                   </div>
                 </CardContent>
               </Card>
@@ -623,29 +621,43 @@ const PatientProfilePage = () => {
                   <CardTitle>Upcoming Appointments</CardTitle>
                 </CardHeader>
                 <CardContent>
+                  {appointmentsError && (
+                    <div className="text-sm text-red-600 mb-3">{appointmentsError}</div>
+                  )}
                   <div className="space-y-4">
-                    {upcomingAppointments.map((appointment) => (
-                      <div key={appointment.id} className="flex items-center justify-between p-4 border rounded-lg">
-                        <div className="flex items-center gap-4">
-                          <div className="w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center">
-                            <Stethoscope className="h-6 w-6 text-primary" />
+                    {appointmentsLoading ? (
+                      <div className="text-sm text-muted-foreground">Loading...</div>
+                    ) : upcomingAppointments.length === 0 ? (
+                      <div className="text-sm text-muted-foreground">No upcoming appointments</div>
+                    ) : (
+                      upcomingAppointments.map((apt) => {
+                        const date = new Date(apt.appointmentDate);
+                        const doctorName = `Dr. ${apt.doctorId?.userId?.firstName || ''} ${apt.doctorId?.userId?.lastName || ''}`.trim();
+                        return (
+                          <div key={apt._id} className="flex items-center justify-between p-4 border rounded-lg">
+                            <div className="flex items-center gap-4">
+                              <div className="w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center">
+                                <Stethoscope className="h-6 w-6 text-primary" />
+                              </div>
+                              <div>
+                                <div className="font-medium">{doctorName || 'Doctor'}</div>
+                                <div className="text-sm text-muted-foreground">{apt.doctorId?.primarySpecialty || 'Specialty'}</div>
+                              </div>
+                            </div>
+                            <div className="text-right">
+                              <div className="font-medium">{date.toLocaleDateString()}</div>
+                              <div className="text-sm text-muted-foreground">{date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</div>
+                              <div className="flex gap-2 mt-2">
+                                <Button variant="outline" size="sm">Reschedule</Button>
+                                {apt.consultationType === 'telemedicine' && (
+                                  <Button variant="medical" size="sm">Join Call</Button>
+                                )}
+                              </div>
+                            </div>
                           </div>
-                          <div>
-                            <div className="font-medium">{appointment.doctor}</div>
-                            <div className="text-sm text-muted-foreground">{appointment.specialty}</div>
-                            <div className="text-sm text-muted-foreground">{appointment.location}</div>
-                          </div>
-                        </div>
-                        <div className="text-right">
-                          <div className="font-medium">{appointment.date}</div>
-                          <div className="text-sm text-muted-foreground">{appointment.time}</div>
-                          <div className="flex gap-2 mt-2">
-                            <Button variant="outline" size="sm">Reschedule</Button>
-                            <Button variant="medical" size="sm">Join Call</Button>
-                          </div>
-                        </div>
-                      </div>
-                    ))}
+                        );
+                      })
+                    )}
                   </div>
                 </CardContent>
               </Card>
@@ -657,28 +669,35 @@ const PatientProfilePage = () => {
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-4">
-                    {recentAppointments.map((appointment) => (
-                      <div key={appointment.id} className="p-4 border rounded-lg">
-                        <div className="flex justify-between items-start mb-2">
-                          <div>
-                            <div className="font-medium">{appointment.doctor}</div>
-                            <div className="text-sm text-muted-foreground">{appointment.specialty}</div>
-                          </div>
-                          <div className="text-right">
-                            <div className="text-sm text-muted-foreground">{appointment.date}</div>
-                            <div className="flex items-center gap-1">
-                              {[...Array(appointment.rating)].map((_, i) => (
-                                <Star key={i} className="h-3 w-3 text-yellow-500 fill-current" />
-                              ))}
+                    {appointmentsLoading ? (
+                      <div className="text-sm text-muted-foreground">Loading...</div>
+                    ) : completedAppointments.length === 0 ? (
+                      <div className="text-sm text-muted-foreground">No completed appointments</div>
+                    ) : (
+                      completedAppointments.map((apt) => {
+                        const date = new Date(apt.appointmentDate);
+                        const doctorName = `Dr. ${apt.doctorId?.userId?.firstName || ''} ${apt.doctorId?.userId?.lastName || ''}`.trim();
+                        const diagnosis = apt.diagnosis?.primary || 'Diagnosis';
+                        const notes = apt.doctorNotes || 'No feedback provided.';
+                        return (
+                          <div key={apt._id} className="p-4 border rounded-lg">
+                            <div className="flex justify-between items-start mb-2">
+                              <div>
+                                <div className="font-medium">{doctorName || 'Doctor'}</div>
+                                <div className="text-sm text-muted-foreground">{apt.doctorId?.primarySpecialty || 'Specialty'}</div>
+                              </div>
+                              <div className="text-right">
+                                <div className="text-sm text-muted-foreground">{date.toLocaleDateString()}</div>
+                              </div>
                             </div>
+                            <div className="mb-2">
+                              <Badge variant="secondary">{diagnosis}</Badge>
+                            </div>
+                            <p className="text-sm text-muted-foreground">{notes}</p>
                           </div>
-                        </div>
-                        <div className="mb-2">
-                          <Badge variant="secondary">{appointment.diagnosis}</Badge>
-                        </div>
-                        <p className="text-sm text-muted-foreground">{appointment.notes}</p>
-                      </div>
-                    ))}
+                        );
+                      })
+                    )}
                   </div>
                 </CardContent>
               </Card>

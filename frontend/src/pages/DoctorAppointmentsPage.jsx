@@ -37,10 +37,11 @@ const DoctorAppointmentsPage = () => {
       const allAppointments = await appointmentsAPI.getDoctorAppointments();
       console.log('Loaded doctor appointments:', allAppointments);
       
-      // Categorize appointments
+      // Categorize appointments using appointmentDate (slot may be null for custom requests)
+      const now = new Date();
       const categorized = {
         pending: allAppointments.filter(apt => apt.status === 'pending'),
-        upcoming: allAppointments.filter(apt => apt.status === 'confirmed' && new Date(apt.slotId.dateTime) > new Date()),
+        upcoming: allAppointments.filter(apt => apt.status === 'confirmed' && new Date(apt.appointmentDate) > now),
         completed: allAppointments.filter(apt => apt.status === 'completed'),
         cancelled: allAppointments.filter(apt => apt.status === 'cancelled' || apt.status === 'rejected')
       };
@@ -159,7 +160,9 @@ const DoctorAppointmentsPage = () => {
   const AppointmentCard = ({ appointment, showActions = false }) => {
     const patient = appointment.patientId;
     const slot = appointment.slotId;
-    const { date, time } = formatDateTime(slot.dateTime);
+    const dateTime = appointment.appointmentDate || slot?.dateTime;
+    const safeDate = dateTime ? formatDateTime(dateTime) : { date: 'TBD', time: '' };
+    const { date, time } = safeDate;
     const currentAction = actionLoading[appointment._id];
     
     const getCardGradient = (status) => {
@@ -255,27 +258,27 @@ const DoctorAppointmentsPage = () => {
           </div>
           
           {/* Appointment Type */}
-          {slot.type && (
+          {(appointment.appointmentType || slot?.type) && (
             <div className="mb-4">
               <div className="flex items-center gap-2 mb-2">
                 <Stethoscope className="h-4 w-4 text-muted-foreground" />
                 <span className="text-sm font-medium text-muted-foreground">Appointment Type</span>
               </div>
-              <Badge variant="outline" className="bg-white/50">
-                {slot.type === 'video' && <Video className="h-3 w-3 mr-1" />}
-                {slot.type}
+              <Badge variant="outline" className="bg-white/50 capitalize">
+                {(slot?.type === 'video' || appointment.consultationType === 'telemedicine') && <Video className="h-3 w-3 mr-1" />}
+                {appointment.appointmentType || slot?.type}
               </Badge>
             </div>
           )}
 
           {/* Reason for Visit */}
-          {appointment.reason && (
+          {appointment.reasonForVisit && (
             <div className="mb-4 p-4 bg-white/50 border border-primary/20 rounded-lg">
               <div className="flex items-center gap-2 mb-2">
                 <Heart className="h-4 w-4 text-primary" />
                 <span className="text-sm font-semibold text-primary">Reason for Visit</span>
               </div>
-              <p className="text-sm text-foreground leading-relaxed">{appointment.reason}</p>
+              <p className="text-sm text-foreground leading-relaxed">{appointment.reasonForVisit}</p>
             </div>
           )}
 
@@ -337,7 +340,7 @@ const DoctorAppointmentsPage = () => {
                 </div>
               )}
               
-              {appointment.status === 'confirmed' && new Date(slot.dateTime) > new Date() && (
+              {appointment.status === 'confirmed' && dateTime && new Date(dateTime) > new Date() && (
                 <div className="flex gap-3">
                   <Button
                     variant="outline"
@@ -352,7 +355,7 @@ const DoctorAppointmentsPage = () => {
                 </div>
               )}
               
-              {appointment.status === 'confirmed' && new Date(slot.dateTime) <= new Date() && (
+              {appointment.status === 'confirmed' && dateTime && new Date(dateTime) <= new Date() && (
                 <Button
                   variant="default"
                   size="sm"
@@ -383,7 +386,11 @@ const DoctorAppointmentsPage = () => {
   if (!isAuthenticated || user?.userType !== 'doctor') {
     return (
       <div className="min-h-screen bg-gradient-light">
-        <Header />
+        <Header 
+          isAuthenticated={isAuthenticated}
+          userInitial={(user?.firstName?.[0]?.toUpperCase?.() || 'U')}
+          userType={user?.userType || 'doctor'}
+        />
         <div className="flex items-center justify-center min-h-[60vh]">
           <p>Access denied. Doctor login required.</p>
         </div>
@@ -394,7 +401,11 @@ const DoctorAppointmentsPage = () => {
   if (loading) {
     return (
       <div className="min-h-screen bg-gradient-light">
-        <Header />
+        <Header 
+          isAuthenticated={isAuthenticated}
+          userInitial={(user?.firstName?.[0]?.toUpperCase?.() || 'U')}
+          userType={user?.userType || 'doctor'}
+        />
         <div className="flex items-center justify-center min-h-[60vh]">
           <div className="text-center">
             <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-primary mx-auto mb-4" />
@@ -407,7 +418,11 @@ const DoctorAppointmentsPage = () => {
 
   return (
     <div className="min-h-screen bg-gradient-light">
-      <Header />
+      <Header 
+        isAuthenticated={isAuthenticated}
+        userInitial={(user?.firstName?.[0]?.toUpperCase?.() || 'U')}
+        userType={user?.userType || 'doctor'}
+      />
       
       <div className="max-w-6xl mx-auto px-4 py-8">
         <div className="flex justify-between items-center mb-8">

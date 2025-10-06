@@ -428,6 +428,8 @@ router.post('/', authenticate, authorize('patient'), async (req, res) => {
 
     const {
       slotId,
+      doctorId,
+      requestedDateTime,
       reasonForVisit,
       appointmentType = 'consultation', // Allow patient to specify appointment type
       symptoms,
@@ -437,66 +439,132 @@ router.post('/', authenticate, authorize('patient'), async (req, res) => {
       contactPreferences = {}
     } = req.body;
 
-    // Validation
-    if (!slotId || !reasonForVisit) {
-      return res.status(400).json({
-        success: false,
-        message: 'Slot ID and reason for visit are required'
+    // Two flows:
+    // 1) Book existing slot (auto-confirm) when slotId provided
+    // 2) Create custom request (pending) when doctorId and requestedDateTime provided
+
+    if (slotId) {
+      if (!reasonForVisit) {
+        return res.status(400).json({
+          success: false,
+          message: 'Reason for visit is required'
+        });
+      }
+
+      // Find and validate the slot
+      const slot = await Slot.findById(slotId).populate('doctorId');
+      if (!slot) {
+        return res.status(404).json({
+          success: false,
+          message: 'Slot not found'
+        });
+      }
+
+      if (!slot.canBeBooked()) {
+        return res.status(400).json({
+          success: false,
+          message: 'This slot is no longer available'
+        });
+      }
+
+      // Extract appointment date from slot
+      const appointmentDate = slot.dateTime;
+
+      // Create the appointment (will be confirmed immediately)
+      const appointment = new Appointment({
+        doctorId: slot.doctorId._id,
+        patientId: patient._id,
+        slotId: slot._id,
+        appointmentDate,
+        duration: slot.duration,
+        appointmentType: appointmentType,
+        consultationType: slot.consultationType,
+        reasonForVisit,
+        symptoms,
+        relevantMedicalHistory,
+        currentMedications,
+        allergies,
+        contactPreferences,
+        consultationFee: slot.consultationFee,
+        status: 'pending' // will be switched to confirmed below
+      });
+
+      await appointment.save();
+
+      // Reserve the slot immediately
+      await slot.book(patient._id, appointment._id);
+
+      // Auto-confirm the appointment since it's a doctor-created slot
+      await appointment.confirm();
+      
+      const populatedAppointment = await Appointment.findById(appointment._id)
+        .populate('doctorId', 'primarySpecialty')
+        .populate('slotId');
+
+      return res.status(201).json({
+        success: true,
+        message: 'Appointment booked successfully and confirmed.',
+        data: { appointment: populatedAppointment }
       });
     }
 
-    // Find and validate the slot
-    const slot = await Slot.findById(slotId).populate('doctorId');
-    if (!slot) {
-      return res.status(404).json({
-        success: false,
-        message: 'Slot not found'
+    // Custom request flow
+    if (doctorId && requestedDateTime) {
+      if (!reasonForVisit) {
+        return res.status(400).json({
+          success: false,
+          message: 'Reason for visit is required'
+        });
+      }
+
+      const doctor = await Doctor.findById(doctorId);
+      if (!doctor) {
+        return res.status(404).json({
+          success: false,
+          message: 'Doctor not found'
+        });
+      }
+
+      const reqDate = new Date(requestedDateTime);
+      if (isNaN(reqDate.getTime()) || reqDate < new Date()) {
+        return res.status(400).json({
+          success: false,
+          message: 'Requested date/time must be a valid future date'
+        });
+      }
+
+      const appointment = new Appointment({
+        doctorId: doctor._id,
+        patientId: patient._id,
+        appointmentDate: reqDate,
+        isCustomRequest: true,
+        requestedDateTime: reqDate,
+        appointmentType,
+        reasonForVisit,
+        symptoms,
+        relevantMedicalHistory,
+        currentMedications,
+        allergies,
+        contactPreferences,
+        consultationFee: doctor.consultationFee || 0,
+        status: 'pending'
+      });
+
+      await appointment.save();
+
+      const populatedAppointment = await Appointment.findById(appointment._id)
+        .populate('doctorId', 'primarySpecialty');
+
+      return res.status(201).json({
+        success: true,
+        message: 'Appointment request sent successfully! The doctor will review your request.',
+        data: { appointment: populatedAppointment }
       });
     }
 
-    if (!slot.canBeBooked()) {
-      return res.status(400).json({
-        success: false,
-        message: 'This slot is no longer available'
-      });
-    }
-
-    // Extract appointment date from slot
-    const appointmentDate = slot.dateTime;
-
-    // Create the appointment
-    const appointment = new Appointment({
-      doctorId: slot.doctorId._id,
-      patientId: patient._id,
-      slotId: slot._id,
-      appointmentDate,
-      duration: slot.duration,
-      appointmentType: appointmentType, // Use patient-specified appointment type
-      consultationType: slot.consultationType,
-      reasonForVisit,
-      symptoms,
-      relevantMedicalHistory,
-      currentMedications,
-      allergies,
-      contactPreferences,
-      consultationFee: slot.consultationFee
-    });
-
-    await appointment.save();
-
-    // Reserve the slot immediately (mark as booked but not confirmed)
-    // This prevents other patients from booking the same slot
-    await slot.book(patient._id, appointment._id);
-    
-    // Populate appointment data for response
-    const populatedAppointment = await Appointment.findById(appointment._id)
-      .populate('doctorId', 'primarySpecialty')
-      .populate('slotId');
-
-    res.status(201).json({
-      success: true,
-      message: 'Appointment request sent successfully! The doctor will review your request.',
-      data: { appointment: populatedAppointment }
+    return res.status(400).json({
+      success: false,
+      message: 'Provide either a valid slotId to book immediately or doctorId and requestedDateTime to request an appointment.'
     });
 
   } catch (error) {
