@@ -41,7 +41,8 @@ const DoctorAppointmentsPage = () => {
       const now = new Date();
       const categorized = {
         pending: allAppointments.filter(apt => apt.status === 'pending'),
-        upcoming: allAppointments.filter(apt => apt.status === 'confirmed' && new Date(apt.appointmentDate) > now),
+        // Treat 'rescheduled' like an active upcoming appointment
+        upcoming: allAppointments.filter(apt => (apt.status === 'confirmed' || apt.status === 'rescheduled') && new Date(apt.appointmentDate) > now),
         completed: allAppointments.filter(apt => apt.status === 'completed'),
         cancelled: allAppointments.filter(apt => apt.status === 'cancelled' || apt.status === 'rejected')
       };
@@ -355,7 +356,7 @@ const DoctorAppointmentsPage = () => {
                 </div>
               )}
               
-              {appointment.status === 'confirmed' && dateTime && new Date(dateTime) <= new Date() && (
+              {(['completed','cancelled','rejected'].includes(appointment.status) ? false : true) && (
                 <Button
                   variant="default"
                   size="sm"

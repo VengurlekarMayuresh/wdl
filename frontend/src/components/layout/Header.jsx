@@ -129,7 +129,7 @@ export const Header = ({
                         <User className="h-4 w-4" />
                         My Profile
                       </Link>
-                      <Link to="/appointments" className="flex items-center gap-3 px-4 py-2 hover:bg-accent transition-colors">
+                      <Link to="/doctor-appointments" className="flex items-center gap-3 px-4 py-2 hover:bg-accent transition-colors">
                         <Stethoscope className="h-4 w-4" />
                         Appointments
                       </Link>

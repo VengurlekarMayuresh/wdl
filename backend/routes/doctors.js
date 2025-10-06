@@ -509,4 +509,37 @@ function calculateProfileCompletion(doctor) {
   return Math.round((completed / total) * 100);
 }
 
+// @route   GET /api/doctors/:id/reviews
+// @desc    Get public reviews for a doctor
+// @access  Public
+router.get('/:id/reviews', async (req, res) => {
+  try {
+    const doctorId = req.params.id;
+    const reviews = await (await import('../models/Appointment.js')).default.find({
+      doctorId,
+      appointmentRating: { $gte: 1 }
+    })
+      .select('appointmentRating patientFeedback appointmentDate')
+      .populate({
+        path: 'patientId',
+        select: 'userId',
+        populate: { path: 'userId', select: 'firstName lastName' }
+      })
+      .sort({ appointmentDate: -1 })
+      .limit(50);
+
+    const mapped = reviews.map(r => ({
+      rating: r.appointmentRating,
+      comment: r.patientFeedback,
+      date: r.appointmentDate,
+      patientName: r.patientId?.userId ? `${r.patientId.userId.firstName} ${r.patientId.userId.lastName}` : 'Anonymous'
+    }));
+
+    res.json({ success: true, data: { reviews: mapped } });
+  } catch (error) {
+    console.error('Get doctor reviews error:', error);
+    res.status(500).json({ success: false, message: 'Server error fetching reviews' });
+  }
+});
+
 export default router;

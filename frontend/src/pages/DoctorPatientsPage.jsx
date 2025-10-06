@@ -23,17 +23,16 @@ import {
 } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { appointmentsAPI } from '@/services/api';
-import PatientProfileDialog from '@/components/patient/PatientProfileDialog';
+import { useNavigate } from 'react-router-dom';
 
 const DoctorPatientsPage = () => {
   const { user, isAuthenticated, logout } = useAuth();
+  const navigate = useNavigate();
   const [patients, setPatients] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedFilter, setSelectedFilter] = useState('all');
   const [error, setError] = useState('');
-  const [profileOpen, setProfileOpen] = useState(false);
-  const [profilePatientId, setProfilePatientId] = useState(null);
 
   // Transform backend patient structure to UI-friendly shape
   const transformPatient = (p) => {
@@ -385,7 +384,7 @@ const DoctorPatientsPage = () => {
                     variant="outline" 
                     className="flex-1" 
                     size="sm"
-                    onClick={() => { setProfilePatientId(patient.id); setProfileOpen(true); }}
+                    onClick={() => navigate(`/doctor-patient/${patient.id}`)}
                   >
                     <Eye className="h-4 w-4 mr-2" />
                     View Profile
@@ -430,12 +429,6 @@ const DoctorPatientsPage = () => {
         )}
       </div>
 
-      {/* Patient Profile Dialog */}
-      <PatientProfileDialog 
-        open={profileOpen} 
-        onClose={() => setProfileOpen(false)} 
-        patientId={profilePatientId}
-      />
     </div>
   );
 };
