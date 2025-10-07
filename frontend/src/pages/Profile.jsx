@@ -32,6 +32,14 @@ const Profile = () => {
         console.log('🔄 Redirecting patient to /patient-profile');
         setHasRedirected(true);
         navigate('/patient-profile', { replace: true });
+      } else if (user?.userType === 'careprovider') {
+        console.log('🔄 Redirecting care provider to /careprovider-profile');
+        setHasRedirected(true);
+        navigate('/careprovider-profile', { replace: true });
+      } else if (user?.userType === 'facility') {
+        console.log('🔄 Redirecting facility to /facility-profile');
+        setHasRedirected(true);
+        navigate('/facility-profile', { replace: true });
       } else if (user) {
         console.log('❓ Unknown user type:', user?.userType);
         console.log('Full user object:', user);

@@ -8,11 +8,11 @@ import fs from 'fs';
 import { fileURLToPath } from 'url';
 import dotenv from 'dotenv';
 
-// Load environment variables
-dotenv.config();
-
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
+
+// Load environment variables from backend/.env explicitly
+dotenv.config({ path: path.join(__dirname, '.env') });
 
 console.log('🚀 Starting complete data loader...');
 console.log(`Current directory: ${__dirname}`);

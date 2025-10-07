@@ -77,43 +77,8 @@ router.get('/', async (req, res) => {
   }
 });
 
-// @route   GET /api/careproviders/:id
-// @desc    Get care provider by ID
-// @access  Public
-router.get('/:id', async (req, res) => {
-  try {
-    const careProvider = await CareProvider.findById(req.params.id)
-      .populate('userId', 'firstName lastName email phone address profilePicture bio');
 
-    if (!careProvider) {
-      return res.status(404).json({
-        success: false,
-        message: 'Care provider not found'
-      });
-    }
-
-    // Only show full details if provider is approved and verified
-    if (careProvider.status !== 'approved' || !careProvider.verification.isVerified) {
-      return res.status(403).json({
-        success: false,
-        message: 'Care provider profile is not available for public viewing'
-      });
-    }
-
-    res.json({
-      success: true,
-      data: { careProvider }
-    });
-
-  } catch (error) {
-    console.error('Get care provider by ID error:', error);
-    res.status(500).json({
-      success: false,
-      message: 'Server error fetching care provider'
-    });
-  }
-});
-
+// Place profile routes BEFORE dynamic :id route to avoid shadowing
 // @route   GET /api/careproviders/profile/me
 // @desc    Get current care provider's profile
 // @access  Private (CareProvider only)
@@ -424,6 +389,44 @@ router.get('/available/:day', async (req, res) => {
     res.status(500).json({
       success: false,
       message: 'Server error fetching available care providers'
+    });
+  }
+});
+
+// Keep parameterized :id route LAST so it doesn't capture more specific routes
+// @route   GET /api/careproviders/:id
+// @desc    Get care provider by ID
+// @access  Public
+router.get('/:id', async (req, res) => {
+  try {
+    const careProvider = await CareProvider.findById(req.params.id)
+      .populate('userId', 'firstName lastName email phone address profilePicture bio');
+
+    if (!careProvider) {
+      return res.status(404).json({
+        success: false,
+        message: 'Care provider not found'
+      });
+    }
+
+    // Only show full details if provider is approved and verified
+    if (careProvider.status !== 'approved' || !careProvider.verification?.isVerified) {
+      return res.status(403).json({
+        success: false,
+        message: 'Care provider profile is not available for public viewing'
+      });
+    }
+
+    res.json({
+      success: true,
+      data: { careProvider }
+    });
+
+  } catch (error) {
+    console.error('Get care provider by ID error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Server error fetching care provider'
     });
   }
 });

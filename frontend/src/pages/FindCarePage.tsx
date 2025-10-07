@@ -8,6 +8,28 @@ import { Search, MapPin, Star, Clock, Phone, Calendar, Heart, Brain, Baby, Eye, 
 import { doctorAPI } from '@/services/api';
 import { Link } from 'react-router-dom';
 
+// Ten fallback doctor images
+const DOCTOR_FALLBACK_IMAGES = [
+  'https://images.unsplash.com/photo-1550831107-1553da8c8464?q=80&w=800&auto=format&fit=crop',
+  'https://images.unsplash.com/photo-1551601651-2a8555f1a136?q=80&w=800&auto=format&fit=crop',
+  'https://images.unsplash.com/photo-1554727242-741c14fa561c?q=80&w=800&auto=format&fit=crop',
+  'https://images.unsplash.com/photo-1551076805-e1869033e561?q=80&w=800&auto=format&fit=crop',
+  'https://images.unsplash.com/photo-1582750433449-648ed127bb54?q=80&w=800&auto=format&fit=crop',
+  'https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?q=80&w=800&auto=format&fit=crop',
+  'https://images.unsplash.com/photo-1576765607924-b211db2fc0f1?q=80&w=800&auto=format&fit=crop',
+  'https://images.unsplash.com/photo-1578496479531-9e42936c18ab?q=80&w=800&auto=format&fit=crop',
+  'https://images.unsplash.com/photo-1584982751601-97dcc096659c?q=80&w=800&auto=format&fit=crop',
+  'https://images.unsplash.com/photo-1583912086096-7f6c2b4b9cf3?q=80&w=800&auto=format&fit=crop'
+];
+
+const pickFallbackImage = (id: string | undefined) => {
+  const s = id || Math.random().toString(36).slice(2);
+  let hash = 0;
+  for (let i = 0; i < s.length; i++) hash = ((hash << 5) - hash) + s.charCodeAt(i);
+  const idx = Math.abs(hash) % DOCTOR_FALLBACK_IMAGES.length;
+  return DOCTOR_FALLBACK_IMAGES[idx];
+};
+
 const iconMap: Record<string, React.ComponentType<any>> = {
   Heart, Brain, Baby, Eye, Bone, Stethoscope, User,
 };
@@ -54,20 +76,27 @@ const FindCarePage: React.FC = () => {
       const name = `${d.firstName || ''} ${d.lastName || ''}`.trim();
       const specialty = d.primarySpecialty || d.specialty || '';
       return name.toLowerCase().includes(q) || specialty.toLowerCase().includes(q);
-    }).map((d: any) => ({
-      id: d.id || d._id,
-      name: `Dr. ${d.firstName || ''} ${d.lastName || ''}`.trim(),
-      specialty: d.primarySpecialty || d.specialty || 'Doctor',
-      rating: d.averageRating ?? 4.8,
-      reviews: d.totalReviews ?? 0,
-      experience: d.yearsOfExperience ? `${d.yearsOfExperience}+ years` : '—',
-      location: d.hospitalName || d.clinicName || 'Medical Center',
-      distance: d.distance || '',
-      image: d.profileImage || d.profilePicture,
-      nextAvailable: d.nextAvailable || '',
-      languages: d.languages || ['English'],
-      acceptingNew: d.isAcceptingNewPatients ?? true,
-    }));
+    }).map((d: any) => {
+      const rawId = d._id || d.id || d?.userId?._id || d?.userId?.id;
+      const id = rawId ? String(rawId) : '';
+      const user = d.userId || {};
+      const directImage = d.profileImage || d.profilePicture || user.profilePicture;
+      const finalImage = directImage || pickFallbackImage(id);
+      return ({
+        id,
+        name: `Dr. ${d.firstName || user.firstName || ''} ${d.lastName || user.lastName || ''}`.trim(),
+        specialty: d.primarySpecialty || d.specialty || 'Doctor',
+        rating: d.averageRating ?? 4.8,
+        reviews: d.totalReviews ?? 0,
+        experience: d.yearsOfExperience ? `${d.yearsOfExperience}+ years` : '—',
+        location: d.hospitalName || d.clinicName || user?.address?.city || 'Medical Center',
+        distance: d.distance || '',
+        image: finalImage,
+        nextAvailable: d.nextAvailable || '',
+        languages: d.languages || user.languages || ['English'],
+        acceptingNew: d.isAcceptingNewPatients ?? true,
+      });
+    });
   }, [doctors, searchTerm]);
 
   if (loading) return (
@@ -163,9 +192,12 @@ const FindCarePage: React.FC = () => {
                 <CardContent className={`p-0 ${viewMode === 'list' ? 'flex' : ''}`}>
                   {/* Doctor Image */}
                   <div className={viewMode === 'list' ? 'w-48 flex-shrink-0' : 'relative'}>
-                    <div className={`${viewMode === 'list' ? 'h-full' : 'h-48'} bg-gradient-to-br from-primary/20 to-primary-light/20 flex items-center justify-center`}>
-                      <User className="h-20 w-20 text-primary/50" />
-                    </div>
+                    <img
+                      src={doctor.image}
+                      alt={doctor.name}
+                      className={`${viewMode === 'list' ? 'h-full w-48' : 'h-48 w-full'} object-cover bg-muted`}
+                      onError={(e) => { (e.currentTarget as HTMLImageElement).src = pickFallbackImage(doctor.id); }}
+                    />
                     {doctor.acceptingNew && (
                       <Badge className="absolute top-3 left-3 bg-green-500 hover:bg-green-600">Accepting New Patients</Badge>
                     )}
@@ -197,9 +229,13 @@ const FindCarePage: React.FC = () => {
                     </div>
 
                     <div className="flex gap-2">
-                      <Link to={`/doctor/${doctor.id}`} className="flex-1">
-                        <Button variant="outline" className="w-full"><User className="h-4 w-4 mr-2" />View Profile</Button>
-                      </Link>
+                      {doctor.id ? (
+                        <Link to={`/doctor/${doctor.id}`} className="flex-1">
+                          <Button variant="outline" className="w-full"><User className="h-4 w-4 mr-2" />View Profile</Button>
+                        </Link>
+                      ) : (
+                        <Button variant="outline" className="flex-1" disabled><User className="h-4 w-4 mr-2" />View Profile</Button>
+                      )}
                       <Button variant="medical" className="flex-1"><Calendar className="h-4 w-4 mr-2" />Book Appointment</Button>
                     </div>
                   </div>

@@ -11,6 +11,8 @@
     "load-static-data": "node loadStaticData.js",
     "load-complete-data": "node loadCompleteData.js",
     "seed-careproviders": "node scripts/seedCareProviders.js",
+    "seed:facilities": "node scripts/seedHealthcareFacilities.js",
+    "migrate:facilities:frontend-shape": "node scripts/migrateFacilitiesToFrontendShape.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [

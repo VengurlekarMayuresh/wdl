@@ -20,10 +20,22 @@ const CareProviderProfilePage = () => {
     yearsOfExperience: '',
     hourlyRate: '',
     acceptsNewClients: true,
-    bio: ''
+    bio: '',
+    credentials: {
+      licenseNumber: '',
+      licenseType: '',
+      licenseState: '',
+      licenseExpiryDate: ''
+    },
+    education: [],
+    availability: {
+      workSchedule: '',
+      availableDays: []
+    }
   });
   const [isEditing, setIsEditing] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 
   const providerTypes = [
@@ -45,26 +57,64 @@ const CareProviderProfilePage = () => {
   useEffect(() => {
     const loadProfile = async () => {
       try {
+        setLoading(true);
+        setError('');
         const cp = await careProviderAPI.getProfile();
         setProfile(cp);
         setFormData({
           providerType: cp.providerType || '',
-          services: cp.services || [],
+          services: Array.isArray(cp.services) ? cp.services : [],
           yearsOfExperience: cp.experience?.yearsOfExperience?.toString() || '',
           hourlyRate: cp.preferences?.hourlyRate?.min?.toString() || '',
           acceptsNewClients: cp.preferences?.acceptsNewClients ?? true,
-          bio: cp.userId?.bio || ''
+          bio: cp.userId?.bio || '',
+          credentials: {
+            licenseNumber: cp.credentials?.licenseNumber || '',
+            licenseType: cp.credentials?.licenseType || '',
+            licenseState: cp.credentials?.licenseState || '',
+            licenseExpiryDate: cp.credentials?.licenseExpiryDate ? new Date(cp.credentials.licenseExpiryDate).toISOString().slice(0,10) : ''
+          },
+          education: Array.isArray(cp.education) ? cp.education.map(e => ({
+            institution: e.institution || '',
+            program: e.program || '',
+            degree: e.degree || '',
+            graduationYear: e.graduationYear || ''
+          })) : [],
+          availability: {
+            workSchedule: cp.availability?.workSchedule || '',
+            availableDays: Array.isArray(cp.availability?.availableDays) ? cp.availability.availableDays : []
+          }
         });
       } catch (e) {
         console.error('Failed to load profile:', e);
         setError(e.message || 'Failed to load profile');
+      } finally {
+        setLoading(false);
       }
     };
+
+    // If not authenticated, avoid hitting the API and show message
+    if (!isAuthenticated) {
+      setLoading(false);
+      setError('You must be logged in as a care provider to view this page.');
+      return;
+    }
+
     loadProfile();
-  }, []);
+  }, [isAuthenticated]);
 
   const handleInputChange = (field, value) => {
     setFormData(prev => ({ ...prev, [field]: value }));
+  };
+
+  const handleNestedChange = (section, field, value) => {
+    setFormData(prev => ({
+      ...prev,
+      [section]: {
+        ...prev[section],
+        [field]: value
+      }
+    }));
   };
 
   const handleServiceToggle = (service) => {
@@ -79,6 +129,7 @@ const CareProviderProfilePage = () => {
   const handleSave = async () => {
     try {
       setIsSaving(true);
+      setError('');
       const updates = {
         providerType: formData.providerType,
         services: formData.services,
@@ -90,6 +141,22 @@ const CareProviderProfilePage = () => {
             min: parseFloat(formData.hourlyRate) || 0
           },
           acceptsNewClients: formData.acceptsNewClients
+        },
+        credentials: {
+          licenseNumber: formData.credentials.licenseNumber || undefined,
+          licenseType: formData.credentials.licenseType || undefined,
+          licenseState: formData.credentials.licenseState || undefined,
+          licenseExpiryDate: formData.credentials.licenseExpiryDate ? new Date(formData.credentials.licenseExpiryDate) : undefined
+        },
+        education: formData.education.map(e => ({
+          institution: e.institution,
+          program: e.program,
+          degree: e.degree,
+          graduationYear: e.graduationYear ? parseInt(e.graduationYear) : undefined
+        })),
+        availability: {
+          workSchedule: formData.availability.workSchedule || undefined,
+          availableDays: formData.availability.availableDays || []
         }
       };
       
@@ -116,7 +183,7 @@ const CareProviderProfilePage = () => {
     ).join(' ');
   };
 
-  if (!profile) {
+  if (loading) {
     return (
       <div className="min-h-screen bg-gradient-light">
         <Header 
@@ -127,6 +194,33 @@ const CareProviderProfilePage = () => {
         />
         <div className="max-w-4xl mx-auto px-4 py-8">
           <div className="text-center">Loading profile...</div>
+        </div>
+      </div>
+    );
+  }
+
+  if (error && !profile) {
+    return (
+      <div className="min-h-screen bg-gradient-light">
+        <Header 
+          isAuthenticated={isAuthenticated}
+          userInitial={(user?.firstName?.[0]?.toUpperCase?.() || 'U')}
+          userType={user?.userType || 'careprovider'}
+          onLogout={logout}
+        />
+        <div className="max-w-4xl mx-auto px-4 py-8">
+          <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg text-red-700">
+            {error}
+          </div>
+          {!isAuthenticated ? (
+            <div className="text-center">
+              <a className="underline text-primary" href="/login">Go to Login</a>
+            </div>
+          ) : (
+            <div className="text-center">
+              <Button onClick={() => window.location.reload()}>Retry</Button>
+            </div>
+          )}
         </div>
       </div>
     );
@@ -290,6 +384,57 @@ const CareProviderProfilePage = () => {
             </CardContent>
           </Card>
 
+          {/* Credentials */}
+          <Card className="shadow-soft border-0">
+            <CardHeader>
+              <CardTitle>Credentials</CardTitle>
+            </CardHeader>
+            <CardContent>
+              {isEditing ? (
+                <div className="grid md:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm text-muted-foreground mb-1">License Number</label>
+                    <Input value={formData.credentials.licenseNumber}
+                      onChange={(e) => handleNestedChange('credentials','licenseNumber', e.target.value)}
+                      placeholder="License Number" />
+                  </div>
+                  <div>
+                    <label className="block text-sm text-muted-foreground mb-1">License Type</label>
+                    <Select value={formData.credentials.licenseType}
+                      onValueChange={(v)=>handleNestedChange('credentials','licenseType', v)}>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select license type" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {['RN','LPN','CNA','PTA','OTA','SLP','RRT','LSW','LCSW','PharmD','RD','LPC','Other'].map(t=> (
+                          <SelectItem key={t} value={t}>{t}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div>
+                    <label className="block text-sm text-muted-foreground mb-1">License State</label>
+                    <Input value={formData.credentials.licenseState}
+                      onChange={(e)=>handleNestedChange('credentials','licenseState', e.target.value)}
+                      placeholder="e.g. NY" />
+                  </div>
+                  <div>
+                    <label className="block text-sm text-muted-foreground mb-1">License Expiry</label>
+                    <Input type="date" value={formData.credentials.licenseExpiryDate}
+                      onChange={(e)=>handleNestedChange('credentials','licenseExpiryDate', e.target.value)} />
+                  </div>
+                </div>
+              ) : (
+                <div className="grid md:grid-cols-2 gap-2 text-muted-foreground">
+                  <div>License: {profile.credentials?.licenseNumber || '—'}</div>
+                  <div>Type: {profile.credentials?.licenseType || '—'}</div>
+                  <div>State: {profile.credentials?.licenseState || '—'}</div>
+                  <div>Expiry: {profile.credentials?.licenseExpiryDate ? new Date(profile.credentials.licenseExpiryDate).toLocaleDateString() : '—'}</div>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+
           {/* Services */}
           <Card className="shadow-soft border-0">
             <CardHeader>
@@ -329,7 +474,79 @@ const CareProviderProfilePage = () => {
             </CardContent>
           </Card>
 
-          {/* Experience & Rate */}
+          {/* Education */}
+          <Card className="shadow-soft border-0">
+            <CardHeader>
+              <CardTitle>Education</CardTitle>
+            </CardHeader>
+            <CardContent>
+              {isEditing ? (
+                <div className="space-y-4">
+                  {formData.education.map((ed, idx) => (
+                    <div key={idx} className="grid md:grid-cols-4 gap-3 items-end">
+                      <div>
+                        <label className="block text-sm text-muted-foreground mb-1">Institution</label>
+                        <Input value={ed.institution} onChange={(e)=>{
+                          const v = e.target.value;
+                          setFormData(prev => {
+                            const arr = [...prev.education]; arr[idx] = { ...arr[idx], institution: v }; return { ...prev, education: arr };
+                          });
+                        }} />
+                      </div>
+                      <div>
+                        <label className="block text-sm text-muted-foreground mb-1">Program</label>
+                        <Input value={ed.program} onChange={(e)=>{
+                          const v = e.target.value;
+                          setFormData(prev => { const arr = [...prev.education]; arr[idx] = { ...arr[idx], program: v }; return { ...prev, education: arr }; });
+                        }} />
+                      </div>
+                      <div>
+                        <label className="block text-sm text-muted-foreground mb-1">Degree</label>
+                        <Select value={ed.degree || ''} onValueChange={(v)=>{
+                          setFormData(prev => { const arr = [...prev.education]; arr[idx] = { ...arr[idx], degree: v }; return { ...prev, education: arr }; });
+                        }}>
+                          <SelectTrigger><SelectValue placeholder="Select degree" /></SelectTrigger>
+                          <SelectContent>
+                            {['Certificate','Associates','Bachelors','Masters','Doctorate','Other'].map(d => (
+                              <SelectItem key={d} value={d}>{d}</SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <div>
+                        <label className="block text-sm text-muted-foreground mb-1">Graduation Year</label>
+                        <Input type="number" value={ed.graduationYear || ''} onChange={(e)=>{
+                          const v = e.target.value;
+                          setFormData(prev => { const arr = [...prev.education]; arr[idx] = { ...arr[idx], graduationYear: v }; return { ...prev, education: arr }; });
+                        }} />
+                      </div>
+                      <div className="md:col-span-4 text-right">
+                        <Button variant="outline" size="sm" onClick={()=>{
+                          setFormData(prev => ({ ...prev, education: prev.education.filter((_,i)=> i!==idx) }));
+                        }}>Remove</Button>
+                      </div>
+                    </div>
+                  ))}
+                  <Button variant="secondary" size="sm" onClick={()=>{
+                    setFormData(prev => ({ ...prev, education: [...prev.education, { institution:'', program:'', degree:'', graduationYear:'' }] }));
+                  }}>Add Education</Button>
+                </div>
+              ) : (
+                <div className="space-y-2">
+                  {profile.education?.length ? profile.education.map((ed, idx) => (
+                    <div key={idx} className="flex flex-wrap gap-3 text-muted-foreground">
+                      <Badge variant="secondary">{ed.degree || 'Degree'}</Badge>
+                      <span>{ed.program}</span>
+                      <span>• {ed.institution}</span>
+                      {ed.graduationYear && <span>• {ed.graduationYear}</span>}
+                    </div>
+                  )) : <p className="text-muted-foreground">No education added</p>}
+                </div>
+              )}
+            </CardContent>
+          </Card>
+
+          {/* Experience, Rate & Availability */}
           <div className="grid md:grid-cols-2 gap-6">
             <Card className="shadow-soft border-0">
               <CardHeader>
@@ -397,7 +614,39 @@ const CareProviderProfilePage = () => {
             </CardHeader>
             <CardContent>
               {isEditing ? (
-                <div className="flex items-center space-x-2">
+                <div className="space-y-4">
+                  <div>
+                    <label className="block text-sm text-muted-foreground mb-1">Work Schedule</label>
+                    <Select value={formData.availability.workSchedule || ''} onValueChange={(v)=>handleNestedChange('availability','workSchedule', v)}>
+                      <SelectTrigger><SelectValue placeholder="Select schedule" /></SelectTrigger>
+                      <SelectContent>
+                        {['day_shift','night_shift','evening_shift','rotating','weekends','on_call','flexible'].map(s => (
+                          <SelectItem key={s} value={s}>{s.replace(/_/g,' ')}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div>
+                    <label className="block text-sm text-muted-foreground mb-2">Available Days</label>
+                    <div className="flex flex-wrap gap-3">
+                      {['monday','tuesday','wednesday','thursday','friday','saturday','sunday'].map(d => {
+                        const checked = formData.availability.availableDays.includes(d);
+                        return (
+                          <label key={d} className="flex items-center gap-2">
+                            <input type="checkbox" checked={checked} onChange={(e)=>{
+                              setFormData(prev => {
+                                const set = new Set(prev.availability.availableDays);
+                                if (e.target.checked) set.add(d); else set.delete(d);
+                                return { ...prev, availability: { ...prev.availability, availableDays: Array.from(set) } };
+                              });
+                            }} />
+                            <span className="capitalize">{d}</span>
+                          </label>
+                        );
+                      })}
+                    </div>
+                  </div>
+                  <div className="flex items-center space-x-2">
                   <input
                     type="checkbox"
                     id="acceptsNewClients"
@@ -409,6 +658,7 @@ const CareProviderProfilePage = () => {
                     Currently accepting new clients
                   </label>
                 </div>
+              </div>
               ) : (
                 <Badge 
                   variant={profile.preferences?.acceptsNewClients ? "default" : "secondary"}

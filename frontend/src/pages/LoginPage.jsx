@@ -19,8 +19,7 @@ import {
   ArrowLeft,
   Loader2
 } from "lucide-react";
-import { authAPI } from "@/services/api";
-import { useToast } from "@/hooks/use-toast";
+import { authAPI, doctorAPI } from "@/services/api";
 import { useAuth } from "@/contexts/AuthContext";
 import logoImg from "@/assets/logo.png";
 
@@ -89,10 +88,17 @@ const LoginPage = () => {
         }
       }
       
-      // Care Provider specific validations
-      if (formData.userType === 'careprovider') {
-        if (!formData.providerType) {
-          newErrors.providerType = "Provider type is required";
+      // Care Provider removed
+
+      // Facility validations
+      if (formData.userType === 'facility') {
+        if (!formData.facilityName?.trim()) newErrors.facilityName = 'Facility name is required';
+        if (!formData.facilityType) newErrors.facilityType = 'Facility type is required';
+        if (!formData.facilityStreet?.trim()) {
+          newErrors.facilityAddress = (newErrors.facilityAddress ? newErrors.facilityAddress + '; ' : '') + 'Street is required';
+        }
+        if (!formData.facilityCity?.trim() || !formData.facilityState?.trim() || !String(formData.facilityPincode || '').trim()) {
+          newErrors.facilityAddress = (newErrors.facilityAddress ? newErrors.facilityAddress + '; ' : '') + 'City, State and Pincode are required';
         }
       }
     }
@@ -105,8 +111,8 @@ const LoginPage = () => {
 
     if (!formData.password.trim()) {
       newErrors.password = "Password is required";
-    } else if (formData.password.length < 6) {
-      newErrors.password = "Password must be at least 6 characters";
+    } else if (formData.password.length < 8) {
+      newErrors.password = "Password must be at least 8 characters";
     }
 
     setErrors(newErrors);
@@ -131,15 +137,27 @@ const LoginPage = () => {
           phone: formData.phone,
           dateOfBirth: formData.dateOfBirth,
           // Doctor specific fields
-          ...((formData.userType === 'doctor') && {
-            medicalLicenseNumber: formData.medicalLicenseNumber,
-            licenseState: formData.licenseState,
-            primarySpecialty: formData.primarySpecialty,
-          }),
-          // Care Provider specific fields
-          ...((formData.userType === 'careprovider') && {
-            providerType: formData.providerType,
-          }),
+          ...(formData.userType === 'doctor'
+            ? {
+                medicalLicenseNumber: formData.medicalLicenseNumber,
+                licenseState: formData.licenseState,
+                primarySpecialty: formData.primarySpecialty,
+              }
+            : {}),
+          // Facility provider fields
+          ...(formData.userType === 'facility'
+            ? {
+                facilityName: formData.facilityName,
+                facilityType: formData.facilityType,
+                facilityAddress: {
+                  street: formData.facilityStreet,
+                  area: formData.facilityArea,
+                  city: formData.facilityCity,
+                  state: formData.facilityState,
+                  pincode: formData.facilityPincode,
+                },
+              }
+            : {}),
         });
         
         toast({
@@ -153,16 +171,18 @@ const LoginPage = () => {
           navigate('/doctor-dashboard');
         } else if (formData.userType === 'patient') {
           navigate('/profile');
+        } else if (formData.userType === 'facility') {
+          navigate('/facility-profile');
         } else {
           navigate('/');
         }
       } else {
-        // Login user using AuthContext
+        // User login using AuthContext
         await login(formData.email, formData.password);
-        
-        // Get current user data to determine user type
-        const currentUser = await authAPI.getCurrentUser();
-        
+        // Determine user type from stored user (works for facility too)
+        const storedUserStr = localStorage.getItem('user');
+        const currentUser = storedUserStr ? JSON.parse(storedUserStr) : null;
+
         toast({
           title: "Login successful!",
           description: "Welcome back to MASSS.",
@@ -170,17 +190,18 @@ const LoginPage = () => {
         });
         
         // Redirect based on user type
-        if (currentUser.userType === 'doctor') {
+        if (currentUser?.userType === 'doctor') {
           navigate('/doctor-dashboard');
-        } else if (currentUser.userType === 'patient') {
+        } else if (currentUser?.userType === 'patient') {
           navigate('/profile');
-        } else if (currentUser.userType === 'careprovider') {
-          navigate('/profile'); // For now, can be updated when care provider dashboard is created
+        } else if (currentUser?.userType === 'careprovider') {
+          navigate('/careprovider-profile');
+        } else if (currentUser?.userType === 'facility') {
+          navigate('/facility-profile');
         } else {
           navigate('/');
         }
       }
-      
     } catch (error) {
       toast({
         title: isSignUp ? "Registration failed" : "Login failed",
@@ -207,7 +228,14 @@ const LoginPage = () => {
       medicalLicenseNumber: "",
       licenseState: "",
       primarySpecialty: "",
-      providerType: ""
+      providerType: "",
+      facilityName: "",
+      facilityType: "",
+      facilityStreet: "",
+      facilityArea: "",
+      facilityCity: "",
+      facilityState: "",
+      facilityPincode: ""
     });
     setErrors({});
   };
@@ -220,9 +248,11 @@ const LoginPage = () => {
       try {
         // Only fetch when doctor is selected and we are in signup mode
         if (isSignUp && formData.userType === 'doctor') {
-          const meta = await (await import('@/services/api'))();
-          setSpecialtyOptions(meta.specialties || []);
-          setStateOptions(meta.states || []);
+          const meta = await doctorAPI.getMeta();
+          setSpecialtyOptions(meta?.specialties || [
+            'Cardiology','Dermatology','Emergency Medicine','Endocrinology','Family Medicine','Gastroenterology','General Surgery','Gynecology','Hematology','Infectious Disease','Internal Medicine','Neurology','Neurosurgery','Obstetrics','Oncology','Ophthalmology','Orthopedics','Otolaryngology','Pediatrics','Psychiatry','Pulmonology','Radiology','Rheumatology','Urology','Other'
+          ]);
+          setStateOptions(meta?.states || ['AL','AK','AZ','AR','CA','CO','CT','DE','FL','GA','HI','ID','IL','IN','IA','KS','KY','LA','ME','MD','MA','MI','MN','MS','MO','MT','NE','NV','NH','NJ','NM','NY','NC','ND','OH','OK','OR','PA','RI','SC','SD','TN','TX','UT','VT','VA','WA','WV','WI','WY']);
         }
       } catch (e) {
         console.warn('Failed to load doctor metadata, falling back to defaults');
@@ -335,10 +365,10 @@ const LoginPage = () => {
                                 Doctor
                               </div>
                             </SelectItem>
-                            <SelectItem value="careprovider">
+                            <SelectItem value="facility">
                               <div className="flex items-center gap-2">
                                 <Shield className="h-4 w-4" />
-                                Care Provider
+                                Facility
                               </div>
                             </SelectItem>
                           </SelectContent>
@@ -347,6 +377,50 @@ const LoginPage = () => {
                           <p className="text-sm text-destructive">{errors.userType}</p>
                         )}
                       </div>
+
+                      {/* Facility signup fields */}
+                      {formData.userType === 'facility' && (
+                        <>
+                          <div className="space-y-2">
+                            <Input
+                              type="text"
+                              placeholder="Facility Name"
+                              value={formData.facilityName || ''}
+                              onChange={(e) => handleInputChange("facilityName", e.target.value)}
+                              className={errors.facilityName ? "border-destructive" : ""}
+                            />
+                            {errors.facilityName && (<p className="text-sm text-destructive">{errors.facilityName}</p>)}
+                          </div>
+                          <div className="space-y-2">
+                            <Select value={formData.facilityType || ''} onValueChange={(v)=>handleInputChange('facilityType', v)}>
+                              <SelectTrigger className={errors.facilityType ? "border-destructive" : ""}>
+                                <SelectValue placeholder="Facility Type" />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="hospital">Hospital</SelectItem>
+                                <SelectItem value="clinic">Clinic</SelectItem>
+                                <SelectItem value="primary_care">Primary Care</SelectItem>
+                                <SelectItem value="pharmacy">Pharmacy</SelectItem>
+                              </SelectContent>
+                            </Select>
+                            {errors.facilityType && (<p className="text-sm text-destructive">{errors.facilityType}</p>)}
+                          </div>
+                          <div className="grid grid-cols-2 gap-4">
+                            <div className="space-y-2">
+                              <Input type="text" placeholder="Street" value={formData.facilityStreet || ''} onChange={(e)=>handleInputChange('facilityStreet', e.target.value)} />
+                            </div>
+                            <div className="space-y-2">
+                              <Input type="text" placeholder="Area" value={formData.facilityArea || ''} onChange={(e)=>handleInputChange('facilityArea', e.target.value)} />
+                            </div>
+                          </div>
+                          <div className="grid grid-cols-3 gap-4">
+                            <Input type="text" placeholder="City" value={formData.facilityCity || ''} onChange={(e)=>handleInputChange('facilityCity', e.target.value)} />
+                            <Input type="text" placeholder="State" value={formData.facilityState || ''} onChange={(e)=>handleInputChange('facilityState', e.target.value)} />
+                            <Input type="text" placeholder="Pincode" value={formData.facilityPincode || ''} onChange={(e)=>handleInputChange('facilityPincode', e.target.value)} />
+                          </div>
+                          {errors.facilityAddress && (<p className="text-sm text-destructive">{errors.facilityAddress}</p>)}
+                        </>
+                      )}
 
                       <div className="space-y-2">
                         <Input

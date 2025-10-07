@@ -23,6 +23,9 @@ import SecurityPrivacyPage from "./pages/SecurityPrivacyPage";
 import BlogPostPage from "./pages/BlogPostPage";
 import NotFound from "./pages/NotFound";
 import AboutUs from "./pages/AboutUs";
+import CareProviderProfilePage from "./pages/CareProviderProfilePage";
+import FacilityProfilePage from "./pages/FacilityProfilePage";
+import FacilityLoginPage from "./pages/FacilityLoginPage";
 
 const queryClient = new QueryClient();
 
@@ -43,6 +46,9 @@ const App = () => (
             <Route path="/doctor-profile" element={<DoctorSelfProfilePage />} />
             <Route path="/profile" element={<Profile />} />
             <Route path="/patient-profile" element={<PatientProfilePage />} />
+            <Route path="/careprovider-profile" element={<CareProviderProfilePage />} />
+            <Route path="/facility-profile" element={<FacilityProfilePage />} />
+            <Route path="/facility-login" element={<FacilityLoginPage />} />
             <Route path="/doctor-appointments" element={<DoctorAppointmentsPage />} />
             <Route path="/patient-appointments" element={<PatientAppointmentsPage />} />
             <Route path="/doctor-patients" element={<DoctorPatientsPage />} />

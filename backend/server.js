@@ -5,7 +5,13 @@ import compression from 'compression';
 import morgan from 'morgan';
 import rateLimit from 'express-rate-limit';
 import dotenv from 'dotenv';
+import path from 'path';
+import { fileURLToPath } from 'url';
 import { connectDatabase, createIndexes, healthCheck } from './config/database.js';
+
+// Resolve backend directory and load .env explicitly
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 // Import routes
 import authRoutes from './routes/auth.js';
@@ -14,9 +20,10 @@ import patientRoutes from './routes/patients.js';
 import careProviderRoutes from './routes/careProviders.js';
 import uploadRoutes from './routes/upload.js';
 import appointmentRoutes from './routes/appointments.js';
+import healthcareFacilitiesRoutes from './routes/healthcareFacilities.js';
 
-// Load environment variables
-dotenv.config();
+// Load environment variables from backend/.env explicitly
+dotenv.config({ path: path.join(__dirname, '.env') });
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -145,9 +152,10 @@ app.use(express.urlencoded({
 }));
 
 // Rate limiting
+const isProd = (process.env.NODE_ENV || 'development') === 'production';
 const generalLimiter = rateLimit({
-  windowMs: parseInt(process.env.WINDOW_TIME_MINUTES) * 60 * 1000 || 15 * 60 * 1000, // 15 minutes
-  max: parseInt(process.env.MAX_REQUESTS_PER_WINDOW) || 100, // limit each IP to 100 requests per windowMs
+  windowMs: (parseInt(process.env.WINDOW_TIME_MINUTES) || 15) * 60 * 1000,
+  max: isProd ? (parseInt(process.env.MAX_REQUESTS_PER_WINDOW) || 100) : 1000000, // effectively disabled in dev
   message: {
     success: false,
     message: 'Too many requests from this IP, please try again later.'
@@ -155,8 +163,19 @@ const generalLimiter = rateLimit({
   standardHeaders: true,
   legacyHeaders: false,
   skip: (req, res) => {
-    // Skip rate limiting for health check endpoint
+    // Skip rate limiting entirely in development and for health checks
+    if (!isProd) return true;
     return req.path === '/api/health';
+  },
+  keyGenerator: (req, res) => {
+    // Prefer user id when available to avoid throttling all users behind same IP (optional)
+    try {
+      const auth = req.headers.authorization || '';
+      // Keep it simple: still use IP if no auth
+      return req.ip || req.headers['x-forwarded-for'] || req.socket.remoteAddress || 'global';
+    } catch {
+      return req.ip || 'global';
+    }
   }
 });
 
@@ -199,6 +218,7 @@ app.use('/api/patients', patientRoutes);
 app.use('/api/careproviders', careProviderRoutes);
 app.use('/api/upload', uploadRoutes);
 app.use('/api/appointments', appointmentRoutes);
+app.use('/api/healthcare-facilities', healthcareFacilitiesRoutes);
 
 // Welcome route
 app.get('/api', (req, res) => {

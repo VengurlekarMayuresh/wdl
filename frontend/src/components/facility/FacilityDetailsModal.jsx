@@ -21,7 +21,7 @@ import {
   ChevronLeft,
   ChevronRight
 } from 'lucide-react';
-import healthcareFacilitiesAPI from '@/services/healthcareFacilitiesAPI';
+import { healthcareFacilitiesAPI } from '@/services/healthcareFacilitiesAPI';
 
 const FacilityDetailsModal = ({ facilityId, isOpen, onClose, facility: initialFacility }) => {
   const [facility, setFacility] = useState(initialFacility || null);
@@ -169,9 +169,9 @@ const FacilityDetailsModal = ({ facilityId, isOpen, onClose, facility: initialFa
                 </div>
               </div>
             </div>
-            <Button variant="ghost" size="sm" onClick={onClose}>
+            {/* <Button variant="ghost" size="sm" onClick={onClose}>
               <X className="h-4 w-4" />
-            </Button>
+            </Button> */}
           </div>
         </div>
 
@@ -345,12 +345,25 @@ const FacilityDetailsModal = ({ facilityId, isOpen, onClose, facility: initialFa
                       {!facility.is24x7 && facility.operatingHours && (
                         <div className="bg-muted/50 rounded-lg p-3">
                           <div className="space-y-2">
-                            {Object.entries(facility.operatingHours).map(([day, hours]) => (
-                              <div key={day} className="flex justify-between text-sm">
-                                <span className="capitalize">{day}</span>
-                                <span className="text-muted-foreground">{hours}</span>
-                              </div>
-                            ))}
+                            {Array.isArray(facility.operatingHours) ? (
+                              // API array format: [{ day, isOpen, openTime, closeTime, _id }]
+                              facility.operatingHours.map((h, idx) => (
+                                <div key={h._id || idx} className="flex justify-between text-sm">
+                                  <span className="capitalize">{String(h.day || '').toLowerCase()}</span>
+                                  <span className="text-muted-foreground">
+                                    {h.isOpen ? `${h.openTime} - ${h.closeTime}` : 'Closed'}
+                                  </span>
+                                </div>
+                              ))
+                            ) : (
+                              // Object map format: { monday: "09:00 - 17:00", tuesday: "Closed", ... }
+                              Object.entries(facility.operatingHours).map(([day, hours]) => (
+                                <div key={day} className="flex justify-between text-sm">
+                                  <span className="capitalize">{day}</span>
+                                  <span className="text-muted-foreground">{typeof hours === 'string' ? hours : (hours?.isOpen ? `${hours.openTime} - ${hours.closeTime}` : 'Closed')}</span>
+                                </div>
+                              ))
+                            )}
                           </div>
                         </div>
                       )}

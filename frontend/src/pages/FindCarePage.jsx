@@ -32,7 +32,7 @@ import {
   Users
 } from 'lucide-react';
 
-import healthcareFacilitiesAPI from '@/services/healthcareFacilitiesAPI';
+import { healthcareFacilitiesAPI } from '@/services/healthcareFacilitiesAPI';
 import FacilityDetailsModal from '@/components/facility/FacilityDetailsModal';
 import { doctorAPI } from '@/services/api';
 import mockPrimaryCareData from '@/data/mockPrimaryCareData';
@@ -111,24 +111,38 @@ const FindCarePage = () => {
   const [selectedFacility, setSelectedFacility] = useState(null);
   const [showFacilityModal, setShowFacilityModal] = useState(false);
   const [specialtyCategories, setSpecialtyCategories] = useState(defaultSpecialtyCategories);
+  // Facilities pagination
+  const [page, setPage] = useState(1);
+  const [total, setTotal] = useState(0);
+  const [hasMore, setHasMore] = useState(false);
+  const pageSize = 10;
+  // Specialty care state
+  const [selectedSpecialty, setSelectedSpecialty] = useState(null);
+  const [specialtyDoctors, setSpecialtyDoctors] = useState([]);
+  const [loadingSpecialty, setLoadingSpecialty] = useState(false);
 
   const getUserInitial = () => {
     if (!user) return 'G';
     return user.firstName?.[0]?.toUpperCase() || 'U';
   };
 
-  // Load facilities on component mount and when activeTab changes
+  // Load facilities on component mount and when activeTab or page changes
   useEffect(() => {
     if (activeTab === 'primary-care') {
-      loadPrimaryCare();
+      loadFacilitiesFromDB('primary_care');
     } else if (activeTab === 'specialty-care') {
+      // When opening specialty care, show categories and load counts; reset selection
+      setSelectedSpecialty(null);
+      setSpecialtyDoctors([]);
       loadSpecialtyDoctorCounts();
     } else if (activeTab === 'hospitals') {
-      loadHospitals();
+      loadFacilitiesFromDB('hospital');
     } else if (activeTab === 'clinics') {
-      loadClinics();
+      loadFacilitiesFromDB('clinic');
+    } else if (activeTab === 'pharmacies') {
+      loadFacilitiesFromDB('pharmacy');
     }
-  }, [activeTab]);
+  }, [activeTab, page, selectedPincode, searchQuery]);
 
   // Filter facilities based on search and pincode
   useEffect(() => {
@@ -154,49 +168,30 @@ const FindCarePage = () => {
     setFilteredFacilities(filtered);
   }, [searchQuery, selectedPincode, facilities]);
 
-  const loadPrimaryCare = async () => {
+  const loadFacilitiesFromDB = async (type) => {
     try {
       setLoading(true);
-      await new Promise(resolve => setTimeout(resolve, 300));
-      const facilitiesData = mockPrimaryCareData.data || [];
-      setFacilities(facilitiesData);
-      setFilteredFacilities(facilitiesData);
-    } catch (error) {
-      console.error('Error loading primary care facilities:', error);
-      setFacilities([]);
-      setFilteredFacilities([]);
-    } finally {
-      setLoading(false);
-    }
-  };
+      const params = {
+        type,
+        limit: pageSize,
+        skip: (page - 1) * pageSize,
+      };
+      // Apply server-side filters where supported
+      if (selectedPincode) params.pincode = selectedPincode;
+      if (searchQuery) params.search = searchQuery;
 
-  const loadHospitals = async () => {
-    try {
-      setLoading(true);
-      await new Promise(resolve => setTimeout(resolve, 300));
-      const hospitalsData = mockHospitalsData.data || [];
-      setFacilities(hospitalsData);
-      setFilteredFacilities(hospitalsData);
+      const resp = await healthcareFacilitiesAPI.getAll(params);
+      const list = resp.data || resp; // service may return wrapped
+      setFacilities(list);
+      setFilteredFacilities(list);
+      setTotal(resp.total ?? list.length);
+      setHasMore(resp.hasMore ?? list.length === pageSize);
     } catch (error) {
-      console.error('Error loading hospitals:', error);
+      console.error('Error loading facilities:', error);
       setFacilities([]);
       setFilteredFacilities([]);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const loadClinics = async () => {
-    try {
-      setLoading(true);
-      await new Promise(resolve => setTimeout(resolve, 300));
-      const clinicsData = mockClinicsData.data || [];
-      setFacilities(clinicsData);
-      setFilteredFacilities(clinicsData);
-    } catch (error) {
-      console.error('Error loading clinics:', error);
-      setFacilities([]);
-      setFilteredFacilities([]);
+      setTotal(0);
+      setHasMore(false);
     } finally {
       setLoading(false);
     }
@@ -261,9 +256,22 @@ const FindCarePage = () => {
     setShowFacilityModal(true);
   };
 
-  const handleSpecialtyClick = (specialty) => {
-    // Navigate to doctors page with specialty filter
-    navigate(`/doctors?specialty=${specialty.id}`);
+  const handleSpecialtyClick = async (specialty) => {
+    try {
+      setSelectedSpecialty(specialty);
+      setLoadingSpecialty(true);
+      // Try server-side filter; fallback to client filter
+      const resp = await doctorAPI.list({ specialty: specialty.name });
+      const list = resp?.doctors || resp?.data || [];
+      const normalized = list.length ? list : (await doctorAPI.list())?.doctors || [];
+      const filtered = normalized.filter(d => (d.primarySpecialty || '').toLowerCase().includes(specialty.name.toLowerCase()));
+      setSpecialtyDoctors(filtered);
+    } catch (e) {
+      console.error('Failed to load doctors for specialty', specialty, e);
+      setSpecialtyDoctors([]);
+    } finally {
+      setLoadingSpecialty(false);
+    }
   };
 
   const careCategories = [
@@ -280,13 +288,6 @@ const FindCarePage = () => {
       description: 'Specialized medical care by experts',
       icon: Heart,
       color: 'bg-red-500'
-    },
-    {
-      id: 'urgent-care',
-      name: 'Urgent Care / Emergency',
-      description: 'Immediate medical attention',
-      icon: Zap,
-      color: 'bg-orange-500'
     },
     {
       id: 'hospitals',
@@ -308,6 +309,13 @@ const FindCarePage = () => {
       description: 'Prescription and over-the-counter medications',
       icon: Pill,
       color: 'bg-teal-500'
+    },
+    {
+      id: 'urgent-care',
+      name: 'Urgent Care / Emergency',
+      description: 'Immediate medical attention',
+      icon: Zap,
+      color: 'bg-orange-500'
     }
   ];
 
@@ -447,6 +455,13 @@ const FindCarePage = () => {
               </p>
             </div>
           )}
+
+          {/* Pagination */}
+          <div className="flex items-center justify-between pt-2">
+            <Button variant="outline" size="sm" disabled={page === 1} onClick={() => setPage(p => Math.max(1, p - 1))}>Prev</Button>
+            <div className="text-sm text-muted-foreground">Page {page}{total ? ` of ${Math.max(1, Math.ceil(total / pageSize))}` : ''}</div>
+            <Button variant="outline" size="sm" disabled={!hasMore} onClick={() => setPage(p => p + 1)}>Next</Button>
+          </div>
         </div>
       )}
     </div>
@@ -454,39 +469,75 @@ const FindCarePage = () => {
 
   const renderSpecialtyCare = () => (
     <div className="space-y-6">
-      <div className="text-center mb-8">
-        <h2 className="text-2xl font-bold mb-2">Choose Your Specialty</h2>
-        <p className="text-muted-foreground">Find specialized doctors for your specific health needs</p>
-      </div>
-      
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-        {specialtyCategories.map((specialty) => {
-          const IconComponent = specialty.icon;
-          return (
-            <Card 
-              key={specialty.id}
-              className="cursor-pointer hover:shadow-lg transition-all hover:-translate-y-1"
-              onClick={() => handleSpecialtyClick(specialty)}
-            >
-              <CardContent className="p-6 text-center">
-                <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-4">
-                  <IconComponent className="h-8 w-8 text-primary" />
-                </div>
-                
-                <h3 className="text-lg font-semibold mb-2">{specialty.name}</h3>
-                <p className="text-sm text-muted-foreground mb-4">{specialty.description}</p>
-                
-                <div className="flex items-center justify-between">
-                  <Badge variant="secondary" className="text-xs">
-                    {specialty.doctorCount} doctors
-                  </Badge>
-                  <ChevronRight className="h-4 w-4 text-muted-foreground" />
-                </div>
-              </CardContent>
-            </Card>
-          );
-        })}
-      </div>
+      {!selectedSpecialty ? (
+        <>
+          <div className="text-center mb-8">
+            <h2 className="text-2xl font-bold mb-2">Choose Your Specialty</h2>
+            <p className="text-muted-foreground">Find specialized doctors for your specific health needs</p>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+            {specialtyCategories.map((specialty) => {
+              const IconComponent = specialty.icon;
+              return (
+                <Card 
+                  key={specialty.id}
+                  className="cursor-pointer hover:shadow-lg transition-all hover:-translate-y-1"
+                  onClick={() => handleSpecialtyClick(specialty)}
+                >
+                  <CardContent className="p-6 text-center">
+                    <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-4">
+                      <IconComponent className="h-8 w-8 text-primary" />
+                    </div>
+                    <h3 className="text-lg font-semibold mb-2">{specialty.name}</h3>
+                    <p className="text-sm text-muted-foreground mb-4">{specialty.description}</p>
+                    <div className="flex items-center justify-between">
+                      <Badge variant="secondary" className="text-xs">
+                        {specialty.doctorCount} doctors
+                      </Badge>
+                      <ChevronRight className="h-4 w-4 text-muted-foreground" />
+                    </div>
+                  </CardContent>
+                </Card>
+              );
+            })}
+          </div>
+        </>
+      ) : (
+        <div className="space-y-4">
+          <div className="flex items-center justify-between">
+            <h2 className="text-xl font-semibold">{selectedSpecialty.name} Doctors</h2>
+            <Button variant="outline" size="sm" onClick={()=>{ setSelectedSpecialty(null); setSpecialtyDoctors([]); }}>Back</Button>
+          </div>
+          {loadingSpecialty ? (
+            <div className="flex justify-center py-8"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div></div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {specialtyDoctors.length ? specialtyDoctors.map((d)=> (
+                <Card key={d._id} className="hover:shadow"> 
+                  <CardContent className="p-4">
+                    <div className="flex items-center gap-3">
+                      <img src={d.userId?.profilePicture || 'https://via.placeholder.com/64'} alt="doc" className="w-16 h-16 rounded-full object-cover" />
+                      <div>
+                        <div className="font-semibold">Dr. {d.userId?.firstName} {d.userId?.lastName}</div>
+                        <div className="text-sm text-muted-foreground">{d.primarySpecialty}</div>
+                      </div>
+                    </div>
+                    <div className="mt-3 flex items-center gap-2 text-sm text-muted-foreground">
+                      <Award className="h-4 w-4" /> {d.yearsOfExperience || 0} yrs • <Star className="h-4 w-4" /> {d.averageRating || '4.5'}
+                    </div>
+                    <div className="mt-4 flex items-center gap-2">
+                      <Button size="sm" variant="outline" onClick={()=>navigate(`/doctor/${String(d._id || d?.userId?._id || '')}`)}>View Profile</Button>
+                      <Button size="sm"><Calendar className="h-4 w-4 mr-1" />Book</Button>
+                    </div>
+                  </CardContent>
+                </Card>
+              )) : (
+                <div className="text-center text-muted-foreground py-8">No doctors found for this specialty.</div>
+              )}
+            </div>
+          )}
+        </div>
+      )}
     </div>
   );
 
@@ -503,6 +554,24 @@ const FindCarePage = () => {
     </div>
   );
 
+  const renderUrgentCare = () => (
+    <div className="space-y-6">
+      <div className="text-center mb-6">
+        <h2 className="text-2xl font-bold mb-2">Emergency Help</h2>
+        <p className="text-muted-foreground">If this is a life threatening emergency, call your local emergency number immediately.</p>
+      </div>
+      <div className="grid md:grid-cols-3 gap-4">
+        <Card><CardContent className="p-4"><div className="font-semibold">Emergency (India)</div><div className="text-muted-foreground">Dial 112</div></CardContent></Card>
+        <Card><CardContent className="p-4"><div className="font-semibold">Ambulance</div><div className="text-muted-foreground">Dial 102 / 108</div></CardContent></Card>
+        <Card><CardContent className="p-4"><div className="font-semibold">Women Helpline</div><div className="text-muted-foreground">Dial 181</div></CardContent></Card>
+      </div>
+      <div className="grid md:grid-cols-2 gap-4">
+        <Card><CardContent className="p-4"><div className="font-semibold mb-2">First Aid Tips</div><ul className="list-disc ml-4 text-sm text-muted-foreground"><li>Stay calm and call for help.</li><li>Control bleeding with clean cloth and pressure.</li><li>Do not move injured person unless necessary.</li></ul></CardContent></Card>
+        <Card><CardContent className="p-4"><div className="font-semibold mb-2">When to go to ER</div><ul className="list-disc ml-4 text-sm text-muted-foreground"><li>Chest pain, severe bleeding, difficulty breathing.</li><li>Severe head injury, sudden weakness, seizures.</li><li>Poisoning, major burns, severe allergic reaction.</li></ul></CardContent></Card>
+      </div>
+    </div>
+  );
+
   const renderContent = () => {
     const activeCategory = careCategories.find(cat => cat.id === activeTab);
     
@@ -510,9 +579,12 @@ const FindCarePage = () => {
       case 'primary-care':
       case 'hospitals':
       case 'clinics':
+      case 'pharmacies':
         return renderFacilities();
       case 'specialty-care':
         return renderSpecialtyCare();
+      case 'urgent-care':
+        return renderUrgentCare();
       default:
         return renderComingSoon(activeCategory);
     }
@@ -548,7 +620,7 @@ const FindCarePage = () => {
                 className={`h-auto p-4 flex-col ${
                   activeTab === category.id ? '' : 'hover:bg-accent'
                 }`}
-                onClick={() => setActiveTab(category.id)}
+                onClick={() => { setActiveTab(category.id); setPage(1); }}
               >
                 <div className={`w-8 h-8 rounded-full flex items-center justify-center mb-2 ${
                   activeTab === category.id ? 'bg-primary-foreground' : category.color

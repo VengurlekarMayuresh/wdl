@@ -49,30 +49,43 @@ export function emitNotificationsRefresh() {
 export function buildNotificationsFromAppointments(appointments = [], role = 'patient') {
   const items = [];
   for (const a of appointments) {
-    const dt = new Date(a.appointmentDate || a.slotId?.dateTime || a.proposedDateTime || Date.now());
+    const dt = new Date(a.appointmentDate || a.slotId?.dateTime || a.pendingReschedule?.proposedDateTime || Date.now());
     const doctor = a.doctorId?.userId || a.doctorId || {};
     const patient = a.patientId?.userId || a.patientId || {};
     const who = role === 'doctor' ? `${patient.firstName || 'Patient'} ${patient.lastName || ''}`.trim() : `Dr. ${doctor.firstName || ''} ${doctor.lastName || ''}`.trim();
 
-    // Reschedule proposals
-    const hasProposal = !!(a.pendingReschedule || a.proposedDateTime || a.proposedSlotId) || (typeof a.reasonForVisit === 'string' && a.reasonForVisit.toLowerCase().includes('reschedule request'));
-    if (hasProposal) {
+    // Reschedule proposals (only when explicitly active)
+    const pr = a.pendingReschedule;
+    const hasActiveProposal = !!(pr && pr.active === true);
+    if (hasActiveProposal) {
+      const proposedText = pr.proposedDateTime
+        ? new Date(pr.proposedDateTime).toLocaleString()
+        : (pr.proposedSlotId ? 'a new slot' : 'a new time');
       if (role === 'patient') {
-        items.push({ id: `${a._id}-reschedule-proposed`, kind: 'request', title: 'Doctor proposed new time', message: `${who} proposed ${a.proposedDateTime ? new Date(a.proposedDateTime).toLocaleString() : 'a new slot'}`, date: dt });
+        // Only show when doctor proposed
+        if (pr.proposedBy === 'doctor') {
+          items.push({
+            id: `${a._id}-reschedule-proposed`,
+            kind: 'request',
+            title: 'Doctor proposed new time',
+            message: `${who} proposed ${proposedText}`,
+            date: dt
+          });
+        }
       } else {
-        items.push({ id: `${a._id}-reschedule-awaiting-patient`, kind: 'request', title: 'Pending reschedule approval', message: `Awaiting patient decision`, date: dt });
+        // Doctor view: waiting on patient if doctor proposed OR waiting on doctor if patient proposed
+        const waitingOn = pr.proposedBy === 'doctor' ? 'patient' : 'doctor';
+        items.push({
+          id: `${a._id}-reschedule-awaiting-${waitingOn}`,
+          kind: 'request',
+          title: 'Pending reschedule approval',
+          message: `Awaiting ${waitingOn} decision`,
+          date: dt
+        });
       }
     }
 
-    // Cancellation proposals
-    const hasCancelProposal = typeof a.reasonForVisit === 'string' && a.reasonForVisit.toLowerCase().includes('cancellation request');
-    if (hasCancelProposal) {
-      if (role === 'doctor') {
-        items.push({ id: `${a._id}-cancel-proposed`, kind: 'request', title: 'Patient requested cancellation', message: `${who} requested to cancel`, date: dt });
-      } else {
-        items.push({ id: `${a._id}-cancel-awaiting-doctor`, kind: 'request', title: 'Cancellation request pending', message: `Awaiting doctor decision`, date: dt });
-      }
-    }
+    // Note: Remove heuristic cancellation proposal detection via reasonForVisit to avoid false positives
 
     switch (a.status) {
       case 'pending':
@@ -89,8 +102,10 @@ export function buildNotificationsFromAppointments(appointments = [], role = 'pa
         }
         break;
       case 'confirmed':
-      case 'rescheduled':
         items.push({ id: `${a._id}-confirmed`, kind: 'confirmed', title: 'Appointment confirmed', message: `${who} on ${dt.toLocaleString()}`, date: dt });
+        break;
+      case 'rescheduled':
+        items.push({ id: `${a._id}-rescheduled`, kind: 'confirmed', title: 'Appointment rescheduled', message: `${who} on ${dt.toLocaleString()}`, date: dt });
         break;
       case 'rejected':
         items.push({ id: `${a._id}-rejected`, kind: 'rejected', title: 'Appointment rejected', message: `With ${who}`, date: dt });
