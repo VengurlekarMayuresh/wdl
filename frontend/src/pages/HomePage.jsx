@@ -105,10 +105,10 @@ const HomePage = () => {
                 Find Care Now
               </Button>
             </Link>
-            <Link to="/login?signup=true">
-              <Button variant="nav" size="hero" className="min-w-48">
+            <Link to="/healthy-living">
+              <Button variant="hero" size="hero" className="min-w-48">
                 <Users className="h-5 w-5" />
-                Join MASSS
+                Health Tips & Articles
               </Button>
             </Link>
           </div>
