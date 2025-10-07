@@ -665,6 +665,27 @@ export const appointmentsAPI = {
     throw new Error(response.message || 'Failed to reschedule appointment');
   },
 
+  // Proposed reschedule (backend optional)
+  async proposeReschedule(appointmentId, payload) {
+    // payload: { proposedSlotId? , proposedDateTime?, reason? }
+    const response = await apiRequest(`/appointments/${appointmentId}/reschedule/propose`, {
+      method: 'POST',
+      body: JSON.stringify(payload),
+    });
+    if (response.success && response.data) return response.data;
+    throw new Error(response.message || 'Failed to propose reschedule');
+  },
+
+  async decideReschedule(appointmentId, decision, reason = '') {
+    // decision: 'approved' | 'rejected'
+    const response = await apiRequest(`/appointments/${appointmentId}/reschedule/decision`, {
+      method: 'PUT',
+      body: JSON.stringify({ decision, reason }),
+    });
+    if (response.success && response.data) return response.data;
+    throw new Error(response.message || 'Failed to decide reschedule');
+  },
+
   // Doctor: Get patients who have appointments with current doctor
   async getDoctorPatients() {
     const response = await apiRequest('/appointments/doctor/patients');

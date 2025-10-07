@@ -38,14 +38,41 @@ export function addSeenIds(userId, ids = []) {
   } catch {}
 }
 
+// Broadcast to refresh header notifications (simple event bus)
+export function emitNotificationsRefresh() {
+  try {
+    window.dispatchEvent(new CustomEvent('notif:refresh'));
+  } catch {}
+}
+
 // Build simplified notifications from appointments
 export function buildNotificationsFromAppointments(appointments = [], role = 'patient') {
   const items = [];
   for (const a of appointments) {
-    const dt = new Date(a.appointmentDate || a.slotId?.dateTime || Date.now());
+    const dt = new Date(a.appointmentDate || a.slotId?.dateTime || a.proposedDateTime || Date.now());
     const doctor = a.doctorId?.userId || a.doctorId || {};
     const patient = a.patientId?.userId || a.patientId || {};
     const who = role === 'doctor' ? `${patient.firstName || 'Patient'} ${patient.lastName || ''}`.trim() : `Dr. ${doctor.firstName || ''} ${doctor.lastName || ''}`.trim();
+
+    // Reschedule proposals
+    const hasProposal = !!(a.pendingReschedule || a.proposedDateTime || a.proposedSlotId) || (typeof a.reasonForVisit === 'string' && a.reasonForVisit.toLowerCase().includes('reschedule request'));
+    if (hasProposal) {
+      if (role === 'patient') {
+        items.push({ id: `${a._id}-reschedule-proposed`, kind: 'request', title: 'Doctor proposed new time', message: `${who} proposed ${a.proposedDateTime ? new Date(a.proposedDateTime).toLocaleString() : 'a new slot'}`, date: dt });
+      } else {
+        items.push({ id: `${a._id}-reschedule-awaiting-patient`, kind: 'request', title: 'Pending reschedule approval', message: `Awaiting patient decision`, date: dt });
+      }
+    }
+
+    // Cancellation proposals
+    const hasCancelProposal = typeof a.reasonForVisit === 'string' && a.reasonForVisit.toLowerCase().includes('cancellation request');
+    if (hasCancelProposal) {
+      if (role === 'doctor') {
+        items.push({ id: `${a._id}-cancel-proposed`, kind: 'request', title: 'Patient requested cancellation', message: `${who} requested to cancel`, date: dt });
+      } else {
+        items.push({ id: `${a._id}-cancel-awaiting-doctor`, kind: 'request', title: 'Cancellation request pending', message: `Awaiting doctor decision`, date: dt });
+      }
+    }
 
     switch (a.status) {
       case 'pending':

@@ -126,9 +126,18 @@ const AppointmentCard = ({ appointment, onApprove, onReject, isLoading, showActi
 
         {/* Reason for visit */}
         {appointment.reasonForVisit && (
-          <div className="mb-4 p-3 bg-blue-50 border-l-4 border-blue-400">
+          <div className="mb-3 p-3 bg-blue-50 border-l-4 border-blue-400">
             <p className="text-sm text-blue-800">
               <strong>Reason:</strong> {appointment.reasonForVisit}
+            </p>
+          </div>
+        )}
+
+        {/* Reschedule reason */}
+        {appointment.rescheduledFrom?.reason && (
+          <div className="mb-4 p-3 bg-amber-50 border-l-4 border-amber-400">
+            <p className="text-sm text-amber-800">
+              <strong>Reschedule reason:</strong> {appointment.rescheduledFrom.reason}
             </p>
           </div>
         )}
@@ -1415,18 +1424,20 @@ const DoctorSelfProfilePage = () => {
                             <p className="text-sm">Patient requests will appear here for your approval</p>
                           </div>
                         ) : (
-                          <div className="space-y-4">
+                          <div className="space-y-3">
                             <h3 className="font-medium text-sm text-muted-foreground">PENDING APPROVAL ({appointments.pending.length})</h3>
-                            {appointments.pending.map((appointment) => (
-                              <AppointmentCard 
-                                key={appointment._id} 
-                                appointment={appointment}
-                                onApprove={() => handleApproveAppointment(appointment._id)}
-                                onReject={() => handleRejectAppointment(appointment._id)}
-                                isLoading={actionLoading[appointment._id]}
-                                showActions={true}
-                              />
-                            ))}
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                              {appointments.pending.map((appointment) => (
+                                <AppointmentCard 
+                                  key={appointment._id} 
+                                  appointment={appointment}
+                                  onApprove={() => handleApproveAppointment(appointment._id)}
+                                  onReject={() => handleRejectAppointment(appointment._id)}
+                                  isLoading={actionLoading[appointment._id]}
+                                  showActions={true}
+                                />
+                              ))}
+                            </div>
                           </div>
                         )}
                       </TabsContent>
@@ -1440,11 +1451,13 @@ const DoctorSelfProfilePage = () => {
                             <p className="text-sm">Confirmed appointments will appear here</p>
                           </div>
                         ) : (
-                          <div className="space-y-4">
+                          <div className="space-y-3">
                             <h3 className="font-medium text-sm text-muted-foreground">UPCOMING APPOINTMENTS ({appointments.upcoming.length})</h3>
-                            {appointments.upcoming.map((appointment) => (
-                              <AppointmentCard key={appointment._id} appointment={appointment} />
-                            ))}
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                              {appointments.upcoming.map((appointment) => (
+                                <AppointmentCard key={appointment._id} appointment={appointment} />
+                              ))}
+                            </div>
                           </div>
                         )}
                       </TabsContent>
@@ -1458,11 +1471,13 @@ const DoctorSelfProfilePage = () => {
                             <p className="text-sm">Completed appointments will appear here</p>
                           </div>
                         ) : (
-                          <div className="space-y-4">
+                          <div className="space-y-3">
                             <h3 className="font-medium text-sm text-muted-foreground">COMPLETED ({appointments.completed.length})</h3>
-                            {appointments.completed.map((appointment) => (
-                              <AppointmentCard key={appointment._id} appointment={appointment} />
-                            ))}
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                              {appointments.completed.map((appointment) => (
+                                <AppointmentCard key={appointment._id} appointment={appointment} />
+                              ))}
+                            </div>
                           </div>
                         )}
                       </TabsContent>
@@ -1476,11 +1491,13 @@ const DoctorSelfProfilePage = () => {
                             <p className="text-sm">Cancelled or rejected appointments will appear here</p>
                           </div>
                         ) : (
-                          <div className="space-y-4">
+                          <div className="space-y-3">
                             <h3 className="font-medium text-sm text-muted-foreground">CANCELLED/REJECTED ({appointments.cancelled.length})</h3>
-                            {appointments.cancelled.map((appointment) => (
-                              <AppointmentCard key={appointment._id} appointment={appointment} />
-                            ))}
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                              {appointments.cancelled.map((appointment) => (
+                                <AppointmentCard key={appointment._id} appointment={appointment} />
+                              ))}
+                            </div>
                           </div>
                         )}
                       </TabsContent>

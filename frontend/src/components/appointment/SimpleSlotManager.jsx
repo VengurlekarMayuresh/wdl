@@ -5,6 +5,8 @@ import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Calendar, Clock, Plus, Trash2, AlertCircle, CheckCircle } from 'lucide-react';
 import { slotsAPI } from '@/services/api';
+import { toast } from '@/components/ui/sonner';
+import ConfirmDialog from '@/components/ui/ConfirmDialog';
 
 const SimpleSlotManager = ({ doctorId }) => {
   const [slots, setSlots] = useState([]);
@@ -12,6 +14,7 @@ const SimpleSlotManager = ({ doctorId }) => {
   const [createLoading, setCreateLoading] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
+  const [confirmDelete, setConfirmDelete] = useState({ open: false, slotId: null });
 
   // Form data
   const [date, setDate] = useState('');
@@ -91,17 +94,24 @@ const SimpleSlotManager = ({ doctorId }) => {
   };
 
   const deleteSlot = async (slotId) => {
-    if (!confirm('Are you sure you want to delete this slot?')) return;
-    
+    setConfirmDelete({ open: true, slotId });
+  };
+
+  const confirmDeleteYes = async () => {
+    const slotId = confirmDelete.slotId;
     try {
       console.log('Deleting slot:', slotId);
       await slotsAPI.deleteSlot(slotId);
       setSlots(prev => prev.filter(slot => slot._id !== slotId));
       setSuccess('Slot deleted successfully');
+      toast.success('Slot deleted');
       setTimeout(() => setSuccess(''), 3000);
     } catch (e) {
       console.error('Error deleting slot:', e);
       setError(`Failed to delete slot: ${e.message}`);
+      toast.error(e.message || 'Failed to delete slot');
+    } finally {
+      setConfirmDelete({ open: false, slotId: null });
     }
   };
 
@@ -139,6 +149,16 @@ const SimpleSlotManager = ({ doctorId }) => {
 
   return (
     <div className="space-y-6">
+      {/* Confirm delete */}
+      <ConfirmDialog
+        open={confirmDelete.open}
+        title="Delete slot?"
+        description="This will permanently remove the slot if it is not booked."
+        confirmLabel="Delete"
+        cancelLabel="Cancel"
+        onConfirm={confirmDeleteYes}
+        onClose={() => setConfirmDelete({ open: false, slotId: null })}
+      />
       {/* Create Slot Section */}
       <Card>
         <CardHeader>

@@ -8,6 +8,8 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Calendar, Clock, AlertCircle, RefreshCw } from 'lucide-react';
 import { slotsAPI, appointmentsAPI } from '@/services/api';
+import { toast } from '@/components/ui/sonner';
+import { emitNotificationsRefresh } from '@/services/notifications';
 
 const RescheduleModal = ({ 
   appointment, 
@@ -65,29 +67,88 @@ const RescheduleModal = ({
   };
 
   const handleReschedule = async () => {
-    if (!selectedSlot) {
-      setError('Please select a new time slot');
-      return;
-    }
-
     try {
       setLoading(true);
       setError('');
-      
-      await appointmentsAPI.rescheduleAppointment(
-        appointment._id,
-        selectedSlot._id,
-        reason
-      );
-      
-      // Notify parent component
-      if (onReschedule) {
-        onReschedule();
+
+      if (userType === 'patient') {
+        if (!reason || !reason.trim()) {
+          setError('Please provide a reason for rescheduling.');
+          return;
+        }
+        // For patients: propose a reschedule on the existing appointment
+        if (!selectedSlot && !newDateTime) {
+          setError('Please select a slot or request a specific time');
+          return;
+        }
+        if (selectedSlot) {
+          await appointmentsAPI.proposeReschedule(appointment._id, {
+            proposedSlotId: selectedSlot._id,
+            reason,
+          });
+        } else if (newDateTime) {
+          const iso = new Date(newDateTime).toISOString();
+          await appointmentsAPI.proposeReschedule(appointment._id, {
+            proposedDateTime: iso,
+            reason,
+          });
+        }
+        toast.success('Reschedule request sent. The doctor will approve or reject.');
+        emitNotificationsRefresh();
+        onReschedule?.();
+        handleClose();
+        return;
       }
-      
-      // Close modal and reset
+
+      // For doctors: propose reschedule (requires patient approval)
+      if (!reason || !reason.trim()) {
+        setError('Please provide a reason for rescheduling.');
+        return;
+      }
+      if (!selectedSlot && !newDateTime) {
+        setError('Please select a slot or specify a time');
+        return;
+      }
+      try {
+        if (selectedSlot) {
+          await appointmentsAPI.proposeReschedule(appointment._id, {
+            proposedSlotId: selectedSlot._id,
+            reason,
+          });
+        } else if (newDateTime) {
+          const iso = new Date(newDateTime).toISOString();
+          await appointmentsAPI.proposeReschedule(appointment._id, {
+            proposedDateTime: iso,
+            reason,
+          });
+        }
+      } catch (e) {
+        // Backend route not available: fall back to creating a pending request via bookAppointment
+        if (selectedSlot) {
+          await appointmentsAPI.bookAppointment({
+            slotId: selectedSlot._id,
+            forAppointmentId: appointment._id,
+            requestedBy: 'doctor',
+            patientId: appointment.patientId?._id || appointment.patientId,
+            reasonForVisit: `Doctor reschedule request for appointment ${appointment._id}${reason ? `: ${reason}` : ''}`,
+          });
+        } else if (newDateTime) {
+          const iso = new Date(newDateTime).toISOString();
+          await appointmentsAPI.bookAppointment({
+            doctorId: appointment.doctorId?._id || appointment.doctorId,
+            patientId: appointment.patientId?._id || appointment.patientId,
+            requestedDateTime: iso,
+            forAppointmentId: appointment._id,
+            requestedBy: 'doctor',
+            reasonForVisit: `Doctor reschedule request for appointment ${appointment._id}${reason ? `: ${reason}` : ''}`,
+            appointmentType: 'consultation',
+          });
+        }
+      }
+      toast.success('Reschedule proposal sent to patient for approval');
+      emitNotificationsRefresh();
+      onReschedule?.();
       handleClose();
-      
     } catch (e) {
       console.error('Error rescheduling appointment:', e);
       setError(e.message);
@@ -246,10 +307,9 @@ const RescheduleModal = ({
             )}
           </div>
 
-          {/* Doctor: Create a new slot and reschedule */}
-          {userType === 'doctor' && (
-            <div className="space-y-3 pt-4 border-t">
-              <Label>Create a new slot (custom)</Label>
+          {/* Patient: request a specific time (custom) OR Doctor: create custom slot */}
+          <div className="space-y-3 pt-4 border-t">
+            <Label>{userType === 'doctor' ? 'Create a new slot (custom)' : 'Request a specific time (custom)'}</Label>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
                 <div className="md:col-span-2">
                   <Label htmlFor="newDateTime" className="text-xs text-muted-foreground">Date & Time</Label>
@@ -273,36 +333,74 @@ const RescheduleModal = ({
                 </div>
               </div>
               <div className="flex gap-2">
-                <Button 
-                  variant="outline"
-                  onClick={async () => {
-                    try {
-                      setCreatingSlot(true);
-                      setError('');
-                      if (!newDateTime) {
-                        setError('Please select a date and time to create a new slot');
-                        return;
+                {userType === 'doctor' ? (
+                  <Button 
+                    variant="outline"
+                    onClick={async () => {
+                      try {
+                        setCreatingSlot(true);
+                        setError('');
+                        if (!newDateTime) {
+                          setError('Please select a date and time to create a new slot');
+                          return;
+                        }
+                        const slot = await slotsAPI.createSlot({ dateTime: newDateTime, duration: newDuration });
+                        // Propose using the newly created slot; patient must approve
+                        await appointmentsAPI.proposeReschedule(appointment._id, {
+                          proposedSlotId: slot._id,
+                          reason,
+                        });
+                        toast.success('Reschedule proposal sent to patient for approval');
+                        emitNotificationsRefresh();
+                        onReschedule?.();
+                        handleClose();
+                      } catch (e) {
+                        console.error('Error creating slot and proposing reschedule:', e);
+                        setError(e.message);
+                      } finally {
+                        setCreatingSlot(false);
                       }
-                      // Create a new slot
-                      const slot = await slotsAPI.createSlot({ dateTime: newDateTime, duration: newDuration });
-                      // Immediately reschedule using this slot
-                      await appointmentsAPI.rescheduleAppointment(appointment._id, slot._id, reason);
-                      if (onReschedule) onReschedule();
-                      handleClose();
-                    } catch (e) {
-                      console.error('Error creating slot and rescheduling:', e);
-                      setError(e.message);
-                    } finally {
-                      setCreatingSlot(false);
-                    }
-                  }}
-                  disabled={creatingSlot || !newDateTime}
-                >
-                  {creatingSlot ? 'Creating slot...' : 'Create slot and reschedule'}
-                </Button>
+                    }}
+                    disabled={creatingSlot || !newDateTime}
+                  >
+                    {creatingSlot ? 'Creating slot...' : 'Create slot & propose'}
+                  </Button>
+                ) : (
+                  <Button 
+                    variant="outline"
+                    onClick={async () => {
+                      try {
+                        setCreatingSlot(true);
+                        setError('');
+                        if (!newDateTime) {
+                          setError('Please select a date and time to request');
+                          return;
+                        }
+                        const iso = new Date(newDateTime).toISOString();
+                        await appointmentsAPI.bookAppointment({
+                          doctorId: appointment.doctorId?._id || appointment.doctorId,
+                          requestedDateTime: iso,
+                          reasonForVisit: `Reschedule request for appointment ${appointment._id}${reason ? `: ${reason}` : ''}`,
+                          appointmentType: 'consultation'
+                        });
+                        toast.success('Reschedule request sent for your custom time');
+                        emitNotificationsRefresh();
+                        onReschedule?.();
+                        handleClose();
+                      } catch (e) {
+                        console.error('Error requesting custom reschedule:', e);
+                        setError(e.message);
+                      } finally {
+                        setCreatingSlot(false);
+                      }
+                    }}
+                    disabled={creatingSlot || !newDateTime}
+                  >
+                    {creatingSlot ? 'Requesting...' : 'Request custom time'}
+                  </Button>
+                )}
               </div>
             </div>
-          )}
 
           {/* Action Buttons */}
           <div className="flex gap-3 pt-4 border-t">
