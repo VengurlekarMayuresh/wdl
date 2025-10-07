@@ -94,10 +94,25 @@ export const authAPI = {
     });
     
     if (response.success && response.data) {
-      // Store token in localStorage
+      // Facility fallback: backend returns { token, facility } instead of { token, user }
+      let userPayload = response.data.user;
+      if (!userPayload && response.data.facility) {
+        const f = response.data.facility;
+        userPayload = {
+          userType: 'facility',
+          email: f.email,
+          facilityId: f._id,
+          firstName: f.name,
+          lastName: ''
+        };
+      }
+      if (!userPayload) {
+        throw new Error('Invalid response from server: missing user data');
+      }
+      // Store token and normalized user
       localStorage.setItem('token', response.data.token);
-      localStorage.setItem('user', JSON.stringify(response.data.user));
-      return response.data;
+      localStorage.setItem('user', JSON.stringify(userPayload));
+      return { token: response.data.token, user: userPayload };
     }
     
     throw new Error(response.message || 'Login failed');
@@ -114,6 +129,34 @@ export const authAPI = {
       userType: registerData.userType,
       phone: registerData.phone,
       dateOfBirth: registerData.dateOfBirth,
+      // Pass-through doctor fields if present (backend may ignore)
+      ...(registerData.userType === 'doctor' ? {
+        medicalLicenseNumber: registerData.medicalLicenseNumber,
+        licenseState: registerData.licenseState,
+        primarySpecialty: registerData.primarySpecialty,
+      } : {}),
+      // Facility fields mapped to expected backend shape
+      ...(registerData.userType === 'facility' ? {
+        // Send both explicit facility fields and generic aliases for maximum compatibility
+        facilityName: registerData.facilityName,
+        facilityType: registerData.facilityType,
+        name: registerData.facilityName,
+        type: registerData.facilityType,
+        // Structured address
+        facilityAddress: {
+          street: registerData.facilityStreet,
+          area: registerData.facilityArea,
+          city: registerData.facilityCity,
+          state: registerData.facilityState,
+          pincode: String(registerData.facilityPincode || '').trim(),
+        },
+        // Flat address mirrors
+        facilityStreet: registerData.facilityStreet,
+        facilityArea: registerData.facilityArea,
+        facilityCity: registerData.facilityCity,
+        facilityState: registerData.facilityState,
+        facilityPincode: String(registerData.facilityPincode || '').trim(),
+      } : {}),
     };
 
     const response = await apiRequest('/auth/register', {
@@ -216,16 +259,62 @@ export const authAPI = {
   },
 };
 
+// Simple in-memory cache for GET endpoints to reduce duplicate requests
+const __apiCache = {
+  doctorsList: new Map(), // key -> { ts, data }
+  pending: new Map(), // key -> Promise
+};
+const __CACHE_TTL_MS = 60 * 1000; // 60 seconds
+const __now = () => Date.now();
+const __keyFromParams = (base, params = {}) => {
+  const sp = new URLSearchParams(params);
+  // Ensure stable order
+  const entries = Array.from(sp.entries()).sort(([a], [b]) => a.localeCompare(b));
+  const stable = new URLSearchParams(entries).toString();
+  return `${base}?${stable}`;
+};
+
 // Doctor-specific API
 export const doctorAPI = {
   // List doctors (public)
   async list(params = {}) {
-    const query = new URLSearchParams(params).toString();
-    const response = await apiRequest(`/doctors${query ? `?${query}` : ''}`);
-    if (response.success && response.data) {
-      return response.data;
+    const key = __keyFromParams('/doctors', params);
+
+    // Return cached within TTL
+    const cached = __apiCache.doctorsList.get(key);
+    if (cached && (__now() - cached.ts) < __CACHE_TTL_MS) {
+      return cached.data;
     }
-    throw new Error(response.message || 'Failed to fetch doctors');
+
+    // De-duplicate concurrent requests
+    if (__apiCache.pending.has(key)) {
+      return __apiCache.pending.get(key);
+    }
+
+    const query = new URLSearchParams(params).toString();
+    const p = (async () => {
+      try {
+        const response = await apiRequest(`/doctors${query ? `?${query}` : ''}`);
+        if (response.success && response.data) {
+          __apiCache.doctorsList.set(key, { ts: __now(), data: response.data });
+          return response.data;
+        }
+        throw new Error(response.message || 'Failed to fetch doctors');
+      } catch (err) {
+        // If rate-limited and we have stale cache, return stale to avoid UI break
+        const msg = (err && err.message) || '';
+        if (msg.toLowerCase().includes('too many requests')) {
+          const stale = __apiCache.doctorsList.get(key);
+          if (stale) return stale.data;
+        }
+        throw err;
+      } finally {
+        __apiCache.pending.delete(key);
+      }
+    })();
+
+    __apiCache.pending.set(key, p);
+    return p;
   },
 
   // Get doctor by id (public)
@@ -421,6 +510,35 @@ export const contentAPI = {
     const response = await apiRequest('/content/workouts');
     if (response.success && response.data) return response.data.workouts || response.data;
     throw new Error(response.message || 'Failed to fetch workouts');
+  },
+};
+
+// Facility authentication API
+export const facilityAuthAPI = {
+  async login({ authEmail, password }) {
+    const response = await apiRequest('/healthcare-facilities/auth/login', {
+      method: 'POST',
+      body: JSON.stringify({ authEmail, password }),
+    });
+    if (response.success && response.data) {
+      // Store facility token separately to avoid colliding with user token
+      localStorage.setItem('facilityToken', response.data.token);
+      localStorage.setItem('facilityId', response.data.facilityId);
+      return response.data;
+    }
+    throw new Error(response.message || 'Facility login failed');
+  },
+  async register({ name, type, address, authEmail, password }) {
+    const response = await apiRequest('/healthcare-facilities/auth/register', {
+      method: 'POST',
+      body: JSON.stringify({ name, type, address, authEmail, password }),
+    });
+    if (response.success && response.data) {
+      localStorage.setItem('facilityToken', response.data.token);
+      localStorage.setItem('facilityId', response.data.facilityId);
+      return response.data;
+    }
+    throw new Error(response.message || 'Facility registration failed');
   },
 };
 

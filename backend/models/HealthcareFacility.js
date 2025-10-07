@@ -1,4 +1,5 @@
 import mongoose from 'mongoose';
+import bcrypt from 'bcryptjs';
 
 const healthcareFacilitySchema = new mongoose.Schema({
   // Basic Information
@@ -12,6 +13,12 @@ const healthcareFacilitySchema = new mongoose.Schema({
     type: String,
     required: true,
     enum: ['pharmacy', 'clinic', 'hospital', 'lab', 'diagnostic_center', 'primary_care']
+  },
+  
+  // Frontend compatibility: explicitly store providerType (mirrors type)
+  providerType: {
+    type: String,
+    default: function() { return this.type; }
   },
   
   subCategory: {
@@ -71,6 +78,9 @@ const healthcareFacilitySchema = new mongoose.Schema({
       longitude: { type: Number }
     }
   },
+
+  // Frontend compatibility: top-level phone string
+  phone: { type: String },
   
   // Operating Hours
   operatingHours: [{
@@ -87,6 +97,13 @@ const healthcareFacilitySchema = new mongoose.Schema({
       end: String
     }
   }],
+
+  // Frontend compatibility: operating hours as text ranges per day
+  operatingHoursText: {
+    type: Map,
+    of: String,
+    default: {}
+  },
   
   is24x7: {
     type: Boolean,
@@ -105,6 +122,10 @@ const healthcareFacilitySchema = new mongoose.Schema({
       enum: ['consultation', 'diagnostic', 'treatment', 'pharmacy', 'emergency', 'other']
     }
   }],
+
+  // Frontend compatibility: simple accepted insurance list and languages
+  acceptedInsurance: [{ type: String }],
+  languages: [{ type: String }],
   
   specialties: [{
     type: String,
@@ -184,6 +205,32 @@ const healthcareFacilitySchema = new mongoose.Schema({
     type: String,
     enum: ['cash', 'card', 'upi', 'net_banking', 'insurance', 'emi']
   }],
+  
+  // Facility authentication (single account per facility)
+  email: {
+    type: String,
+    lowercase: true,
+    unique: true,
+    sparse: true,
+    trim: true,
+    required: true
+  },
+  password: {
+    type: String,
+    select: false,
+    required: true
+  },
+  isAuthActive: {
+    type: Boolean,
+    default: true,
+  },
+  
+  // Link to User account (top-level)
+  userId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User',
+    index: true
+  },
   
   // Media and Branding
   media: {
@@ -308,6 +355,10 @@ const healthcareFacilitySchema = new mongoose.Schema({
     ambulanceService: { type: Boolean, default: false },
     onlineAppointment: { type: Boolean, default: false }
   },
+
+  // Frontend compatibility: clinic-specific display fields
+  clinicType: { type: String },
+  appointmentRequired: { type: Boolean },
   
   // Search and Analytics
   tags: [String],
@@ -348,6 +399,7 @@ healthcareFacilitySchema.index({ specialties: 1 });
 healthcareFacilitySchema.index({ name: 'text', description: 'text', tags: 'text' });
 healthcareFacilitySchema.index({ 'address.coordinates': '2dsphere' });
 healthcareFacilitySchema.index({ 'rating.overall': -1 });
+healthcareFacilitySchema.index({ email: 1 }, { unique: true, sparse: true });
 
 // Virtual for full address
 healthcareFacilitySchema.virtual('fullAddress').get(function() {
@@ -375,6 +427,23 @@ healthcareFacilitySchema.virtual('isCurrentlyOpen').get(function() {
   
   return currentTime >= todaySchedule.openTime && currentTime <= todaySchedule.closeTime;
 });
+// Hash password if modified
+healthcareFacilitySchema.pre('save', async function(next) {
+  if (!this.isModified('password')) return next();
+  try {
+    const saltRounds = parseInt(process.env.BCRYPT_SALT_ROUNDS) || 12;
+    this.password = await bcrypt.hash(this.password, saltRounds);
+    next();
+  } catch (err) {
+    next(err);
+  }
+});
+
+// Compare password
+healthcareFacilitySchema.methods.comparePassword = function(candidate) {
+  if (!this.password) return false;
+  return bcrypt.compare(candidate, this.password);
+};
 
 // Method to calculate distance
 healthcareFacilitySchema.methods.calculateDistance = function(lat, lng) {

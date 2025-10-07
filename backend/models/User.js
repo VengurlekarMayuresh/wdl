@@ -34,7 +34,7 @@ const userSchema = new mongoose.Schema({
   userType: {
     type: String,
     required: true,
-    enum: ['doctor', 'patient', 'careprovider']
+    enum: ['doctor', 'patient', 'careprovider', 'facility']
   },
   isActive: {
     type: Boolean,

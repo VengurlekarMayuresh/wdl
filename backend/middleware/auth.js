@@ -1,5 +1,6 @@
 import jwt from 'jsonwebtoken';
 import User from '../models/User.js';
+import HealthcareFacility from '../models/HealthcareFacility.js';
 
 // Generate JWT token
 export const generateToken = (userId) => {
@@ -208,10 +209,10 @@ export const refreshTokenIfNeeded = (req, res, next) => {
     if (token) {
       const decoded = jwt.decode(token);
       const currentTime = Date.now() / 1000;
-      const timeUntilExpiry = decoded.exp - currentTime;
+      const timeUntilExpiry = decoded?.exp ? decoded.exp - currentTime : null;
       
-      // If token expires in less than 24 hours, refresh it
-      if (timeUntilExpiry < 24 * 60 * 60) {
+      // If token expires in less than 24 hours, refresh it for user tokens
+      if (timeUntilExpiry !== null && timeUntilExpiry < 24 * 60 * 60 && decoded?.userId) {
         const newToken = generateToken(decoded.userId);
         res.setHeader('X-New-Token', newToken);
       }
@@ -221,6 +222,44 @@ export const refreshTokenIfNeeded = (req, res, next) => {
   } catch (error) {
     // Continue without refreshing if there's an error
     next();
+  }
+};
+
+// Facility authentication middleware (separate from user auth)
+export const authenticateFacility = async (req, res, next) => {
+  try {
+    let token;
+    if (req.headers.authorization && req.headers.authorization.startsWith('Bearer')) {
+      token = req.headers.authorization.split(' ')[1];
+    } else if (req.cookies?.facilityToken) {
+      token = req.cookies.facilityToken;
+    }
+
+    if (!token) {
+      return res.status(401).json({ success: false, message: 'Facility access denied. No token provided.' });
+    }
+
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    if (!decoded || !decoded.facilityId) {
+      return res.status(401).json({ success: false, message: 'Invalid facility token.' });
+    }
+
+    const facility = await HealthcareFacility.findById(decoded.facilityId).select('+password');
+    if (!facility) {
+      return res.status(401).json({ success: false, message: 'Facility not found for token.' });
+    }
+    if (facility.isAuthActive === false) {
+      return res.status(403).json({ success: false, message: 'Facility account is deactivated.' });
+    }
+
+    req.facility = facility;
+    next();
+  } catch (error) {
+    console.error('Facility authentication error:', error.message);
+    if (error.name === 'TokenExpiredError') {
+      return res.status(401).json({ success: false, message: 'Facility token has expired. Please login again.' });
+    }
+    return res.status(401).json({ success: false, message: 'Invalid facility token.' });
   }
 };
 
@@ -268,3 +307,4 @@ export const clearRateLimit = (req, res, next) => {
   loginAttempts.delete(key);
   next();
 };
+

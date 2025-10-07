@@ -190,7 +190,13 @@ export const Header = ({
                         <Stethoscope className="h-4 w-4" />
                         Appointments
                       </Link>
-                      <Link to="/profile" className="flex items-center gap-3 px-4 py-2 hover:bg-accent transition-colors">
+<Link to={(userType === 'facility'
+                        ? '/facility-profile'
+                        : (userType === 'doctor'
+                          ? '/doctor-profile'
+                          : (userType === 'patient'
+                            ? '/patient-profile'
+                            : '/profile')))} className="flex items-center gap-3 px-4 py-2 hover:bg-accent transition-colors">
                         <User className="h-4 w-4" />
                         My Profile
                       </Link>
