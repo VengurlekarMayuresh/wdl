@@ -9,6 +9,7 @@ import { Input } from '@/components/ui/input';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Heart, Apple, Dumbbell, Brain, Moon, Droplets, Search, Clock, User, BookOpen, Star, TrendingUp, Calendar, Share2, Play, ChefHat, Activity, Zap, Shield, Sparkles, Target, Award, ThumbsUp, MessageSquare, Download, Filter, ChevronRight, Lightbulb, Users, Globe, X } from 'lucide-react';
 import { contentAPI } from '@/services/api';
+import { toast } from '@/components/ui/sonner';
 
 const iconMap = {
   Heart, Apple, Dumbbell, Brain, Moon, Droplets, ChefHat, Activity, Zap, Shield, Sparkles, Target
@@ -366,7 +367,7 @@ const HealthyLivingPage = () => {
     e.preventDefault();
     if (newsletterEmail) {
       // In a real app, this would send to backend
-      alert(`Thank you! You've subscribed with ${newsletterEmail}`);
+      toast.success(`Thank you! You've subscribed with ${newsletterEmail}`);
       setNewsletterEmail('');
     }
   };

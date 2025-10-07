@@ -10,10 +10,15 @@ import {
   MapPin,
   Heart,
   Stethoscope,
-  Users 
+  Users,
+  Bell
 } from "lucide-react";
 import { useState, useEffect } from "react";
 import logoImg from "@/assets/logo.png";
+import { appointmentsAPI } from '@/services/api';
+import { useAuth } from '@/contexts/AuthContext';
+import { buildNotificationsFromAppointments, getLastSeen, setLastSeen, getSeenIds, addSeenIds } from '@/services/notifications';
+import NotificationsDialog from '@/components/notifications/NotificationsDialog';
 
 export const Header = ({ 
   isAuthenticated = false, 
@@ -25,6 +30,7 @@ export const Header = ({
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
   const location = useLocation();
   const navigate = useNavigate();
+  const { user } = useAuth?.() || { user: null };
 
   // Close mobile menu when route changes
   useEffect(() => {
@@ -34,6 +40,40 @@ export const Header = ({
 
   const toggleMobileMenu = () => setIsMobileMenuOpen(!isMobileMenuOpen);
   const toggleUserMenu = () => setIsUserMenuOpen(!isUserMenuOpen);
+
+  // Notifications state
+  const [notifItems, setNotifItems] = useState([]);
+  const [unread, setUnread] = useState(0);
+  const [notifOpen, setNotifOpen] = useState(false);
+  const userId = user?._id || user?.id || 'guest';
+
+  const refreshNotifications = async () => {
+    if (!isAuthenticated) return;
+    try {
+      const role = userType;
+      const appts = role === 'doctor' ? await appointmentsAPI.getDoctorAppointments('all') : await appointmentsAPI.getMyAppointments('all');
+      const items = buildNotificationsFromAppointments(appts || [], role === 'doctor' ? 'doctor' : 'patient');
+      setNotifItems(items);
+      const seen = getSeenIds(userId);
+      const unreadCount = items.filter(it => !seen.has(it.id)).length;
+      setUnread(unreadCount);
+    } catch (e) {
+      // Fail quietly
+      setNotifItems([]);
+      setUnread(0);
+    }
+  };
+
+  useEffect(() => {
+    refreshNotifications();
+    const id = setInterval(refreshNotifications, 30000); // poll every 30s
+    return () => clearInterval(id);
+  }, [isAuthenticated, userType, userId]);
+
+  const markAllRead = () => {
+    setLastSeen(userId, new Date());
+    setUnread(0);
+  };
 
   // Filter navigation links based on user type
   const allNavLinks = [
@@ -111,30 +151,46 @@ export const Header = ({
               })}
             </nav>
 
-            <div className="flex items-center gap-2 ml-4">
+            <div className="flex items-center gap-3 ml-4">
               {isAuthenticated ? (
-                <div className="relative">
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    onClick={toggleUserMenu}
-                    className="w-10 h-10 rounded-full bg-white text-primary font-bold hover:bg-white/90 transition-all hover:scale-110"
-                  >
-                    {userInitial}
-                  </Button>
+                <>
+                  {/* Bell notifications button */}
+                  <div className="relative">
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => { setNotifOpen(true); }}
+                      className="relative w-10 h-10 rounded-full hover:bg-white/20"
+                    >
+                      <Bell className="h-5 w-5 text-white" />
+                      {unread > 0 && (
+                        <span className="absolute top-0 right-0 translate-x-1 -translate-y-1 inline-flex items-center justify-center w-5 h-5 text-[10px] bg-red-600 text-white rounded-full ring-2 ring-primary z-10">{unread}</span>
+                      )}
+                    </Button>
+                  </div>
+
+                  <div className="relative">
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={toggleUserMenu}
+                      className="w-10 h-10 rounded-full bg-white text-primary font-bold hover:bg-white/90 transition-all hover:scale-110 relative"
+                    >
+                      {userInitial}
+                    </Button>
                   
 {isUserMenuOpen && (
-                    <div className="absolute right-0 top-12 bg-white rounded-lg shadow-strong min-w-48 py-2 text-foreground">
+                    <div className="absolute right-0 top-12 bg-white rounded-lg shadow-strong min-w-[16rem] py-2 text-foreground">
+                      <Link to={userType === 'doctor' ? '/doctor-appointments' : '/patient-appointments'} className="flex items-center gap-3 px-4 py-2 hover:bg-accent transition-colors">
+                        <Stethoscope className="h-4 w-4" />
+                        Appointments
+                      </Link>
                       <Link to="/profile" className="flex items-center gap-3 px-4 py-2 hover:bg-accent transition-colors">
                         <User className="h-4 w-4" />
                         My Profile
                       </Link>
-                      <Link to="/doctor-appointments" className="flex items-center gap-3 px-4 py-2 hover:bg-accent transition-colors">
-                        <Stethoscope className="h-4 w-4" />
-                        Appointments
-                      </Link>
                       <hr className="my-2" />
-<button 
+                      <button 
                         onClick={() => { onLogout?.(); setIsUserMenuOpen(false); navigate('/'); }}
                         className="flex items-center gap-3 px-4 py-2 hover:bg-accent transition-colors w-full text-left text-destructive"
                       >
@@ -144,6 +200,16 @@ export const Header = ({
                     </div>
                   )}
                 </div>
+
+                {/* Notifications full dialog */}
+                <NotificationsDialog
+                  open={notifOpen}
+                  onClose={() => setNotifOpen(false)}
+                  userType={userType}
+                  userId={userId}
+                  onUpdated={() => refreshNotifications()}
+                />
+              </>
               ) : (
                 <>
                   <Link to="/login">

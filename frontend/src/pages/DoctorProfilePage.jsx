@@ -129,19 +129,19 @@ const DoctorProfilePage = () => {
     try {
       setBookingLoading(true);
 
-      if (requestMode === 'slot') {
-        await appointmentsAPI.bookAppointment({
-          slotId: selectedSlot._id,
-          reasonForVisit: bookingReason || 'General consultation',
-          symptoms: '',
-          relevantMedicalHistory: '',
-          currentMedications: [],
-          allergies: [],
-          contactPreferences: {}
-        });
-        // Immediate confirmation now
-        alert('Appointment booked and confirmed!');
-      } else {
+        if (requestMode === 'slot') {
+          await appointmentsAPI.bookAppointment({
+            slotId: selectedSlot._id,
+            reasonForVisit: bookingReason || 'General consultation',
+            symptoms: '',
+            relevantMedicalHistory: '',
+            currentMedications: [],
+            allergies: [],
+            contactPreferences: {}
+          });
+          // Immediate confirmation now
+          toast.success('Appointment booked and confirmed!');
+        } else {
         // Custom request flow
         if (!customDate || !customTime) {
           alert('Please select a date and time for your request.');
@@ -159,7 +159,7 @@ const DoctorProfilePage = () => {
           allergies: [],
           contactPreferences: {}
         });
-        alert('Appointment request sent! The doctor will review and approve or reject your request.');
+        toast.success('Appointment request sent! The doctor will review and approve or reject your request.');
       }
       
       // Refresh slots to show updated availability
