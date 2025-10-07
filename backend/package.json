@@ -10,6 +10,7 @@
     "generate-data": "node scripts/generateData.js",
     "load-static-data": "node loadStaticData.js",
     "load-complete-data": "node loadCompleteData.js",
+    "seed-careproviders": "node scripts/seedCareProviders.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [
