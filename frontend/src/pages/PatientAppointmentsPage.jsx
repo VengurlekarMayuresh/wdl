@@ -10,6 +10,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Calendar, Clock, User, Stethoscope, MapPin, Phone, AlertCircle, CheckCircle, XCircle, MessageCircle, Star, Edit } from 'lucide-react';
 import { appointmentsAPI } from '@/services/api';
 import RescheduleModal from '@/components/appointment/RescheduleModal';
+import ConfirmDialog from '@/components/ui/ConfirmDialog';
 
 const PatientAppointmentsPage = () => {
   const { user, isAuthenticated, logout } = useAuth();
@@ -25,6 +26,7 @@ const PatientAppointmentsPage = () => {
   const [rescheduleModal, setRescheduleModal] = useState({ isOpen: false, appointment: null });
   const [ratingById, setRatingById] = useState({});
   const [feedbackById, setFeedbackById] = useState({});
+  const [confirmCancel, setConfirmCancel] = useState({ open: false, appointmentId: null });
 
   useEffect(() => {
     loadAppointments();
@@ -62,13 +64,19 @@ const PatientAppointmentsPage = () => {
   };
 
   const handleCancelAppointment = async (appointmentId) => {
-    if (!confirm('Are you sure you want to cancel this appointment?')) return;
-    
+    setConfirmCancel({ open: true, appointmentId });
+  };
+
+  const confirmCancelYes = async () => {
+    const appointmentId = confirmCancel.appointmentId;
     try {
       await appointmentsAPI.cancelAppointment(appointmentId);
       loadAppointments(); // Refresh appointments
+      toast.success('Appointment cancelled');
     } catch (e) {
-      alert('Failed to cancel appointment: ' + e.message);
+      toast.error('Failed to cancel appointment: ' + e.message);
+    } finally {
+      setConfirmCancel({ open: false, appointmentId: null });
     }
   };
 
@@ -79,7 +87,7 @@ const PatientAppointmentsPage = () => {
   const handleRescheduleSuccess = () => {
     setRescheduleModal({ isOpen: false, appointment: null });
     loadAppointments(); // Refresh appointments
-    alert('Appointment rescheduled successfully!');
+    toast.success('Appointment rescheduled successfully!');
   };
 
   const handleRescheduleClose = () => {
@@ -256,7 +264,12 @@ const PatientAppointmentsPage = () => {
   if (loading) {
     return (
       <div className="min-h-screen bg-gradient-light">
-        <Header />
+        <Header 
+          isAuthenticated={isAuthenticated}
+          userInitial={(user?.firstName?.[0]?.toUpperCase?.() || 'U')}
+          userType={user?.userType || 'patient'}
+          onLogout={logout}
+        />
         <div className="flex items-center justify-center min-h-[60vh]">
           <div className="text-center">
             <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-primary mx-auto mb-4" />
@@ -269,7 +282,12 @@ const PatientAppointmentsPage = () => {
 
   return (
     <div className="min-h-screen bg-gradient-light">
-      <Header />
+      <Header 
+        isAuthenticated={isAuthenticated}
+        userInitial={(user?.firstName?.[0]?.toUpperCase?.() || 'U')}
+        userType={user?.userType || 'patient'}
+        onLogout={logout}
+      />
       
       <div className="max-w-6xl mx-auto px-4 py-8">
         <div className="flex justify-between items-center mb-8">
@@ -434,6 +452,17 @@ const PatientAppointmentsPage = () => {
           </TabsContent>
         </Tabs>
         
+        {/* Confirm cancel */}
+        <ConfirmDialog
+          open={confirmCancel.open}
+          title="Cancel appointment?"
+          description="This action cannot be undone. Your time slot will be released."
+          confirmLabel="Cancel Appointment"
+          cancelLabel="Keep Appointment"
+          onConfirm={confirmCancelYes}
+          onClose={() => setConfirmCancel({ open: false, appointmentId: null })}
+        />
+
         {/* Reschedule Modal */}
         <RescheduleModal
           appointment={rescheduleModal.appointment}

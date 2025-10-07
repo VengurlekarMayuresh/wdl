@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Header } from '@/components/layout/Header';
 import { useAuth } from '@/contexts/AuthContext';
@@ -16,11 +16,124 @@ import {
   ArrowLeft,
   Calendar,
   Award,
-  Users,
   Filter,
   User
 } from 'lucide-react';
 import { doctorAPI } from '@/services/api';
+
+// Small presentational card to keep JSX simple and avoid parser edge cases
+const DoctorCard = ({ doctor, onClick, navigate }) => {
+  const doctorName = `Dr. ${doctor?.userId?.firstName || ''} ${doctor?.userId?.lastName || ''}`.trim();
+  const doctorImage = doctor?.userId?.profilePicture;
+  const location = doctor?.userId?.address ? `${doctor.userId.address.city || ''}, ${doctor.userId.address.state || ''}`.trim() : 'Location not specified';
+  const phone = doctor?.userId?.phone;
+  return (
+    <Card className="cursor-pointer hover:shadow-lg transition-shadow" onClick={onClick}>
+      <CardContent className="p-6">
+        <div className="flex gap-4">
+          <div className="w-24 h-24 rounded-full overflow-hidden flex-shrink-0">
+            {doctorImage ? (
+              <img src={doctorImage} alt={doctorName} className="w-full h-full object-cover" />
+            ) : (
+              <div className="w-full h-full bg-primary/10 flex items-center justify-center">
+                <User className="h-12 w-12 text-primary" />
+              </div>
+            )}
+          </div>
+
+          <div className="flex-1">
+            <div className="flex items-start justify-between mb-2">
+              <div>
+                <h3 className="text-xl font-semibold">{doctorName || 'Doctor'}</h3>
+                <div className="flex items-center gap-2 mb-1">
+                  <Badge variant="secondary" className="text-xs">
+                    <Stethoscope className="h-3 w-3 mr-1" />
+                    {doctor?.primarySpecialty || 'General Practice'}
+                  </Badge>
+                  {Array.isArray(doctor?.specializations) && doctor.specializations.length > 0 && (
+                    <Badge variant="outline" className="text-xs">
+                      {doctor.specializations[0]}
+                    </Badge>
+                  )}
+                </div>
+                <p className="text-sm text-muted-foreground">
+                  {doctor?.affiliations?.[0]?.organization || 'Medical Professional'}
+                </p>
+              </div>
+
+              <div className="text-right">
+                <div className="flex items-center gap-1 mb-1">
+                  <Star className="h-4 w-4 text-yellow-500 fill-current" />
+                  <span className="text-sm font-medium">
+                    {Number(doctor?.averageRating || 0).toFixed(1)}
+                  </span>
+                  <span className="text-sm text-muted-foreground">
+                    ({doctor?.totalReviews || 0})
+                  </span>
+                </div>
+                <div className="text-lg font-semibold text-green-600">
+                  ₹{doctor?.consultationFee || 500}
+                </div>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+              <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                <Award className="h-4 w-4" />
+                <span>{doctor?.yearsOfExperience || 0} years exp</span>
+              </div>
+              <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                <MapPin className="h-4 w-4" />
+                <span>{location}</span>
+              </div>
+              <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                <Clock className="h-4 w-4" />
+                <span>{doctor?.isAcceptingNewPatients ? 'Accepting Patients' : 'Not Available'}</span>
+              </div>
+            </div>
+
+            <div className="flex items-center justify-between pt-4 border-t">
+              <div className="flex flex-wrap gap-1">
+                {Array.isArray(doctor?.specializations) && doctor.specializations.slice(0, 2).map((spec, index) => (
+                  <Badge key={index} variant="outline" className="text-xs">{spec}</Badge>
+                ))}
+                {Array.isArray(doctor?.specializations) && doctor.specializations.length > 2 && (
+                  <Badge variant="outline" className="text-xs">+{doctor.specializations.length - 2} more</Badge>
+                )}
+              </div>
+
+              <div className="flex items-center gap-2">
+                {phone && (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      window.open(`tel:${phone}`);
+                    }}
+                  >
+                    <Phone className="h-4 w-4 mr-2" />
+                    Call
+                  </Button>
+                )}
+                <Button
+                  size="sm"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    navigate(`/doctor/${doctor?._id}?tab=availability`);
+                  }}
+                >
+                  <Calendar className="h-4 w-4 mr-2" />
+                  Book Appointment
+                </Button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </CardContent>
+    </Card>
+  );
+};
 
 const DoctorsPage = () => {
   const { user, isAuthenticated, logout } = useAuth();
@@ -32,6 +145,9 @@ const DoctorsPage = () => {
   const [filteredDoctors, setFilteredDoctors] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  // Pagination
+  const [page, setPage] = useState(1);
+  const pageSize = 10;
 
   const getUserInitial = () => {
     if (!user) return 'G';
@@ -47,14 +163,27 @@ const DoctorsPage = () => {
     try {
       setLoading(true);
       setError(null);
-      const response = await doctorAPI.list({ limit: 200 });
+      const response = await doctorAPI.list({ limit: 200 }).catch((e) => { throw e; });
       console.log('Doctors API response:', response);
-      const allDoctors = response.doctors || response || [];
+      // Normalize to an array
+      const raw = Array.isArray(response?.doctors)
+        ? response.doctors
+        : (Array.isArray(response) ? response : []);
+      // Filter out obviously invalid entries and de-dup by _id
+      const seen = new Set();
+      const allDoctors = raw
+        .filter((d) => d && typeof d === 'object')
+        .filter((d) => {
+          if (!d._id) return false;
+          if (seen.has(d._id)) return false;
+          seen.add(d._id);
+          return true;
+        });
       setDoctors(allDoctors);
       setFilteredDoctors(allDoctors);
     } catch (error) {
       console.error('Error loading doctors:', error);
-      setError('Failed to load doctors');
+      setError(error?.message || 'Failed to load doctors');
       setDoctors([]);
       setFilteredDoctors([]);
     } finally {
@@ -64,35 +193,62 @@ const DoctorsPage = () => {
 
   // Filter doctors based on search and location
   useEffect(() => {
-    let filtered = doctors;
+    const list = Array.isArray(doctors) ? doctors : [];
+    let filtered = list;
 
     if (searchQuery) {
+      const q = (searchQuery || '').toString().toLowerCase();
       filtered = filtered.filter(doctor => {
-        const doctorName = `Dr. ${doctor.userId?.firstName} ${doctor.userId?.lastName}`;
-        const primarySpecialty = doctor.primarySpecialty || '';
-        const specializations = doctor.specializations?.join(' ') || '';
-        
-        return doctorName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-               primarySpecialty.toLowerCase().includes(searchQuery.toLowerCase()) ||
-               specializations.toLowerCase().includes(searchQuery.toLowerCase());
+        const doctorName = `Dr. ${doctor?.userId?.firstName || ''} ${doctor?.userId?.lastName || ''}`;
+        const primarySpecialty = doctor?.primarySpecialty || '';
+        const specializations = Array.isArray(doctor?.specializations) ? doctor.specializations.join(' ') : '';
+        return (
+          doctorName.toLowerCase().includes(q) ||
+          primarySpecialty.toLowerCase().includes(q) ||
+          specializations.toLowerCase().includes(q)
+        );
       });
     }
 
     if (selectedLocation) {
+      const lq = (selectedLocation || '').toString().toLowerCase();
       filtered = filtered.filter(doctor => {
-        const city = doctor.userId?.address?.city || '';
-        const state = doctor.userId?.address?.state || '';
-        const location = `${city} ${state}`.toLowerCase();
-        return location.includes(selectedLocation.toLowerCase());
+        const city = doctor?.userId?.address?.city || '';
+        const state = doctor?.userId?.address?.state || '';
+        const location = `${city} ${state}`.trim().toLowerCase();
+        return location.includes(lq);
       });
     }
 
     setFilteredDoctors(filtered);
+    setPage(1); // reset to first page on new filter
   }, [searchQuery, selectedLocation, doctors]);
 
+  // Derived: sorted by rating desc, then name
+  const sortedDoctors = useMemo(() => {
+    const list = Array.isArray(filteredDoctors) ? filteredDoctors : [];
+    return list.slice().sort((a, b) => {
+      const ra = Number(a?.averageRating || 0);
+      const rb = Number(b?.averageRating || 0);
+      if (rb !== ra) return rb - ra;
+      const an = `${a?.userId?.firstName || ''} ${a?.userId?.lastName || ''}`.trim().toLowerCase();
+      const bn = `${b?.userId?.firstName || ''} ${b?.userId?.lastName || ''}`.trim().toLowerCase();
+      return an.localeCompare(bn);
+    });
+  }, [filteredDoctors]);
+
+  // Pagination slice
+  const total = sortedDoctors.length;
+  const totalPages = Math.max(1, Math.ceil(total / pageSize));
+  const current = Math.min(page, totalPages);
+  const start = (current - 1) * pageSize;
+  const end = start + pageSize;
+  const pageSlice = sortedDoctors.slice(start, end);
+
   const handleDoctorClick = (doctor) => {
-    // Navigate to doctor profile or booking page
-    navigate(`/doctor/${doctor._id}`);
+    const id = doctor?._id;
+    if (!id) return; // guard
+    navigate(`/doctor/${id}`);
   };
 
 
@@ -172,8 +328,9 @@ const DoctorsPage = () => {
               <Stethoscope className="h-12 w-12 text-muted-foreground" />
             </div>
             <h2 className="text-xl font-semibold mb-2">Error Loading Doctors</h2>
-            <p className="text-muted-foreground mb-6">{error}</p>
-            <Button onClick={loadDoctorsBySpecialty}>
+            <p className="text-muted-foreground mb-2">{error}</p>
+            <p className="text-xs text-muted-foreground mb-6">Open console for more details. We will retry with a safer parser.</p>
+            <Button onClick={loadAllDoctors}>
               Try Again
             </Button>
           </div>
@@ -194,135 +351,32 @@ const DoctorsPage = () => {
                 </Button>
               </div>
             ) : (
-              <div className="grid gap-6">
-                {filteredDoctors.map((doctor) => {
-                  const doctorName = `Dr. ${doctor.userId?.firstName} ${doctor.userId?.lastName}`;
-                  const doctorImage = doctor.userId?.profilePicture;
-                  const location = doctor.userId?.address ? `${doctor.userId.address.city}, ${doctor.userId.address.state}` : 'Location not specified';
-                  const phone = doctor.userId?.phone;
-                  
-                  return (
-                    <Card 
-                      key={doctor._id} 
-                      className="cursor-pointer hover:shadow-lg transition-shadow"
+              <>
+                <div className="grid gap-6">
+                  {pageSlice.map((doctor) => (
+                    <DoctorCard
+                      key={doctor?._id || Math.random()}
+                      doctor={doctor}
+                      navigate={navigate}
                       onClick={() => handleDoctorClick(doctor)}
-                    >
-                      <CardContent className="p-6">
-                        <div className="flex gap-4">
-                          <div className="w-24 h-24 rounded-full overflow-hidden flex-shrink-0">
-                            {doctorImage ? (
-                              <img 
-                                src={doctorImage} 
-                                alt={doctorName}
-                                className="w-full h-full object-cover"
-                              />
-                            ) : (
-                              <div className="w-full h-full bg-primary/10 flex items-center justify-center">
-                                <User className="h-12 w-12 text-primary" />
-                              </div>
-                            )}
-                          </div>
-                          
-                          <div className="flex-1">
-                            <div className="flex items-start justify-between mb-2">
-                              <div>
-                                <h3 className="text-xl font-semibold">{doctorName}</h3>
-                                <div className="flex items-center gap-2 mb-1">
-                                  <Badge variant="secondary" className="text-xs">
-                                    <Stethoscope className="h-3 w-3 mr-1" />
-                                    {doctor.primarySpecialty || 'General Practice'}
-                                  </Badge>
-                                  {doctor.specializations && doctor.specializations.length > 0 && (
-                                    <Badge variant="outline" className="text-xs">
-                                      {doctor.specializations[0]}
-                                    </Badge>
-                                  )}
-                                </div>
-                                <p className="text-sm text-muted-foreground">
-                                  {doctor.affiliations?.[0]?.organization || 'Medical Professional'}
-                                </p>
-                              </div>
-                              
-                              <div className="text-right">
-                                <div className="flex items-center gap-1 mb-1">
-                                  <Star className="h-4 w-4 text-yellow-500 fill-current" />
-                                  <span className="text-sm font-medium">
-                                    {doctor.averageRating?.toFixed(1) || 'N/A'}
-                                  </span>
-                                  <span className="text-sm text-muted-foreground">
-                                    ({doctor.totalReviews || 0})
-                                  </span>
-                                </div>
-                                <div className="text-lg font-semibold text-green-600">
-                                  ₹{doctor.consultationFee || 500}
-                                </div>
-                              </div>
-                            </div>
-                            
-                            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
-                              <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                                <Award className="h-4 w-4" />
-                                <span>{doctor.yearsOfExperience || 0} years exp</span>
-                              </div>
-                              <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                                <MapPin className="h-4 w-4" />
-                                <span>{location}</span>
-                              </div>
-                              <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                                <Clock className="h-4 w-4" />
-                                <span>
-                                  {doctor.isAcceptingNewPatients ? 'Accepting Patients' : 'Not Available'}
-                                </span>
-                              </div>
-                            </div>
-                            
-                            <div className="flex items-center justify-between pt-4 border-t">
-                              <div className="flex flex-wrap gap-1">
-                                {doctor.specializations?.slice(0, 2).map((spec, index) => (
-                                  <Badge key={index} variant="outline" className="text-xs">
-                                    {spec}
-                                  </Badge>
-                                ))}
-                                {doctor.specializations?.length > 2 && (
-                                  <Badge variant="outline" className="text-xs">
-                                    +{doctor.specializations.length - 2} more
-                                  </Badge>
-                                )}
-                              </div>
-                              
-                              <div className="flex items-center gap-2">
-                                {phone && (
-                                  <Button 
-                                    variant="outline" 
-                                    size="sm"
-                                    onClick={(e) => {
-                                      e.stopPropagation();
-                                      window.open(`tel:${phone}`);
-                                    }}
-                                  >
-                                    <Phone className="h-4 w-4 mr-2" />
-                                    Call
-                                  </Button>
-                                )}
-                                <Button 
-                                  size="sm"
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                    navigate(`/doctor/${doctor._id}?tab=availability`);
-                                  }}
-                                >
-                                  <Calendar className="h-4 w-4 mr-2" />
-                                  Book Appointment
-                                </Button>
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-                      </CardContent>
-                    </Card>
-                  );
-                })}
-              </div>
+                    />
+                  ))}
+                </div>
+                {/* Pagination Controls */}
+                {total > pageSize && (
+                  <div className="flex items-center justify-center gap-2 mt-6">
+                    <Button variant="outline" size="sm" disabled={current <= 1} onClick={() => setPage(p => Math.max(1, p - 1))}>
+                      Prev
+                    </Button>
+                    <span className="text-sm text-muted-foreground">
+                      Page {current} of {totalPages}
+                    </span>
+                    <Button variant="outline" size="sm" disabled={current >= totalPages} onClick={() => setPage(p => Math.min(totalPages, p + 1))}>
+                      Next
+                    </Button>
+                  </div>
+                )}
+              </>
             )}
           </>
         )}

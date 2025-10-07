@@ -35,7 +35,8 @@ import {
   XCircle,
   AlertCircle
 } from "lucide-react";
-import toast from 'react-hot-toast';
+import { toast } from '@/components/ui/sonner';
+import PromptDialog from '@/components/ui/PromptDialog';
 import ProfileImageUpload from "@/components/ui/ProfileImageUpload";
 import SlotManager from "@/components/appointment/SlotManager";
 
@@ -197,6 +198,7 @@ const DoctorSelfProfilePage = () => {
   const [reviews, setReviews] = useState([]);
   const [loadingReviews, setLoadingReviews] = useState(false);
   const [doctorProfile, setDoctorProfile] = useState(null);
+  const [prompt, setPrompt] = useState({ open: false, appointmentId: null });
   
   // Load my doctor profile and reviews
   useEffect(() => {
@@ -526,13 +528,15 @@ const DoctorSelfProfilePage = () => {
 
   const handleRejectAppointment = async (appointmentId) => {
     console.log('🔄 Starting reject for ID:', appointmentId);
-    
-    const reason = prompt('Enter rejection reason:');
-    if (!reason) {
-      toast.error('Rejection reason is required', { duration: 3000 });
+    setPrompt({ open: true, appointmentId });
+  };
+
+  const submitRejection = async (reason) => {
+    const appointmentId = prompt.appointmentId;
+    if (reason === undefined) {
+      setPrompt({ open: false, appointmentId: null });
       return;
     }
-    
     try {
       setActionLoading(prev => ({ ...prev, [appointmentId]: 'rejecting' }));
       
@@ -578,7 +582,7 @@ const DoctorSelfProfilePage = () => {
       setEditingSection(null);
     } catch (e) {
       console.error('Save about error:', e);
-      alert(e.message || "Failed to update about section");
+      toast.error(e.message || 'Failed to update about section');
     }
   };
   
@@ -664,13 +668,13 @@ const DoctorSelfProfilePage = () => {
       await refreshUser();
       
       setEditingSection(null);
-      alert('✅ Profile updated successfully!');
+      toast.success('Profile updated successfully!');
       console.log('✅ Profile saved successfully');
       
     } catch (e) {
       console.error('❌ Save profile error:', e);
       console.error('Error details:', e.response || e);
-      alert(`Failed to update profile: ${e.message}`);
+      toast.error(`Failed to update profile: ${e.message}`);
     }
   };
   
@@ -678,7 +682,7 @@ const DoctorSelfProfilePage = () => {
   const addLanguage = () => {
     if (!newLanguage.trim()) return;
     if (profileForm.languages.includes(newLanguage.trim())) {
-      alert('Language already added');
+      toast.error('Language already added');
       return;
     }
     setProfileForm(prev => ({
@@ -721,18 +725,18 @@ const DoctorSelfProfilePage = () => {
       const langTest = await doctorAPI.updateProfile({ languages: ['English', 'Spanish'] });
       console.log('✅ Language update result:', langTest);
       
-      alert('✅ Backend connection test completed! Check console for details.');
+      toast.success('Backend connection test completed! Check console for details.');
       
     } catch (e) {
       console.error('❌ Backend connection test failed:', e);
       console.error('Error details:', e.response?.data || e.message);
-      alert(`❌ Backend test failed: ${e.message}`);
+      toast.error(`Backend test failed: ${e.message}`);
     }
   };
 
   const addEducation = async () => {
     if (!educationForm.degree || !educationForm.institution) {
-      alert('Please fill in all education fields');
+      toast.error('Please fill in all education fields');
       return;
     }
     
@@ -938,7 +942,7 @@ const DoctorSelfProfilePage = () => {
                                 console.error('Profile picture upload failed:', error);
                                 // Revert to original image on error
                                 setDoctorData(prev => ({ ...prev, image: user?.profilePicture || prev.image }));
-                                alert('Failed to upload profile picture. Please try again.');
+                                toast.error('Failed to upload profile picture. Please try again.');
                               }
                             }
                           }}
@@ -1509,6 +1513,15 @@ const DoctorSelfProfilePage = () => {
           </Tabs>
         </div>
       </section>
+
+      <PromptDialog
+        open={prompt.open}
+        title="Reject appointment"
+        label="Reason (optional)"
+        placeholder="Add a reason for rejection"
+        onSubmit={(val) => submitRejection(val)}
+        onClose={() => setPrompt({ open: false, appointmentId: null })}
+      />
       
     </div>
   );

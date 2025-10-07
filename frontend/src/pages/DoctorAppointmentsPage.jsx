@@ -9,6 +9,8 @@ import { Textarea } from '@/components/ui/textarea';
 import { Calendar, Clock, User, Stethoscope, MapPin, Phone, AlertCircle, CheckCircle, XCircle, MessageCircle, RefreshCw, Edit, Video, Heart, Activity, FileText, Star } from 'lucide-react';
 import { appointmentsAPI } from '@/services/api';
 import RescheduleModal from '@/components/appointment/RescheduleModal';
+import PromptDialog from '@/components/ui/PromptDialog';
+import { toast } from '@/components/ui/sonner';
 
 const DoctorAppointmentsPage = () => {
   const { user, isAuthenticated } = useAuth();
@@ -23,6 +25,7 @@ const DoctorAppointmentsPage = () => {
   const [activeTab, setActiveTab] = useState('pending');
   const [actionLoading, setActionLoading] = useState({});
   const [rescheduleModal, setRescheduleModal] = useState({ isOpen: false, appointment: null });
+  const [prompt, setPrompt] = useState({ open: false, mode: null, appointmentId: null, title: '', label: '', placeholder: '' });
 
   useEffect(() => {
     loadAppointments();
@@ -61,8 +64,9 @@ const DoctorAppointmentsPage = () => {
       setActionLoading(prev => ({ ...prev, [appointmentId]: 'approving' }));
       await appointmentsAPI.approveAppointment(appointmentId);
       await loadAppointments(); // Refresh appointments
+      toast.success('Appointment approved');
     } catch (e) {
-      alert('Failed to approve appointment: ' + e.message);
+      toast.error('Failed to approve appointment: ' + e.message);
     } finally {
       setActionLoading(prev => {
         const newState = { ...prev };
@@ -73,14 +77,17 @@ const DoctorAppointmentsPage = () => {
   };
 
   const handleRejectAppointment = async (appointmentId, reason = '') => {
-    const rejectionReason = reason || prompt('Please provide a reason for rejection (optional):') || '';
-    
+    if (!reason) {
+      setPrompt({ open: true, mode: 'reject', appointmentId, title: 'Reject appointment', label: 'Reason (optional)', placeholder: 'Add a reason for rejection' });
+      return;
+    }
     try {
       setActionLoading(prev => ({ ...prev, [appointmentId]: 'rejecting' }));
-      await appointmentsAPI.rejectAppointment(appointmentId, rejectionReason);
+      await appointmentsAPI.rejectAppointment(appointmentId, reason);
       await loadAppointments(); // Refresh appointments
+      toast.success('Appointment rejected');
     } catch (e) {
-      alert('Failed to reject appointment: ' + e.message);
+      toast.error('Failed to reject appointment: ' + e.message);
     } finally {
       setActionLoading(prev => {
         const newState = { ...prev };
@@ -91,14 +98,17 @@ const DoctorAppointmentsPage = () => {
   };
 
   const handleCompleteAppointment = async (appointmentId, notes = '') => {
-    const appointmentNotes = notes || prompt('Add consultation notes (optional):') || '';
-    
+    if (!notes) {
+      setPrompt({ open: true, mode: 'complete', appointmentId, title: 'Complete appointment', label: 'Consultation notes (optional)', placeholder: 'Add notes for this consultation' });
+      return;
+    }
     try {
       setActionLoading(prev => ({ ...prev, [appointmentId]: 'completing' }));
-      await appointmentsAPI.completeAppointment(appointmentId, appointmentNotes);
+      await appointmentsAPI.completeAppointment(appointmentId, notes);
       await loadAppointments(); // Refresh appointments
+      toast.success('Appointment completed');
     } catch (e) {
-      alert('Failed to complete appointment: ' + e.message);
+      toast.error('Failed to complete appointment: ' + e.message);
     } finally {
       setActionLoading(prev => {
         const newState = { ...prev };
@@ -115,7 +125,7 @@ const DoctorAppointmentsPage = () => {
   const handleRescheduleSuccess = () => {
     setRescheduleModal({ isOpen: false, appointment: null });
     loadAppointments(); // Refresh appointments
-    alert('Appointment rescheduled successfully!');
+    toast.success('Appointment rescheduled successfully!');
   };
 
   const handleRescheduleClose = () => {
@@ -384,6 +394,16 @@ const DoctorAppointmentsPage = () => {
     );
   };
 
+  const handlePromptSubmit = async (value) => {
+    const { appointmentId, mode } = prompt;
+    setPrompt(prev => ({ ...prev, open: false }));
+    if (mode === 'reject') {
+      await handleRejectAppointment(appointmentId, value || '');
+    } else if (mode === 'complete') {
+      await handleCompleteAppointment(appointmentId, value || '');
+    }
+  };
+
   if (!isAuthenticated || user?.userType !== 'doctor') {
     return (
       <div className="min-h-screen bg-gradient-light">
@@ -545,6 +565,16 @@ const DoctorAppointmentsPage = () => {
           </TabsContent>
         </Tabs>
         
+        {/* Prompt Dialog */}
+        <PromptDialog
+          open={prompt.open}
+          title={prompt.title}
+          label={prompt.label}
+          placeholder={prompt.placeholder}
+          onSubmit={handlePromptSubmit}
+          onClose={() => setPrompt(prev => ({ ...prev, open: false }))}
+        />
+
         {/* Reschedule Modal */}
         <RescheduleModal
           appointment={rescheduleModal.appointment}
