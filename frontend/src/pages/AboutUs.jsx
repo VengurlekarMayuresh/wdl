@@ -151,42 +151,61 @@ const AboutUs = () => {
       Meet the Team
     </h2>
 
-    <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 justify-items-center">
-      {(aboutMedia || [])
-        .filter((m) => m && m.src)
-        .map((m, i, arr) => {
-          // If last row has only 2 items and we’re on large screen, center them by spanning columns
-          const isLastRowWithTwo =
-            arr.length % 3 === 2 && i >= Math.floor(arr.length / 3) * 3;
-
-          return (
-            <div
-              key={i}
-              className={`w-full ${
-                isLastRowWithTwo ? "lg:col-span-1 lg:last:col-start-2" : ""
-              }`}
-            >
+    {(() => {
+      const team = (aboutMedia || []).filter(m => m && m.src);
+      if (team.length === 5) {
+        // 3 on top (equal width), 2 centered below at the same width, without increasing photo size.
+        // Use a 6-col grid on md+ to center bottom two (start at columns 2 and 4). On small screens fallback to 2/3 cols.
+        return (
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-6">
+            {team.map((m, i) => {
+              const common = 'col-span-1 sm:col-span-1 md:col-span-2';
+              const placement =
+                i < 3
+                  ? '' // first row auto places into 3 columns (md spans 2 each)
+                  : i === 3
+                  ? 'md:col-start-2'
+                  : 'md:col-start-4';
+              return (
+                <div key={i} className={`${common} ${placement}`}>
+                  <Card className="border-none shadow-soft hover:shadow-medium transition-all group w-full">
+                    <div className="relative rounded-xl overflow-hidden aspect-[4/3]">
+                      <img src={m.src} alt={m.alt || m.name || 'Team member'} className="w-full h-full object-cover group-hover:scale-[1.03] transition-transform duration-300" />
+                      {(m.name || m.role) && (
+                        <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/80 to-transparent p-4 text-white">
+                          <div className="text-sm opacity-90">{m.role || 'Team'}</div>
+                          <div className="text-lg font-semibold leading-tight">{m.name || m.alt || 'Member'}</div>
+                        </div>
+                      )}
+                    </div>
+                  </Card>
+                </div>
+              );
+            })}
+          </div>
+        );
+      }
+      // Fallback responsive grid for other counts
+      return (
+        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 justify-items-center">
+          {team.map((m, i, arr) => (
+            <div key={i} className="w-full">
               <Card className="border-none shadow-soft hover:shadow-medium transition-all group w-full max-w-sm">
                 <div className="relative rounded-t-xl overflow-hidden aspect-[4/3]">
-                  <img
-                    src={m.src}
-                    alt={m.alt || m.name || "Team member"}
-                    className="w-full h-full object-cover group-hover:scale-[1.03] transition-transform duration-300"
-                  />
+                  <img src={m.src} alt={m.alt || m.name || 'Team member'} className="w-full h-full object-cover group-hover:scale-[1.03] transition-transform duration-300" />
                   {(m.name || m.role) && (
                     <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/80 to-transparent p-4 text-white">
-                      <div className="text-sm opacity-90">{m.role || "Team"}</div>
-                      <div className="text-lg font-semibold leading-tight">
-                        {m.name || m.alt || "Member"}
-                      </div>
+                      <div className="text-sm opacity-90">{m.role || 'Team'}</div>
+                      <div className="text-lg font-semibold leading-tight">{m.name || m.alt || 'Member'}</div>
                     </div>
                   )}
                 </div>
               </Card>
             </div>
-          );
-        })}
-    </div>
+          ))}
+        </div>
+      );
+    })()}
   </div>
 </section>
 
