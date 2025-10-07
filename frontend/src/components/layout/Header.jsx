@@ -218,7 +218,7 @@ export const Header = ({
               ) : (
                 <>
                   <Link to="/login">
-                    <Button variant="nav" size="nav">
+                    <Button variant="hero" size="nav">
                       <LogIn className="h-4 w-4" />
                       Login
                     </Button>

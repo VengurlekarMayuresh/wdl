@@ -86,45 +86,52 @@ const HomePage = () => {
       />
       
       {/* Hero Section */}
-      <section className="relative py-20 lg:py-32 overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-primary opacity-90"></div>
-        <div className="relative max-w-6xl mx-auto px-4 sm:px-6 text-center text-white">
-          <h1 className="text-4xl lg:text-6xl font-bold mb-6 animate-fadeInUp">
-            Your Health,{" "}
-            <span className="bg-gradient-to-r from-white to-primary-glow bg-clip-text text-transparent">
-              Our Priority
-            </span>
-          </h1>
-          <p className="text-xl lg:text-2xl mb-8 max-w-3xl mx-auto opacity-90 animate-fadeInUp">
-            Connect with top medical professionals, book appointments instantly, and take control of your healthcare journey with MASSS.
-          </p>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center animate-fadeInUp">
-            <Link to="/find-care">
-              <Button variant="hero" size="hero" className="min-w-48">
-                <MapPin className="h-5 w-5" />
-                Find Care Now
-              </Button>
-            </Link>
-            <Link to="/healthy-living">
-              <Button variant="hero" size="hero" className="min-w-48">
-                <Users className="h-5 w-5" />
-                Health Tips & Articles
-              </Button>
-            </Link>
-          </div>
-        </div>
-        
-        {/* Floating elements */}
-        <div className="absolute top-20 left-10 animate-pulse opacity-20">
-          <Heart className="h-16 w-16 text-white" />
-        </div>
-        <div className="absolute top-40 right-20 animate-pulse opacity-20 animate-fadeInUp">
-          <Stethoscope className="h-20 w-20 text-white" />
-        </div>
-        <div className="absolute bottom-20 left-20 animate-pulse opacity-20">
-          <Shield className="h-12 w-12 text-white" />
-        </div>
-      </section>
+<section className="relative py-20 lg:py-32 overflow-hidden bg-cover bg-center"
+  style={{ backgroundImage: "url('https://res.cloudinary.com/ds20dwlrs/image/upload/v1759839810/happy_qnujts.jpg')" }}  // 👈 change to your image path
+>
+  {/* Overlay gradient for readability */}
+  <div className="absolute inset-0 bg-gradient-to-b from-primary/80 to-black/80 opacity-90"></div>
+
+  <div className="relative max-w-6xl mx-auto px-4 sm:px-6 text-center text-white">
+    <h1 className="text-4xl lg:text-6xl font-bold mb-6 animate-fadeInUp">
+      Your Health,{" "}
+      <span className="bg-gradient-to-r from-white to-primary-glow bg-clip-text text-transparent">
+        Our Priority
+      </span>
+    </h1>
+
+    <p className="text-xl lg:text-2xl mb-8 max-w-3xl mx-auto opacity-90 animate-fadeInUp">
+      Connect with top medical professionals, book appointments instantly, and take control of your healthcare journey with MASSS.
+    </p>
+
+    <div className="flex flex-col sm:flex-row gap-4 justify-center animate-fadeInUp">
+      <Link to="/find-care">
+        <Button variant="hero" size="hero" className="min-w-48">
+          <MapPin className="h-5 w-5" />
+          Find Care Now
+        </Button>
+      </Link>
+      <Link to="/healthy-living">
+        <Button variant="hero" size="hero" className="min-w-48">
+          <Users className="h-5 w-5" />
+          Health Tips & Articles
+        </Button>
+      </Link>
+    </div>
+  </div>
+
+  {/* Floating decorative icons */}
+  <div className="absolute top-20 left-10 animate-pulse opacity-20">
+    <Heart className="h-16 w-16 text-white" />
+  </div>
+  <div className="absolute top-40 right-20 animate-pulse opacity-20 animate-fadeInUp">
+    <Stethoscope className="h-20 w-20 text-white" />
+  </div>
+  <div className="absolute bottom-20 left-20 animate-pulse opacity-20">
+    <Shield className="h-12 w-12 text-white" />
+  </div>
+</section>
+
 
       {/* Features Section */}
       <section className="py-20 bg-background">
@@ -315,7 +322,7 @@ const HomePage = () => {
             <div>
               <h4 className="font-semibold mb-4 text-foreground">Company</h4>
               <ul className="space-y-2 text-sm text-muted-foreground">
-                <li><Link to="#" className="hover:text-foreground transition-colors">About Us</Link></li>
+                <li><Link to="/about" className="hover:text-foreground transition-colors">About Us</Link></li>
                 <li><Link to="#" className="hover:text-foreground transition-colors">Privacy Policy</Link></li>
                 <li><Link to="#" className="hover:text-foreground transition-colors">Terms of Service</Link></li>
                 <li><Link to="#" className="hover:text-foreground transition-colors">Contact</Link></li>
@@ -325,7 +332,7 @@ const HomePage = () => {
           
           <div className="border-t mt-12 pt-8 text-center">
             <p className="text-sm text-muted-foreground">
-              Â© 2024 MASSS. All rights reserved.
+              Â© 2025 MASSS. All rights reserved.
             </p>
           </div>
         </div>

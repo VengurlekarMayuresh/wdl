@@ -22,6 +22,7 @@ import DoctorPatientProfilePage from "./pages/DoctorPatientProfilePage";
 import SecurityPrivacyPage from "./pages/SecurityPrivacyPage";
 import BlogPostPage from "./pages/BlogPostPage";
 import NotFound from "./pages/NotFound";
+import AboutUs from "./pages/AboutUs";
 
 const queryClient = new QueryClient();
 
@@ -50,6 +51,7 @@ const App = () => (
             <Route path="/healthy-living" element={<HealthyLivingPage />} />
             <Route path="/blog/:id" element={<BlogPostPage />} />
             <Route path="/test-slots" element={<TestSlotsPage />} />
+            <Route path="/about" element={<AboutUs />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>
