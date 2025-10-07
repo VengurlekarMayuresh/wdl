@@ -28,6 +28,20 @@ const appointmentSchema = new mongoose.Schema({
   requestedDateTime: {
     type: Date
   },
+
+  // Pending reschedule proposal (doctor->patient or patient->doctor)
+  pendingReschedule: {
+    active: { type: Boolean, default: false },
+    proposedBy: { type: String, enum: ['patient', 'doctor'] },
+    proposedAt: Date,
+    reason: String,
+    proposedSlotId: { type: mongoose.Schema.Types.ObjectId, ref: 'Slot' },
+    proposedDateTime: Date,
+    decision: { type: String, enum: ['approved', 'rejected', null], default: null },
+    decidedBy: { type: String, enum: ['patient', 'doctor', null], default: null },
+    decisionAt: Date,
+    decisionReason: String
+  },
   
   // Appointment details
   appointmentDate: {

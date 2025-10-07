@@ -30,7 +30,10 @@ const NotificationsDialog = ({ open, onClose, userType = 'patient', userId, onUp
       const appts = userType === 'doctor'
         ? await appointmentsAPI.getDoctorAppointments('all')
         : await appointmentsAPI.getMyAppointments('all');
-      const list = buildNotificationsFromAppointments(appts || [], userType === 'doctor' ? 'doctor' : 'patient');
+      let list = buildNotificationsFromAppointments(appts || [], userType === 'doctor' ? 'doctor' : 'patient');
+      // Filter out seen notifications so cleared items stay gone permanently
+      const seen = getSeenIds(userId);
+      list = list.filter(n => !seen.has(n.id));
       setItems(list);
       onUpdated?.(list);
     } finally {
@@ -82,6 +85,7 @@ const NotificationsDialog = ({ open, onClose, userType = 'patient', userId, onUp
                 <RefreshCw className={`h-4 w-4 mr-2 ${loading ? 'animate-spin' : ''}`} /> Refresh
               </Button>
               <Button variant="outline" size="sm" onClick={markAllRead}>Mark all read</Button>
+              <Button variant="destructive" size="sm" onClick={() => { addSeenIds(userId, (items || []).map(i => i.id)); setItems([]); onUpdated?.([]); }}>Clear all</Button>
             </div>
           </DialogTitle>
         </DialogHeader>

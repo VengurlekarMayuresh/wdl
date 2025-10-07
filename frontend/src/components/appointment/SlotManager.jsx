@@ -6,6 +6,8 @@ import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Calendar, Clock, Plus, Edit2, Trash2, Save, X, AlertCircle, CheckCircle, RefreshCw } from 'lucide-react';
 import { slotsAPI } from '@/services/api';
+import { toast } from '@/components/ui/sonner';
+import ConfirmDialog from '@/components/ui/ConfirmDialog';
 
 const SlotManager = ({ doctorId }) => {
   const [slots, setSlots] = useState([]);
@@ -14,6 +16,7 @@ const SlotManager = ({ doctorId }) => {
   const [success, setSuccess] = useState('');
   const [showAddForm, setShowAddForm] = useState(false);
   const [editingSlot, setEditingSlot] = useState(null);
+  const [confirmDelete, setConfirmDelete] = useState({ open: false, slotId: null });
 
   // Debug logging
   useEffect(() => {
@@ -91,13 +94,20 @@ const SlotManager = ({ doctorId }) => {
   };
 
   const handleDeleteSlot = async (slotId) => {
-    if (!confirm('Are you sure you want to delete this slot?')) return;
-    
+    setConfirmDelete({ open: true, slotId });
+  };
+
+  const confirmDeleteYes = async () => {
+    const slotId = confirmDelete.slotId;
     try {
       await slotsAPI.deleteSlot(slotId);
       setSlots(prev => prev.filter(slot => slot._id !== slotId));
+      toast.success('Slot deleted');
     } catch (e) {
       setError(e.message);
+      toast.error(e.message || 'Failed to delete slot');
+    } finally {
+      setConfirmDelete({ open: false, slotId: null });
     }
   };
 
@@ -165,6 +175,15 @@ const SlotManager = ({ doctorId }) => {
 
   return (
     <div className="space-y-6">
+      <ConfirmDialog
+        open={confirmDelete.open}
+        title="Delete slot?"
+        description="This will permanently remove the slot if it is not booked."
+        confirmLabel="Delete"
+        cancelLabel="Cancel"
+        onConfirm={confirmDeleteYes}
+        onClose={() => setConfirmDelete({ open: false, slotId: null })}
+      />
       <Card>
         <CardHeader>
           <div className="flex justify-between items-center">

@@ -8,7 +8,9 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Textarea } from '@/components/ui/textarea';
 import { Calendar, Clock, User, Stethoscope, MapPin, Phone, AlertCircle, CheckCircle, XCircle, MessageCircle, RefreshCw, Edit, Video, Heart, Activity, FileText, Star } from 'lucide-react';
 import { appointmentsAPI } from '@/services/api';
+import { emitNotificationsRefresh } from '@/services/notifications';
 import RescheduleModal from '@/components/appointment/RescheduleModal';
+import AppointmentQuickDialog from '@/components/appointment/AppointmentQuickDialog';
 import PromptDialog from '@/components/ui/PromptDialog';
 import { toast } from '@/components/ui/sonner';
 
@@ -25,6 +27,7 @@ const DoctorAppointmentsPage = () => {
   const [activeTab, setActiveTab] = useState('pending');
   const [actionLoading, setActionLoading] = useState({});
   const [rescheduleModal, setRescheduleModal] = useState({ isOpen: false, appointment: null });
+  const [quickModal, setQuickModal] = useState({ isOpen: false, appointment: null });
   const [prompt, setPrompt] = useState({ open: false, mode: null, appointmentId: null, title: '', label: '', placeholder: '' });
 
   useEffect(() => {
@@ -65,6 +68,7 @@ const DoctorAppointmentsPage = () => {
       await appointmentsAPI.approveAppointment(appointmentId);
       await loadAppointments(); // Refresh appointments
       toast.success('Appointment approved');
+      emitNotificationsRefresh();
     } catch (e) {
       toast.error('Failed to approve appointment: ' + e.message);
     } finally {
@@ -86,6 +90,7 @@ const DoctorAppointmentsPage = () => {
       await appointmentsAPI.rejectAppointment(appointmentId, reason);
       await loadAppointments(); // Refresh appointments
       toast.success('Appointment rejected');
+      emitNotificationsRefresh();
     } catch (e) {
       toast.error('Failed to reject appointment: ' + e.message);
     } finally {
@@ -107,6 +112,7 @@ const DoctorAppointmentsPage = () => {
       await appointmentsAPI.completeAppointment(appointmentId, notes);
       await loadAppointments(); // Refresh appointments
       toast.success('Appointment completed');
+      emitNotificationsRefresh();
     } catch (e) {
       toast.error('Failed to complete appointment: ' + e.message);
     } finally {
@@ -126,6 +132,7 @@ const DoctorAppointmentsPage = () => {
     setRescheduleModal({ isOpen: false, appointment: null });
     loadAppointments(); // Refresh appointments
     toast.success('Appointment rescheduled successfully!');
+    emitNotificationsRefresh();
   };
 
   const handleRescheduleClose = () => {
@@ -168,7 +175,7 @@ const DoctorAppointmentsPage = () => {
     };
   };
 
-  const AppointmentCard = ({ appointment, showActions = false }) => {
+  const AppointmentCard = ({ appointment, onClick }) => {
     const patient = appointment.patientId;
     const slot = appointment.slotId;
     const dateTime = appointment.appointmentDate || slot?.dateTime;
@@ -199,8 +206,8 @@ const DoctorAppointmentsPage = () => {
     const StatusIcon = getStatusIcon(appointment.status);
     
     return (
-      <Card className={`border-2 shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-1 bg-gradient-to-br ${getCardGradient(appointment.status)} overflow-hidden group`}>
-        <CardHeader className="pb-4 relative">
+      <Card onClick={onClick} className={`cursor-pointer border shadow-sm hover:shadow-md transition-all duration-200 bg-white overflow-hidden group`}>
+        <CardHeader className="pb-3 relative">
           <div className="absolute top-4 right-4">
             <div className={`p-2 rounded-full ${appointment.status === 'pending' ? 'bg-yellow-100' : appointment.status === 'confirmed' ? 'bg-blue-100' : appointment.status === 'completed' ? 'bg-green-100' : 'bg-red-100'}`}>
               <StatusIcon className={`h-5 w-5 ${appointment.status === 'pending' ? 'text-yellow-600' : appointment.status === 'confirmed' ? 'text-blue-600' : appointment.status === 'completed' ? 'text-green-600' : 'text-red-600'}`} />
@@ -247,7 +254,7 @@ const DoctorAppointmentsPage = () => {
         
         <CardContent className="pt-0">
           {/* Date and Time */}
-          <div className="grid grid-cols-2 gap-4 mb-6">
+          <div className="grid grid-cols-2 gap-4 mb-3">
             <div className="flex items-center gap-3 p-3 bg-white/70 rounded-lg">
               <div className="p-2 bg-primary/10 rounded-lg">
                 <Calendar className="h-4 w-4 text-primary" />
@@ -315,80 +322,7 @@ const DoctorAppointmentsPage = () => {
             </div>
           )}
 
-          {/* Action Buttons */}
-          {showActions && (
-            <div className="pt-6 mt-6 border-t border-primary/10">
-              {appointment.status === 'pending' && (
-                <div className="flex gap-3">
-                  <Button
-                    variant="default"
-                    size="sm"
-                    onClick={() => handleApproveAppointment(appointment._id)}
-                    disabled={currentAction}
-                    className="flex-1 bg-green-600 hover:bg-green-700 text-white shadow-md hover:shadow-lg transition-all"
-                  >
-                    {currentAction === 'approving' ? (
-                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2" />
-                    ) : (
-                      <CheckCircle className="h-4 w-4 mr-2" />
-                    )}
-                    {currentAction === 'approving' ? 'Approving...' : 'Approve'}
-                  </Button>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => handleRejectAppointment(appointment._id)}
-                    disabled={currentAction}
-                    className="flex-1 border-red-200 text-red-600 hover:bg-red-50 hover:border-red-300 shadow-sm hover:shadow-md transition-all"
-                  >
-                    {currentAction === 'rejecting' ? (
-                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-current mr-2" />
-                    ) : (
-                      <XCircle className="h-4 w-4 mr-2" />
-                    )}
-                    {currentAction === 'rejecting' ? 'Rejecting...' : 'Reject'}
-                  </Button>
-                </div>
-              )}
-              
-              {appointment.status === 'confirmed' && dateTime && new Date(dateTime) > new Date() && (
-                <div className="flex gap-3">
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => handleRescheduleAppointment(appointment)}
-                    disabled={currentAction}
-                    className="flex-1 border-blue-200 text-blue-600 hover:bg-blue-50 hover:border-blue-300 shadow-sm hover:shadow-md transition-all"
-                  >
-                    <Edit className="h-4 w-4 mr-2" />
-                    Reschedule
-                  </Button>
-                </div>
-              )}
-              
-              {(['completed','cancelled','rejected'].includes(appointment.status) ? false : true) && (
-                <Button
-                  variant="default"
-                  size="sm"
-                  onClick={() => handleCompleteAppointment(appointment._id)}
-                  disabled={currentAction}
-                  className="w-full bg-primary hover:bg-primary/90 text-white shadow-md hover:shadow-lg transition-all"
-                >
-                  {currentAction === 'completing' ? (
-                    <>
-                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2" />
-                      Completing...
-                    </>
-                  ) : (
-                    <>
-                      <CheckCircle className="h-4 w-4 mr-2" />
-                      Mark as Completed
-                    </>
-                  )}
-                </Button>
-              )}
-            </div>
-          )}
+          {/* no inline actions; click opens dialog */}
         </CardContent>
       </Card>
     );
@@ -485,7 +419,7 @@ const DoctorAppointmentsPage = () => {
           </TabsList>
 
           <TabsContent value="pending" className="mt-6">
-            <div className="space-y-4">
+            <div className="grid grid-cols-1 sm:grid-cols-1 xl:grid-cols-2 gap-4">
               {appointments.pending.length === 0 ? (
                 <Card>
                   <CardContent className="p-8 text-center">
@@ -498,8 +432,8 @@ const DoctorAppointmentsPage = () => {
                 appointments.pending.map((appointment) => (
                   <AppointmentCard 
                     key={appointment._id} 
-                    appointment={appointment} 
-                    showActions={true} 
+                    appointment={appointment}
+                    onClick={() => setQuickModal({ isOpen: true, appointment })}
                   />
                 ))
               )}
@@ -507,7 +441,7 @@ const DoctorAppointmentsPage = () => {
           </TabsContent>
 
           <TabsContent value="upcoming" className="mt-6">
-            <div className="space-y-4">
+            <div className="grid grid-cols-1 sm:grid-cols-1 xl:grid-cols-2 gap-4">
               {appointments.upcoming.length === 0 ? (
                 <Card>
                   <CardContent className="p-8 text-center">
@@ -520,8 +454,8 @@ const DoctorAppointmentsPage = () => {
                 appointments.upcoming.map((appointment) => (
                   <AppointmentCard 
                     key={appointment._id} 
-                    appointment={appointment} 
-                    showActions={true} 
+                    appointment={appointment}
+                    onClick={() => setQuickModal({ isOpen: true, appointment })}
                   />
                 ))
               )}
@@ -529,7 +463,7 @@ const DoctorAppointmentsPage = () => {
           </TabsContent>
 
           <TabsContent value="completed" className="mt-6">
-            <div className="space-y-4">
+            <div className="grid grid-cols-1 sm:grid-cols-1 xl:grid-cols-2 gap-4">
               {appointments.completed.length === 0 ? (
                 <Card>
                   <CardContent className="p-8 text-center">
@@ -540,14 +474,14 @@ const DoctorAppointmentsPage = () => {
                 </Card>
               ) : (
                 appointments.completed.map((appointment) => (
-                  <AppointmentCard key={appointment._id} appointment={appointment} />
+                  <AppointmentCard key={appointment._id} appointment={appointment} onClick={() => setQuickModal({ isOpen: true, appointment })} />
                 ))
               )}
             </div>
           </TabsContent>
 
           <TabsContent value="cancelled" className="mt-6">
-            <div className="space-y-4">
+            <div className="grid grid-cols-1 sm:grid-cols-1 xl:grid-cols-2 gap-4">
               {appointments.cancelled.length === 0 ? (
                 <Card>
                   <CardContent className="p-8 text-center">
@@ -558,7 +492,7 @@ const DoctorAppointmentsPage = () => {
                 </Card>
               ) : (
                 appointments.cancelled.map((appointment) => (
-                  <AppointmentCard key={appointment._id} appointment={appointment} />
+                  <AppointmentCard key={appointment._id} appointment={appointment} onClick={() => setQuickModal({ isOpen: true, appointment })} />
                 ))
               )}
             </div>
@@ -573,6 +507,28 @@ const DoctorAppointmentsPage = () => {
           placeholder={prompt.placeholder}
           onSubmit={handlePromptSubmit}
           onClose={() => setPrompt(prev => ({ ...prev, open: false }))}
+        />
+
+        {/* Quick Actions Dialog */}
+        <AppointmentQuickDialog
+          open={quickModal.isOpen}
+          onClose={() => setQuickModal({ isOpen: false, appointment: null })}
+          appointment={quickModal.appointment}
+          userType="doctor"
+          onApprove={handleApproveAppointment}
+          onReject={(id) => handleRejectAppointment(id)}
+          onReschedule={(apt) => setRescheduleModal({ isOpen: true, appointment: apt })}
+          onComplete={(id) => handleCompleteAppointment(id)}
+          onCancel={async (id, reason) => {
+            try {
+              await appointmentsAPI.rejectAppointment(id, reason || 'Cancelled by doctor');
+              await loadAppointments();
+              emitNotificationsRefresh();
+            } catch (e) {
+              // show error via toast instead of native alert
+              toast.error(e.message || 'Failed to cancel');
+            }
+          }}
         />
 
         {/* Reschedule Modal */}

@@ -67,7 +67,12 @@ export const Header = ({
   useEffect(() => {
     refreshNotifications();
     const id = setInterval(refreshNotifications, 30000); // poll every 30s
-    return () => clearInterval(id);
+    const listener = () => refreshNotifications();
+    window.addEventListener('notif:refresh', listener);
+    return () => {
+      clearInterval(id);
+      window.removeEventListener('notif:refresh', listener);
+    };
   }, [isAuthenticated, userType, userId]);
 
   const markAllRead = () => {
