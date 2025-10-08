@@ -1009,8 +1009,8 @@ const DoctorSelfProfilePage = () => {
                 {/* Doctor Information */}
                 <div className="lg:col-span-3">
                   <div className="mb-6">
-                    <h1 className="text-3xl font-bold text-foreground mb-2">
-                      {doctorData.name}
+<h1 className="text-3xl font-bold text-foreground mb-2">
+                      {user?.firstName ? `Dr. ${user.firstName} ${user.lastName || ''}`.trim() : doctorData.name}
                     </h1>
                     <div className="flex flex-wrap items-center gap-4 mb-4">
                       <Badge variant="secondary" className="text-primary font-medium">
@@ -1155,7 +1155,7 @@ const DoctorSelfProfilePage = () => {
                   <CardTitle className="flex items-center justify-between">
                     <span className="flex items-center gap-2">
                       <User className="h-5 w-5 text-primary" />
-                      About Dr. {doctorData.name.split(' ').pop()}
+About Dr. {(user?.lastName || doctorData.name.split(' ').pop())}
                     </span>
                     {editingSection === 'about' ? (
                       <div className="flex gap-2">
