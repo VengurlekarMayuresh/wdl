@@ -334,40 +334,44 @@ const DoctorSelfProfilePage = () => {
       const doctorName = `Dr. ${user.firstName || 'Unknown'} ${user.lastName || 'Doctor'}`;
       console.log('🏥 Generated doctor name:', doctorName);
       
-      setDoctorData(prev => {
-        const newData = {
-          ...prev,
-          name: doctorName,
-          email: user.email || prev.email,
-          phone: user.phone || prev.phone,
-          image: user.profilePicture || prev.image,
-          specialty: user.profile?.primarySpecialty || user.primarySpecialty || "Doctor",
-          experience: (() => {
-            if (user.profile?.yearsOfExperience) return `${user.profile.yearsOfExperience}+ years`;
-            if (user.yearsOfExperience) return `${user.yearsOfExperience}+ years`;
-            if (user.age) {
-              const estimatedYears = Math.max(0, user.age - 25);
-              return estimatedYears > 0 ? `${estimatedYears}+ years` : "New Doctor";
-            }
-            return "Experienced";
-          })(),
-          about: user.profile?.bio || user.bio || "Professional healthcare provider committed to patient care.",
-          address: (() => {
-            const addr = user.address;
-            if (typeof addr === 'object' && addr !== null) {
-              return `${addr.street || ''}, ${addr.city || ''}, ${addr.state || ''} ${addr.zipCode || ''}`.trim().replace(/,$/, '');
-            }
-            return addr || "Address not provided";
-          })(),
-          // Extract profile arrays if available
-          education: user.profile?.education || [],
-          certifications: user.profile?.certificationsList || user.profile?.certifications || [],
-          specializations: user.profile?.areasOfExpertise || user.profile?.specializations || [],
-          workingHours: user.profile?.workingHours || {}
-        };
-        console.log('📊 Initial doctor data updated:', newData);
-        return newData;
-      });
+        setDoctorData(prev => {
+          const newData = {
+            ...prev,
+            name: doctorName,
+            email: user.email || prev.email,
+            phone: user.phone || prev.phone,
+            image: user.profilePicture || prev.image,
+            specialty: user.profile?.primarySpecialty || user.primarySpecialty || "Doctor",
+            experience: (() => {
+              if (user.profile?.yearsOfExperience) return `${user.profile.yearsOfExperience}+ years`;
+              if (user.yearsOfExperience) return `${user.yearsOfExperience}+ years`;
+              if (user.age) {
+                const estimatedYears = Math.max(0, user.age - 25);
+                return estimatedYears > 0 ? `${estimatedYears}+ years` : "New Doctor";
+              }
+              return "Experienced";
+            })(),
+            about: user.profile?.bio || user.bio || "Professional healthcare provider committed to patient care.",
+            address: (() => {
+              const addr = user.address;
+              if (typeof addr === 'object' && addr !== null) {
+                return `${addr.street || ''}, ${addr.city || ''}, ${addr.state || ''} ${addr.zipCode || ''}`.trim().replace(/,$/, '');
+              }
+              return addr || "Address not provided";
+            })(),
+            // Extract profile arrays if available
+            education: user.profile?.education || [],
+            certifications: user.profile?.certificationsList || user.profile?.certifications || [],
+            specializations: user.profile?.areasOfExpertise || user.profile?.specializations || [],
+            workingHours: user.profile?.workingHours || {},
+            // Map languagesSpoken -> simple string list for UI
+            languages: Array.isArray(user.profile?.languagesSpoken)
+              ? user.profile.languagesSpoken.map(ls => ls.language).filter(Boolean)
+              : (prev.languages || [])
+          };
+          console.log('📊 Initial doctor data updated:', newData);
+          return newData;
+        });
       
       // Also initialize the profile form with user data
       setProfileForm({
@@ -387,7 +391,9 @@ const DoctorSelfProfilePage = () => {
           }
           return addr || "";
         })(),
-        languages: user.profile?.languages || ["English"],
+        languages: Array.isArray(user.profile?.languagesSpoken)
+          ? user.profile.languagesSpoken.map(ls => ls.language).filter(Boolean)
+          : (user.profile?.languages || ["English"]),
         acceptingNew: user.profile?.isAcceptingNewPatients ?? true
       });
     } else {
@@ -633,7 +639,10 @@ const DoctorSelfProfilePage = () => {
         hospitalName: profileForm.location,
         clinicName: profileForm.location, // Also try clinicName
         isAcceptingNewPatients: profileForm.acceptingNew,
-        languages: profileForm.languages,
+        // Persist languages to backend schema: languagesSpoken
+        languagesSpoken: Array.isArray(profileForm.languages)
+          ? profileForm.languages.map(l => ({ language: l, proficiency: 'conversational' }))
+          : [],
         // Add current specializations from the form
         areasOfExpertise: doctorData.specializations || [],
         // Add current certifications
@@ -750,11 +759,18 @@ const DoctorSelfProfilePage = () => {
     }
     
     try {
+      // Map UI form to backend schema keys
+      const payload = {
+        degree: educationForm.degree,
+        institution: educationForm.institution,
+        graduationYear: educationForm.year ? parseInt(educationForm.year) : undefined,
+      };
+
       // First add via dedicated education API if available
-      const savedEducation = await doctorAPI.addEducation(educationForm);
+      const savedEducation = await doctorAPI.addEducation(payload);
       
       // Update local state with the saved education (with ID from backend)
-      const newEducation = [...doctorData.education, savedEducation || educationForm];
+      const newEducation = [...doctorData.education, savedEducation || payload];
       setDoctorData(prev => ({ ...prev, education: newEducation }));
       setEducationForm({ degree: "", institution: "", year: "" });
       setEditingSection(null);
@@ -762,9 +778,13 @@ const DoctorSelfProfilePage = () => {
       console.log('✅ Education added and saved to database');
     } catch (e) {
       console.error('❌ Error saving education:', e);
-      // Fallback: try updating the whole education array
+      // Fallback: try updating the whole education array with normalized objects
       try {
-        const newEducation = [...doctorData.education, educationForm];
+        const newEducation = [...doctorData.education, {
+          degree: educationForm.degree,
+          institution: educationForm.institution,
+          graduationYear: educationForm.year ? parseInt(educationForm.year) : undefined,
+        }];
         await doctorAPI.updateProfile({ education: newEducation });
         setDoctorData(prev => ({ ...prev, education: newEducation }));
         setEducationForm({ degree: "", institution: "", year: "" });
@@ -992,16 +1012,7 @@ const DoctorSelfProfilePage = () => {
                       >
                         <EditIcon className="h-4 w-4 mr-2" />
                         Edit Profile
-                      </Button>
-                      <div className="flex gap-2">
-                        <Button variant="outline" size="icon" className="flex-1">
-                          <MessageSquare className="h-4 w-4" />
-                        </Button>
-                        <Button variant="outline" size="icon" className="flex-1">
-                          <Share2 className="h-4 w-4" />
-                        </Button>
-                      </div>
-                      
+                      </Button> 
                     </div>
                   </div>
                 </div>
@@ -1291,7 +1302,7 @@ About Dr. {(user?.lastName || doctorData.name.split(' ').pop())}
                         <div key={index} className="border-l-2 border-primary/20 pl-4">
                           <div className="font-semibold">{edu.degree}</div>
                           <div className="text-primary">{edu.institution}</div>
-                          <div className="text-sm text-muted-foreground">{edu.year}</div>
+                          <div className="text-sm text-muted-foreground">{edu.graduationYear || edu.year}</div>
                         </div>
                       ))}
                     </div>
