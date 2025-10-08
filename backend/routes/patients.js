@@ -60,7 +60,38 @@ router.put('/profile/me', authenticate, authorize('patient'), async (req, res) =
     ];
 
     const updates = {};
+
+    // Normalize emergencyContacts if provided to avoid schema validation errors
+    if (Array.isArray(req.body.emergencyContacts)) {
+      const allowedRelationships = ['spouse','parent','child','sibling','friend','other'];
+      const normalizedContacts = req.body.emergencyContacts
+        .map((c) => {
+          const name = (c?.name || '').toString().trim();
+          const phone = (c?.phone || '').toString().trim();
+          let relationship = (c?.relationship || '').toString().trim().toLowerCase();
+          if (!allowedRelationships.includes(relationship)) relationship = 'other';
+          const isPrimary = !!c?.isPrimary;
+          const email = c?.email ? String(c.email).trim() : undefined;
+          const address = c?.address && typeof c.address === 'object' ? {
+            street: c.address.street || undefined,
+            city: c.address.city || undefined,
+            state: c.address.state || undefined,
+            zipCode: c.address.zipCode || undefined,
+            country: c.address.country || undefined,
+          } : undefined;
+          return { name, relationship, phone, email, address, isPrimary };
+        })
+        // Filter out incomplete entries missing required fields
+        .filter(c => c.name && c.phone && c.relationship);
+
+      if (normalizedContacts.length > 0) {
+        updates.emergencyContacts = normalizedContacts;
+      }
+    }
+
+    // Copy over other allowed fields
     Object.keys(req.body).forEach(key => {
+      if (key === 'emergencyContacts') return; // already handled
       if (allowedFields.includes(key) && req.body[key] !== undefined) {
         updates[key] = req.body[key];
       }

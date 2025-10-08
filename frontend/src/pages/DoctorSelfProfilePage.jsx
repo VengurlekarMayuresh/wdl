@@ -216,19 +216,12 @@ const DoctorSelfProfilePage = () => {
         const d = await doctorAPI.getProfile();
         setDoctorProfile(d);
         setLoadingReviews(true);
-        try {
-          const res = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:5000/api'}/doctors/${d._id}/reviews`, {
-            headers: { 'Accept': 'application/json', ...(localStorage.getItem('token') ? { Authorization: `Bearer ${localStorage.getItem('token')}` } : {}) }
-          });
-          const data = await res.json();
-          if (data?.success && data?.data?.reviews) setReviews(data.data.reviews);
-        } catch (e) {
-          console.log('Load reviews failed', e);
-        } finally {
-          setLoadingReviews(false);
-        }
+        const list = await extendedAPI.getReviews(d?._id);
+        setReviews(list);
       } catch (e) {
         console.log('Load doctor profile failed', e);
+      } finally {
+        setLoadingReviews(false);
       }
     })();
   }, []);
@@ -311,16 +304,17 @@ const DoctorSelfProfilePage = () => {
   
   // Extended API functions for missing endpoints
   const extendedAPI = {
-    // Note: Review data should come from actual patient reviews
-    // For now, we'll show placeholder data until review system is implemented
-    async getReviews() {
-      console.log('🔄 Reviews are now managed dynamically (placeholder)');
-      return []; // Return empty array - no static data
+    // Fetch reviews from backend using the doctor API
+    async getReviews(doctorId) {
+      if (!doctorId) return [];
+      try {
+        const list = await (await import('@/services/api')).doctorAPI.getReviews(doctorId);
+        return Array.isArray(list) ? list : (list?.reviews || []);
+      } catch (e) {
+        console.warn('Failed to load reviews:', e?.message || e);
+        return [];
+      }
     },
-    
-    // Note: Appointment data is now managed in the dedicated appointments pages
-    // This static data has been removed to use real dynamic appointment management
-    
   };
 
   // Set initial doctor data from user info immediately
@@ -438,8 +432,11 @@ const DoctorSelfProfilePage = () => {
           });
         }
         
-        // Fetch reviews (appointments are now managed separately)
-        await fetchReviews();
+        // Fetch reviews after we have a doctor id
+        const docId = additionalDoctorData?._id || doctor?._id || doctorProfile?._id;
+        if (docId) {
+          await fetchReviews(docId);
+        }
         
         console.log('✅ All data fetched successfully!');
         
@@ -454,11 +451,11 @@ const DoctorSelfProfilePage = () => {
     fetchAllData();
   }, [isAuthenticated, user]);
   
-  // Fetch reviews
-  const fetchReviews = async () => {
+  // Fetch reviews by doctor id
+  const fetchReviews = async (doctorId) => {
     setLoadingReviews(true);
     try {
-      const data = await extendedAPI.getReviews();
+      const data = await extendedAPI.getReviews(doctorId);
       console.log('✅ Reviews loaded:', data.length, 'reviews');
       setReviews(data);
     } catch (e) {
