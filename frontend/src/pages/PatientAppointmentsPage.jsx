@@ -107,7 +107,6 @@ const PatientAppointmentsPage = () => {
   const handleRescheduleSuccess = () => {
     setRescheduleModal({ isOpen: false, appointment: null });
     loadAppointments(); // Refresh appointments
-    toast.success('Appointment rescheduled successfully!');
     emitNotificationsRefresh();
   };
 
@@ -457,7 +456,7 @@ const PatientAppointmentsPage = () => {
             const appointmentId = typeof appointmentOrId === 'object' ? appointmentOrId._id : appointmentOrId;
             try {
               await appointmentsAPI.decideReschedule(appointmentId, 'approved');
-              toast.success('Reschedule approved');
+              toast.success('Appointment confirmed');
               setQuickModal({ isOpen: false, appointment: null });
               loadAppointments();
               emitNotificationsRefresh();
@@ -465,7 +464,7 @@ const PatientAppointmentsPage = () => {
               // Fallback to approve if backend endpoint not available
               try {
                 await appointmentsAPI.approveAppointment(appointmentId);
-                toast.success('Appointment approved');
+                toast.success('Appointment confirmed');
                 setQuickModal({ isOpen: false, appointment: null });
                 loadAppointments();
                 emitNotificationsRefresh();
@@ -478,7 +477,6 @@ const PatientAppointmentsPage = () => {
             const appointmentId = typeof appointmentOrId === 'object' ? appointmentOrId._id : appointmentOrId;
             try {
               await appointmentsAPI.decideReschedule(appointmentId, 'rejected', 'Patient rejected reschedule');
-              toast.success('Reschedule request rejected');
               setQuickModal({ isOpen: false, appointment: null });
               loadAppointments();
               emitNotificationsRefresh();
@@ -486,7 +484,6 @@ const PatientAppointmentsPage = () => {
               // Fallback to reject if backend endpoint not available
               try {
                 await appointmentsAPI.rejectAppointment(appointmentId, 'Patient rejected reschedule');
-                toast.success('Appointment request rejected');
                 setQuickModal({ isOpen: false, appointment: null });
                 loadAppointments();
                 emitNotificationsRefresh();

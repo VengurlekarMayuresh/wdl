@@ -85,6 +85,54 @@ export function buildNotificationsFromAppointments(appointments = [], role = 'pa
       }
     }
 
+    // Reschedule decision notifications (rejected)
+    if (pr && pr.active === false && pr.decision === 'rejected') {
+      const decisionTime = pr.decisionAt ? new Date(pr.decisionAt) : dt;
+      const decidedBy = pr.decidedBy || 'unknown';
+      if (role === 'patient') {
+        if (pr.proposedBy === 'patient') {
+          // Patient requested; doctor rejected
+          items.push({
+            id: `${a._id}-reschedule-rejected-by-doctor`,
+            kind: 'rejected',
+            title: 'Reschedule rejected',
+            message: 'Doctor rejected your reschedule request',
+            date: decisionTime,
+          });
+        } else if (pr.proposedBy === 'doctor') {
+          // Doctor proposed; patient rejected (show to patient too)
+          items.push({
+            id: `${a._id}-you-rejected-reschedule`,
+            kind: 'rejected',
+            title: 'Reschedule rejected',
+            message: 'You rejected the doctor\'s reschedule proposal',
+            date: decisionTime,
+          });
+        }
+      } else {
+        // role === 'doctor'
+        if (pr.proposedBy === 'patient') {
+          // Patient requested; doctor rejected
+          items.push({
+            id: `${a._id}-you-rejected-reschedule`,
+            kind: 'rejected',
+            title: 'Reschedule rejected',
+            message: 'You rejected the patient\'s reschedule request',
+            date: decisionTime,
+          });
+        } else if (pr.proposedBy === 'doctor') {
+          // Doctor proposed; patient rejected
+          items.push({
+            id: `${a._id}-reschedule-rejected-by-patient`,
+            kind: 'rejected',
+            title: 'Reschedule rejected',
+            message: 'Patient rejected your reschedule proposal',
+            date: decisionTime,
+          });
+        }
+      }
+    }
+
     // Note: Remove heuristic cancellation proposal detection via reasonForVisit to avoid false positives
 
     switch (a.status) {

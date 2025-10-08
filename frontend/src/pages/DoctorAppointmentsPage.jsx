@@ -71,7 +71,7 @@ const DoctorAppointmentsPage = () => {
       setActionLoading(prev => ({ ...prev, [appointmentId]: 'approving' }));
       if (apt?.pendingReschedule?.active) {
         await appointmentsAPI.decideReschedule(appointmentId, 'approved');
-        toast.success('Reschedule approved');
+        toast.success('Appointment confirmed');
       } else {
         await appointmentsAPI.approveAppointment(appointmentId);
         toast.success('Appointment approved');
@@ -100,7 +100,6 @@ const DoctorAppointmentsPage = () => {
       setActionLoading(prev => ({ ...prev, [appointmentId]: 'rejecting' }));
       if (apt?.pendingReschedule?.active) {
         await appointmentsAPI.decideReschedule(appointmentId, 'rejected', reason || 'Doctor rejected reschedule');
-        toast.success('Reschedule rejected');
       } else {
         await appointmentsAPI.rejectAppointment(appointmentId, reason || '');
         toast.success('Appointment rejected');
@@ -147,7 +146,6 @@ const DoctorAppointmentsPage = () => {
   const handleRescheduleSuccess = () => {
     setRescheduleModal({ isOpen: false, appointment: null });
     loadAppointments(); // Refresh appointments
-    toast.success('Appointment rescheduled successfully!');
     emitNotificationsRefresh();
   };
 

@@ -79,7 +79,7 @@ const RescheduleModal = ({
             proposedSlotId: selectedSlot._id,
             reason: reason || 'Patient requested reschedule'
           });
-          toast.success('Reschedule request sent to doctor for approval.');
+          toast.success('Reschedule request sent. Waiting for doctor approval.');
         } else if (newDateTime) {
           // Propose a custom datetime (requires doctor approval)
           const iso = new Date(newDateTime).toISOString();
@@ -87,7 +87,7 @@ const RescheduleModal = ({
             proposedDateTime: iso,
             reason: reason || 'Patient requested custom reschedule time'
           });
-          toast.success('Custom time reschedule request sent to doctor for approval.');
+          toast.success('Reschedule request sent. Waiting for doctor approval.');
         } else {
           setError('Please select an available slot or specify a custom time.');
           return;
@@ -104,14 +104,14 @@ const RescheduleModal = ({
             proposedSlotId: selectedSlot._id,
             reason,
           });
-          toast.success('Reschedule proposal sent to patient for approval.');
+          toast.success('Reschedule proposal sent. Waiting for patient approval.');
         } else if (newDateTime) {
           const iso = new Date(newDateTime).toISOString();
           await appointmentsAPI.proposeReschedule(appointment._id, {
             proposedDateTime: iso,
             reason,
           });
-          toast.success('Custom time reschedule proposal sent to patient for approval.');
+          toast.success('Reschedule proposal sent. Waiting for patient approval.');
         } else {
           setError('Please select a slot or specify a custom time.');
           return;
@@ -330,7 +330,7 @@ const RescheduleModal = ({
                           proposedSlotId: slot._id,
                           reason,
                         });
-                        toast.success('Reschedule proposal sent to patient for approval');
+                        toast.success('Reschedule proposal sent. Waiting for patient approval.');
                         emitNotificationsRefresh();
                         onReschedule?.();
                         handleClose();
@@ -361,7 +361,7 @@ const RescheduleModal = ({
                           proposedDateTime: iso,
                           reason: reason || 'Patient requested custom reschedule time'
                         });
-                        toast.success('Custom time reschedule request sent to doctor for approval.');
+                        toast.success('Reschedule request sent. Waiting for doctor approval.');
                         emitNotificationsRefresh();
                         onReschedule?.();
                         handleClose();
