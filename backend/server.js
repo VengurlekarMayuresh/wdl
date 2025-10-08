@@ -59,15 +59,11 @@ const corsOptions = {
   origin: function (origin, callback) {
     const isProd = (process.env.NODE_ENV || 'development') === 'production';
 
-    // Allow requests with no origin (mobile apps, curl, etc.)
-    if (!origin) {
-      return callback(null, true);
-    }
+    // Allow requests with no origin (mobile apps, curl, server-to-server)
+    if (!origin) return callback(null, true);
 
     // In development, allow all origins for easier local testing
-    if (!isProd) {
-      return callback(null, true);
-    }
+    if (!isProd) return callback(null, true);
 
     // In production, restrict to env-configured origins (comma-separated)
     const configured = (process.env.ALLOWED_ORIGINS || process.env.CLIENT_URL || '')
@@ -75,13 +71,25 @@ const corsOptions = {
       .map(s => s.trim())
       .filter(Boolean);
 
-    // Default: allow localhost in production only if explicitly configured
-    const allowedOrigins = configured;
+    // If wildcard present, allow all
+    if (configured.includes('*')) return callback(null, true);
 
-    const isAllowed = allowedOrigins.some((allowed) => origin === allowed);
-    if (isAllowed) {
-      return callback(null, true);
-    }
+    // Normalize origins by removing trailing slashes and lowercasing the host part
+    const normalize = (url) => {
+      try {
+        const u = new URL(url.replace(/\/$/, ''));
+        // Lowercase protocol+host, keep port if present
+        return `${u.protocol}//${u.host}`;
+      } catch {
+        return url.replace(/\/$/, '');
+      }
+    };
+
+    const allowedSet = new Set(configured.map(normalize));
+    const normalizedOrigin = normalize(origin);
+
+    if (allowedSet.has(normalizedOrigin)) return callback(null, true);
+
     return callback(new Error('Not allowed by CORS'));
   },
   credentials: true,
