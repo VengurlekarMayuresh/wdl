@@ -168,8 +168,19 @@ export const AuthProvider = ({ children }) => {
 
   const refreshUser = async () => {
     try {
-      const userData = await authAPI.getCurrentUser();
-      setUser(userData);
+      const freshUserData = await authAPI.getCurrentUser();
+      // Keep user shape consistent with initial auth check by flattening if needed
+      if (freshUserData && freshUserData.user) {
+        const flattenedUser = {
+          ...freshUserData.user,
+          profile: freshUserData.profile,
+        };
+        setUser(flattenedUser);
+        localStorage.setItem('user', JSON.stringify(flattenedUser));
+      } else {
+        setUser(freshUserData);
+        localStorage.setItem('user', JSON.stringify(freshUserData));
+      }
     } catch (error) {
       console.error('Failed to refresh user data:', error);
       logout();
