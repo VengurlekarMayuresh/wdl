@@ -13,7 +13,7 @@ import {
   Users,
   Bell
 } from "lucide-react";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import logoImg from "@/assets/logo.png";
 import { appointmentsAPI } from '@/services/api';
 import { useAuth } from '@/contexts/AuthContext';
@@ -28,6 +28,7 @@ export const Header = ({
 }) => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
+  const userMenuContainerRef = useRef(null);
   const location = useLocation();
   const navigate = useNavigate();
   const { user } = useAuth?.() || { user: null };
@@ -39,7 +40,24 @@ export const Header = ({
   }, [location]);
 
   const toggleMobileMenu = () => setIsMobileMenuOpen(!isMobileMenuOpen);
-  const toggleUserMenu = () => setIsUserMenuOpen(!isUserMenuOpen);
+  const toggleUserMenu = () => setIsUserMenuOpen(prev => !prev);
+
+  // Close user menu on outside click
+  useEffect(() => {
+    const handleOutside = (e) => {
+      if (!isUserMenuOpen) return;
+      const container = userMenuContainerRef.current;
+      if (container && !container.contains(e.target)) {
+        setIsUserMenuOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleOutside);
+    document.addEventListener('touchstart', handleOutside, { passive: true });
+    return () => {
+      document.removeEventListener('mousedown', handleOutside);
+      document.removeEventListener('touchstart', handleOutside);
+    };
+  }, [isUserMenuOpen]);
 
   // Notifications state
   const [notifItems, setNotifItems] = useState([]);
@@ -174,7 +192,7 @@ export const Header = ({
                     </Button>
                   </div>
 
-                  <div className="relative">
+                  <div className="relative" ref={userMenuContainerRef}>
                     <Button
                       variant="ghost"
                       size="icon"
