@@ -818,17 +818,17 @@ router.put('/:appointmentId/status', authenticate, async (req, res) => {
 });
 
 // @route   PUT /api/appointments/:appointmentId/reschedule
-// @desc    Reschedule an appointment
-// @access  Private (Doctor or Patient)
+// @desc    Patient direct reschedule (with doctor auto-approval for better UX)
+// @access  Private (Patient only)
 router.put('/:appointmentId/reschedule', authenticate, async (req, res) => {
   try {
     const { newSlotId, reason } = req.body;
 
-    // Enforce approval workflow: doctors cannot directly reschedule
-    if (req.user.userType === 'doctor') {
+    // Only patients can use direct reschedule
+    if (req.user.userType !== 'patient') {
       return res.status(403).json({
         success: false,
-        message: 'Doctors must propose reschedule; patient approval is required.'
+        message: 'Only patients can directly reschedule. Doctors should use the propose workflow.'
       });
     }
     
@@ -842,7 +842,8 @@ router.put('/:appointmentId/reschedule', authenticate, async (req, res) => {
     // Find the appointment
     const appointment = await Appointment.findById(req.params.appointmentId)
       .populate('doctorId')
-      .populate('patientId');
+      .populate('patientId')
+      .populate('slotId');
     
     if (!appointment) {
       return res.status(404).json({
@@ -851,17 +852,20 @@ router.put('/:appointmentId/reschedule', authenticate, async (req, res) => {
       });
     }
 
-    // Check if user has permission to reschedule (patient only here)
-    let canReschedule = false;
-    if (req.user.userType === 'patient') {
-      const patient = await Patient.findOne({ userId: req.user._id });
-      canReschedule = patient && patient._id.equals(appointment.patientId._id);
-    }
-
-    if (!canReschedule) {
+    // Check if patient owns this appointment
+    const patient = await Patient.findOne({ userId: req.user._id });
+    if (!patient || !patient._id.equals(appointment.patientId._id)) {
       return res.status(403).json({
         success: false,
         message: 'Not authorized to reschedule this appointment'
+      });
+    }
+
+    // Validate appointment can be rescheduled
+    if (!['pending', 'confirmed'].includes(appointment.status)) {
+      return res.status(400).json({
+        success: false,
+        message: 'Only pending or confirmed appointments can be rescheduled'
       });
     }
 
@@ -877,52 +881,93 @@ router.put('/:appointmentId/reschedule', authenticate, async (req, res) => {
     if (!newSlot.canBeBooked()) {
       return res.status(400).json({
         success: false,
-        message: 'Selected slot is not available'
+        message: 'Selected slot is not available for booking'
       });
     }
 
-    // Free up the old slot
-    const oldSlot = await Slot.findById(appointment.slotId);
-    if (oldSlot) {
-      await oldSlot.cancelBooking(req.user.userType, reason || 'Rescheduled');
-      // Remove the old slot automatically after reschedule
-      try { await Slot.findByIdAndDelete(oldSlot._id); } catch {}
+    // Ensure new slot belongs to same doctor
+    if (!newSlot.doctorId.equals(appointment.doctorId._id)) {
+      return res.status(400).json({
+        success: false,
+        message: 'New slot must belong to the same doctor'
+      });
     }
 
-    // Book the new slot
-    await newSlot.book(appointment.patientId._id, appointment._id);
+    // Get the current slot
+    const currentSlot = appointment.slotId;
+    if (!currentSlot) {
+      return res.status(404).json({
+        success: false,
+        message: 'Current appointment slot not found'
+      });
+    }
 
-    // Update appointment with reschedule information
-    await appointment.reschedule(
-      newSlotId,
-      newSlot.dateTime,
-      req.user.userType,
-      reason || 'Rescheduled'
-    );
+    // Store original details for history
+    const originalDate = currentSlot.dateTime;
+    const originalAppointmentDate = appointment.appointmentDate;
+    
+    // UPDATE the existing slot with new timing (keep same slot ID)
+    currentSlot.dateTime = newSlot.dateTime;
+    currentSlot.duration = newSlot.duration;
+    currentSlot.consultationFee = newSlot.consultationFee;
+    currentSlot.consultationType = newSlot.consultationType;
+    await currentSlot.save();
+    
+    console.log(`✅ Updated existing slot ${currentSlot._id.toString().substr(-8)} with new timing`);
 
-    // Reset status to pending when rescheduled by patient (await doctor confirmation)
-    appointment.status = 'pending';
+    // Delete the NEW slot since we copied its details
+    try {
+      await Slot.findByIdAndDelete(newSlot._id);
+      console.log(`🗑️ Deleted temporary slot ${newSlot._id.toString().substr(-8)} after copying details`);
+    } catch (deleteError) {
+      console.warn(`⚠️ Could not delete temporary slot ${newSlot._id}: ${deleteError.message}`);
+    }
+
+    // UPDATE the appointment with new details
+    appointment.appointmentDate = currentSlot.dateTime;
+    appointment.duration = currentSlot.duration;
+    appointment.consultationFee = currentSlot.consultationFee;
+    appointment.status = 'confirmed'; // Auto-confirm patient reschedules for better UX
+    appointment.lastModifiedBy = 'patient';
+    
+    // Clear any pending reschedule state
+    if (appointment.pendingReschedule?.active) {
+      appointment.pendingReschedule.active = false;
+      appointment.pendingReschedule.decision = 'superseded';
+      appointment.pendingReschedule.decisionAt = new Date();
+    }
+    
+    // Add to reschedule history
+    appointment.rescheduledFrom = {
+      originalDate: originalAppointmentDate,
+      rescheduledBy: 'patient',
+      rescheduledAt: new Date(),
+      reason: reason || 'Patient rescheduled appointment'
+    };
+    
     await appointment.save();
+    console.log(`✅ Updated appointment ${appointment._id.toString().substr(-8)} with new timing`);
+
+    // Comprehensive cleanup of any duplicate/orphaned appointments
+    await cleanupDuplicateRescheduleAppointments(appointment);
 
     const updatedAppointment = await Appointment.findById(appointment._id)
-      .populate('doctorId', 'primarySpecialty')
-      .populate('patientId', 'firstName lastName')
+      .populate('doctorId', 'primarySpecialty consultationFee')
+      .populate('patientId', 'firstName lastName phone email')
       .populate('slotId');
-
-    // Cleanup any prior duplicate 'reschedule request' appointments for this appointment
-    try {
-      const pattern = new RegExp(`Reschedule request for appointment\\s*${appointment._id}`, 'i');
-      await Appointment.deleteMany({ _id: { $ne: appointment._id }, patientId: appointment.patientId._id, doctorId: appointment.doctorId._id, reasonForVisit: { $regex: pattern } });
-    } catch {}
 
     res.json({
       success: true,
-      message: 'Appointment rescheduled and set to pending for approval',
-      data: { appointment: updatedAppointment }
+      message: 'Appointment rescheduled successfully. Your appointment has been confirmed for the new time.',
+      data: { 
+        appointment: updatedAppointment,
+        rescheduledFrom: originalDate,
+        rescheduledTo: currentSlot.dateTime
+      }
     });
 
   } catch (error) {
-    console.error('Reschedule appointment error:', error);
+    console.error('Patient reschedule error:', error);
     res.status(500).json({
       success: false,
       message: 'Server error rescheduling appointment'
@@ -930,8 +975,152 @@ router.put('/:appointmentId/reschedule', authenticate, async (req, res) => {
   }
 });
 
+// Helper function to cleanup duplicate reschedule appointments
+async function cleanupDuplicateRescheduleAppointments(appointment) {
+  try {
+    console.log(`🧹 Starting comprehensive cleanup for appointment ${appointment._id.toString().substr(-8)}`);
+    
+    // Multiple patterns to catch various reschedule-related duplicates
+    const reschedulePatterns = [
+      new RegExp(`reschedule.*${appointment._id.toString()}`, 'i'),
+      new RegExp(`doctor reschedule request.*${appointment._id.toString()}`, 'i'),
+      new RegExp(`patient reschedule request.*${appointment._id.toString()}`, 'i'),
+      new RegExp(`reschedule request for appointment ${appointment._id.toString()}`, 'i')
+    ];
+    
+    // Find potential duplicates using multiple criteria
+    const duplicateAppointments = await Appointment.find({
+      _id: { $ne: appointment._id },
+      $or: [
+        // Appointments with reschedule-related reasons
+        { reasonForVisit: { $in: reschedulePatterns } },
+        // Recent pending appointments for same doctor-patient pair
+        {
+          patientId: appointment.patientId._id,
+          doctorId: appointment.doctorId._id,
+          status: { $in: ['pending'] },
+          createdAt: { $gte: new Date(Date.now() - 48 * 60 * 60 * 1000) }, // Last 48 hours
+          reasonForVisit: { $regex: /reschedule/i }
+        },
+        // Appointments created very recently for same pair (likely duplicates)
+        {
+          patientId: appointment.patientId._id,
+          doctorId: appointment.doctorId._id,
+          status: 'pending',
+          createdAt: { $gte: new Date(Date.now() - 10 * 60 * 1000) } // Last 10 minutes
+        }
+      ]
+    }).populate('slotId');
+    
+    if (duplicateAppointments.length > 0) {
+      console.log(`🗑️ Found ${duplicateAppointments.length} potential duplicate appointments`);
+      
+      // Log details of duplicates for debugging
+      duplicateAppointments.forEach(dup => {
+        console.log(`  - ${dup._id.toString().substr(-8)}: ${dup.reasonForVisit.substring(0, 50)}... (${dup.status})`);
+      });
+      
+      // Get the slot IDs from duplicates (excluding the main appointment's slot)
+      const duplicateSlotIds = duplicateAppointments
+        .map(apt => apt.slotId?._id || apt.slotId)
+        .filter(slotId => slotId && !slotId.equals(appointment.slotId));
+      
+      // Delete duplicate appointments
+      const deleteResult = await Appointment.deleteMany({
+        _id: { $in: duplicateAppointments.map(apt => apt._id) }
+      });
+      console.log(`🗑️ Deleted ${deleteResult.deletedCount} duplicate appointments`);
+      
+      // Delete orphaned slots from duplicates
+      if (duplicateSlotIds.length > 0) {
+        const slotDeleteResult = await Slot.deleteMany({
+          _id: { $in: duplicateSlotIds },
+          isBooked: false // Only delete unbooked slots to be safe
+        });
+        console.log(`🗑️ Deleted ${slotDeleteResult.deletedCount} orphaned duplicate slots`);
+      }
+      
+      return {
+        appointmentsDeleted: deleteResult.deletedCount,
+        slotsDeleted: duplicateSlotIds.length > 0 ? slotDeleteResult?.deletedCount || 0 : 0
+      };
+    } else {
+      console.log('✅ No duplicate appointments found');
+      return { appointmentsDeleted: 0, slotsDeleted: 0 };
+    }
+    
+  } catch (cleanupError) {
+    console.warn('⚠️ Cleanup error (non-critical):', cleanupError.message);
+    return { appointmentsDeleted: 0, slotsDeleted: 0, error: cleanupError.message };
+  }
+}
+
+// Helper function to clean up all reschedule-related orphaned data
+async function performGlobalRescheduleCleanup() {
+  try {
+    console.log('🧹 Starting global reschedule cleanup...');
+    
+    // Find all appointments with reschedule-related reasons that are old and pending
+    const oldRescheduleRequests = await Appointment.find({
+      $or: [
+        { 
+          reasonForVisit: { $regex: /reschedule request/i },
+          status: 'pending',
+          createdAt: { $lt: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000) } // Older than 7 days
+        },
+        {
+          reasonForVisit: { $regex: /doctor reschedule|patient reschedule/i },
+          status: 'pending',
+          createdAt: { $lt: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000) } // Older than 3 days
+        }
+      ]
+    }).populate('slotId');
+    
+    if (oldRescheduleRequests.length > 0) {
+      console.log(`🗑️ Found ${oldRescheduleRequests.length} old reschedule requests to clean up`);
+      
+      const slotIds = oldRescheduleRequests
+        .map(apt => apt.slotId?._id || apt.slotId)
+        .filter(Boolean);
+      
+      // Delete old reschedule request appointments
+      await Appointment.deleteMany({
+        _id: { $in: oldRescheduleRequests.map(apt => apt._id) }
+      });
+      
+      // Delete associated slots
+      if (slotIds.length > 0) {
+        await Slot.deleteMany({
+          _id: { $in: slotIds },
+          isBooked: false
+        });
+      }
+      
+      console.log(`✅ Cleaned up ${oldRescheduleRequests.length} old reschedule requests`);
+    }
+    
+    // Find and clean up unbooked slots that are very old
+    const oldUnbookedSlots = await Slot.find({
+      isBooked: false,
+      dateTime: { $lt: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000) } // Older than 30 days
+    });
+    
+    if (oldUnbookedSlots.length > 0) {
+      await Slot.deleteMany({
+        _id: { $in: oldUnbookedSlots.map(slot => slot._id) }
+      });
+      console.log(`✅ Cleaned up ${oldUnbookedSlots.length} old unbooked slots`);
+    }
+    
+    return { success: true };
+  } catch (error) {
+    console.error('Global cleanup error:', error);
+    return { success: false, error: error.message };
+  }
+}
+
 // @route   POST /api/appointments/:appointmentId/reschedule/propose
-// @desc    Propose a reschedule (doctor or patient)
+// @desc    Propose a reschedule (primarily for doctors, but patients can also use it)
 // @access  Private (Doctor or Patient)
 router.post('/:appointmentId/reschedule/propose', authenticate, async (req, res) => {
   try {
@@ -939,22 +1128,40 @@ router.post('/:appointmentId/reschedule/propose', authenticate, async (req, res)
 
     const appointment = await Appointment.findById(req.params.appointmentId)
       .populate('doctorId')
-      .populate('patientId');
+      .populate('patientId')
+      .populate('slotId');
     if (!appointment) {
       return res.status(404).json({ success: false, message: 'Appointment not found' });
     }
 
+    // Validate appointment can be rescheduled
+    if (!['pending', 'confirmed'].includes(appointment.status)) {
+      return res.status(400).json({
+        success: false,
+        message: 'Only pending or confirmed appointments can be rescheduled'
+      });
+    }
+
     // Ownership check
     let owns = false;
+    let proposerProfile = null;
     if (req.user.userType === 'doctor') {
-      const doctor = await Doctor.findOne({ userId: req.user._id });
-      owns = doctor && appointment.doctorId && doctor._id.equals(appointment.doctorId._id);
+      proposerProfile = await Doctor.findOne({ userId: req.user._id });
+      owns = proposerProfile && appointment.doctorId && proposerProfile._id.equals(appointment.doctorId._id);
     } else if (req.user.userType === 'patient') {
-      const patient = await Patient.findOne({ userId: req.user._id });
-      owns = patient && appointment.patientId && patient._id.equals(appointment.patientId._id);
+      proposerProfile = await Patient.findOne({ userId: req.user._id });
+      owns = proposerProfile && appointment.patientId && proposerProfile._id.equals(appointment.patientId._id);
     }
     if (!owns) {
       return res.status(403).json({ success: false, message: 'Not authorized for this appointment' });
+    }
+
+    // Check if there's already an active reschedule proposal
+    if (appointment.pendingReschedule?.active) {
+      return res.status(400).json({
+        success: false,
+        message: `There is already an active reschedule proposal by ${appointment.pendingReschedule.proposedBy}`
+      });
     }
 
     if (!proposedSlotId && !proposedDateTime) {
@@ -962,20 +1169,21 @@ router.post('/:appointmentId/reschedule/propose', authenticate, async (req, res)
     }
 
     let normalizedDateTime = null;
-    let slot = null;
+    let proposedSlot = null;
+    
     if (proposedSlotId) {
-      slot = await Slot.findById(proposedSlotId);
-      if (!slot) {
+      proposedSlot = await Slot.findById(proposedSlotId);
+      if (!proposedSlot) {
         return res.status(404).json({ success: false, message: 'Proposed slot not found' });
       }
-      if (!slot.canBeBooked()) {
+      if (!proposedSlot.canBeBooked()) {
         return res.status(400).json({ success: false, message: 'Proposed slot is not available' });
       }
       // Ensure slot belongs to the same doctor as the appointment
-      if (!slot.doctorId.equals(appointment.doctorId._id)) {
+      if (!proposedSlot.doctorId.equals(appointment.doctorId._id)) {
         return res.status(400).json({ success: false, message: 'Slot must belong to the same doctor' });
       }
-      normalizedDateTime = slot.dateTime;
+      normalizedDateTime = proposedSlot.dateTime;
     } else if (proposedDateTime) {
       const dt = new Date(proposedDateTime);
       if (isNaN(dt.getTime()) || dt <= new Date()) {
@@ -984,13 +1192,14 @@ router.post('/:appointmentId/reschedule/propose', authenticate, async (req, res)
       normalizedDateTime = dt;
     }
 
+    // Store the reschedule proposal
     appointment.pendingReschedule = {
       active: true,
       proposedBy: req.user.userType,
       proposedAt: new Date(),
       reason: reason || '',
       proposedSlotId: proposedSlotId || undefined,
-      proposedDateTime: normalizedDateTime || undefined,
+      proposedDateTime: normalizedDateTime,
       decision: null,
       decidedBy: null,
       decisionAt: null,
@@ -998,8 +1207,26 @@ router.post('/:appointmentId/reschedule/propose', authenticate, async (req, res)
     };
 
     await appointment.save();
+    console.log(`✅ ${req.user.userType} proposed reschedule for appointment ${appointment._id.toString().substr(-8)}`);
 
-    res.status(201).json({ success: true, message: 'Reschedule proposed', data: { appointment } });
+    // Populate appointment data for response
+    const populatedAppointment = await Appointment.findById(appointment._id)
+      .populate('doctorId', 'primarySpecialty consultationFee')
+      .populate('patientId', 'firstName lastName phone email')
+      .populate('slotId');
+
+    const responseMessage = req.user.userType === 'doctor' 
+      ? 'Reschedule proposal sent to patient for approval'
+      : 'Reschedule proposal sent to doctor for approval';
+
+    res.status(201).json({ 
+      success: true, 
+      message: responseMessage,
+      data: { 
+        appointment: populatedAppointment,
+        pendingReschedule: appointment.pendingReschedule
+      }
+    });
   } catch (error) {
     console.error('Propose reschedule error:', error);
     res.status(500).json({ success: false, message: 'Server error proposing reschedule' });
@@ -1018,7 +1245,8 @@ router.put('/:appointmentId/reschedule/decision', authenticate, async (req, res)
 
     const appointment = await Appointment.findById(req.params.appointmentId)
       .populate('doctorId')
-      .populate('patientId');
+      .populate('patientId')
+      .populate('slotId');
     if (!appointment) {
       return res.status(404).json({ success: false, message: 'Appointment not found' });
     }
@@ -1031,86 +1259,161 @@ router.put('/:appointmentId/reschedule/decision', authenticate, async (req, res)
     // Only the counterparty can decide
     const counterparty = pr.proposedBy === 'doctor' ? 'patient' : 'doctor';
     if (req.user.userType !== counterparty) {
-      return res.status(403).json({ success: false, message: 'Only the other party can decide' });
+      return res.status(403).json({ success: false, message: 'Only the other party can decide on this proposal' });
     }
 
+    // Verify user ownership of the appointment
+    let deciderProfile = null;
+    let canDecide = false;
+    if (req.user.userType === 'doctor') {
+      deciderProfile = await Doctor.findOne({ userId: req.user._id });
+      canDecide = deciderProfile && appointment.doctorId && deciderProfile._id.equals(appointment.doctorId._id);
+    } else if (req.user.userType === 'patient') {
+      deciderProfile = await Patient.findOne({ userId: req.user._id });
+      canDecide = deciderProfile && appointment.patientId && deciderProfile._id.equals(appointment.patientId._id);
+    }
+    if (!canDecide) {
+      return res.status(403).json({ success: false, message: 'Not authorized to decide on this appointment' });
+    }
+
+    // REJECTION PATH
     if (decision === 'rejected') {
+      console.log(`❌ ${req.user.userType} rejected reschedule for appointment ${appointment._id.toString().substr(-8)}`);
+      
       appointment.pendingReschedule.active = false;
       appointment.pendingReschedule.decision = 'rejected';
       appointment.pendingReschedule.decidedBy = req.user.userType;
       appointment.pendingReschedule.decisionAt = new Date();
-      appointment.pendingReschedule.decisionReason = reason || '';
+      appointment.pendingReschedule.decisionReason = reason || 'Reschedule rejected';
+      appointment.lastModifiedBy = req.user.userType;
+      
       await appointment.save();
-      return res.json({ success: true, message: 'Reschedule rejected', data: { appointment } });
+      
+      const updatedAppointment = await Appointment.findById(appointment._id)
+        .populate('doctorId', 'primarySpecialty consultationFee')
+        .populate('patientId', 'firstName lastName phone email')
+        .populate('slotId');
+      
+      return res.json({ 
+        success: true, 
+        message: 'Reschedule proposal has been rejected. The original appointment remains unchanged.', 
+        data: { appointment: updatedAppointment }
+      });
     }
 
-    // Approved path
+    // APPROVAL PATH - UPDATE existing slot and appointment
+    console.log(`✅ ${req.user.userType} approved reschedule for appointment ${appointment._id.toString().substr(-8)}`);
+    
     let targetDate = pr.proposedDateTime;
-    let slot = null;
+    let targetSlotDetails = {};
+    
+    // If proposing a specific slot, get its details and then delete it
     if (pr.proposedSlotId) {
-      slot = await Slot.findById(pr.proposedSlotId);
-      if (!slot || !slot.canBeBooked()) {
+      const proposedSlot = await Slot.findById(pr.proposedSlotId);
+      if (!proposedSlot || !proposedSlot.canBeBooked()) {
         return res.status(400).json({ success: false, message: 'Proposed slot is no longer available' });
       }
-      targetDate = slot.dateTime;
+      targetDate = proposedSlot.dateTime;
+      targetSlotDetails = {
+        duration: proposedSlot.duration,
+        consultationFee: proposedSlot.consultationFee,
+        consultationType: proposedSlot.consultationType
+      };
+      
+      // Delete the proposed slot since we'll update the existing slot
+      try {
+        await Slot.findByIdAndDelete(proposedSlot._id);
+        console.log(`🗑️ Deleted proposed slot ${proposedSlot._id.toString().substr(-8)} after approval`);
+      } catch (deleteError) {
+        console.warn(`⚠️ Could not delete proposed slot: ${deleteError.message}`);
+      }
     } else if (!targetDate) {
       return res.status(400).json({ success: false, message: 'No proposed date to approve' });
     }
 
-    // If no slot provided, create a new slot for the doctor automatically
-    if (!slot) {
-      const doctor = await Doctor.findById(appointment.doctorId._id);
-      // Check conflicts
-      const conflict = await Slot.findOne({ doctorId: doctor._id, dateTime: targetDate, status: 'active' });
-      if (conflict) {
-        return res.status(400).json({ success: false, message: 'Doctor already has a slot at the approved time' });
-      }
-      slot = new Slot({
-        doctorId: doctor._id,
-        dateTime: targetDate,
-        duration: appointment.duration || 30,
-        consultationFee: doctor.consultationFee || 0,
-        consultationType: appointment.consultationType || 'in-person'
+    // Get the current slot
+    const currentSlot = appointment.slotId;
+    if (!currentSlot) {
+      return res.status(404).json({ success: false, message: 'Current appointment slot not found' });
+    }
+
+    // Check for time conflicts with other appointments
+    const conflictingAppointment = await Appointment.findOne({
+      doctorId: appointment.doctorId._id,
+      appointmentDate: targetDate,
+      status: { $in: ['pending', 'confirmed'] },
+      _id: { $ne: appointment._id }
+    });
+    if (conflictingAppointment) {
+      return res.status(400).json({ 
+        success: false, 
+        message: 'Doctor already has another appointment at the approved time' 
       });
-      await slot.save();
     }
 
-    // Free old slot if any and book the new one
-    const oldSlot = await Slot.findById(appointment.slotId);
-    if (oldSlot) {
-      await oldSlot.cancelBooking(counterparty, reason || 'Rescheduled');
-      // Remove the old slot to avoid clutter
-      try { await Slot.findByIdAndDelete(oldSlot._id); } catch {}
-    }
+    // Store original details for history
+    const originalDate = currentSlot.dateTime;
+    const originalAppointmentDate = appointment.appointmentDate;
 
-    await slot.book(appointment.patientId._id, appointment._id);
-    await appointment.reschedule(slot._id, slot.dateTime, counterparty, reason || 'Rescheduled');
-    // After approval, consider appointment confirmed
-    appointment.status = 'confirmed';
+    // UPDATE the existing slot with new timing
+    currentSlot.dateTime = targetDate;
+    if (targetSlotDetails.duration) currentSlot.duration = targetSlotDetails.duration;
+    if (targetSlotDetails.consultationFee) currentSlot.consultationFee = targetSlotDetails.consultationFee;
+    if (targetSlotDetails.consultationType) currentSlot.consultationType = targetSlotDetails.consultationType;
+    
+    await currentSlot.save();
+    console.log(`✅ Updated existing slot ${currentSlot._id.toString().substr(-8)} with approved timing`);
 
-    // Clear pending state
+    // UPDATE the appointment with new timing and status
+    appointment.appointmentDate = targetDate;
+    if (targetSlotDetails.duration) appointment.duration = targetSlotDetails.duration;
+    if (targetSlotDetails.consultationFee) appointment.consultationFee = targetSlotDetails.consultationFee;
+    appointment.status = 'confirmed'; // Approved reschedule is automatically confirmed
+    appointment.lastModifiedBy = req.user.userType;
+    
+    // Clear pending reschedule state
     appointment.pendingReschedule.active = false;
     appointment.pendingReschedule.decision = 'approved';
     appointment.pendingReschedule.decidedBy = req.user.userType;
     appointment.pendingReschedule.decisionAt = new Date();
-    appointment.pendingReschedule.decisionReason = reason || '';
+    appointment.pendingReschedule.decisionReason = reason || 'Reschedule approved';
+    
+    // Add reschedule history
+    appointment.rescheduledFrom = {
+      originalDate: originalAppointmentDate,
+      rescheduledBy: pr.proposedBy, // Who originally proposed it
+      rescheduledAt: new Date(),
+      reason: pr.reason || reason || 'Reschedule approved'
+    };
+    
     await appointment.save();
+    console.log(`✅ Updated appointment ${appointment._id.toString().substr(-8)} with approved timing`);
 
-    // Cleanup: delete any duplicate appointments created earlier as reschedule requests for this appointment
-    try {
-      const pattern = new RegExp(`Reschedule request for appointment\s*${appointment._id}`, 'i');
-      await Appointment.deleteMany({ _id: { $ne: appointment._id }, patientId: appointment.patientId._id, doctorId: appointment.doctorId._id, reasonForVisit: { $regex: pattern } });
-    } catch {}
+    // Comprehensive cleanup of any duplicate/orphaned appointments
+    await cleanupDuplicateRescheduleAppointments(appointment);
 
-    const updated = await Appointment.findById(appointment._id)
-      .populate('doctorId', 'primarySpecialty')
-      .populate('patientId', 'firstName lastName')
+    const updatedAppointment = await Appointment.findById(appointment._id)
+      .populate('doctorId', 'primarySpecialty consultationFee')
+      .populate('patientId', 'firstName lastName phone email')
       .populate('slotId');
 
-    res.json({ success: true, message: 'Reschedule approved and confirmed', data: { appointment: updated } });
+    const approverType = req.user.userType === 'doctor' ? 'doctor' : 'patient';
+    const proposerType = pr.proposedBy;
+    
+    res.json({ 
+      success: true, 
+      message: `Reschedule approved by ${approverType}. The appointment has been confirmed for the new time.`,
+      data: { 
+        appointment: updatedAppointment,
+        rescheduledFrom: originalAppointmentDate,
+        rescheduledTo: targetDate,
+        proposedBy: proposerType,
+        approvedBy: approverType
+      }
+    });
   } catch (error) {
     console.error('Reschedule decision error:', error);
-    res.status(500).json({ success: false, message: 'Server error deciding reschedule' });
+    res.status(500).json({ success: false, message: 'Server error processing reschedule decision' });
   }
 });
 
@@ -1322,6 +1625,46 @@ router.put('/:appointmentId/review', authenticate, authorize('patient'), async (
   } catch (error) {
     console.error('Submit review error:', error);
     res.status(500).json({ success: false, message: 'Server error submitting review' });
+  }
+});
+
+// @route   POST /api/appointments/cleanup/reschedule-duplicates
+// @desc    Manually cleanup reschedule-related duplicate appointments
+// @access  Private (Admin/Developer)
+router.post('/cleanup/reschedule-duplicates', authenticate, async (req, res) => {
+  try {
+    // Only allow admin/developer access
+    if (req.user.userType !== 'admin' && process.env.NODE_ENV !== 'development') {
+      return res.status(403).json({
+        success: false,
+        message: 'Access denied. Admin privileges required.'
+      });
+    }
+
+    console.log('🧹 Manual cleanup requested by:', req.user.email || req.user._id);
+    
+    const result = await performGlobalRescheduleCleanup();
+    
+    if (result.success) {
+      res.json({
+        success: true,
+        message: 'Global reschedule cleanup completed successfully',
+        data: result
+      });
+    } else {
+      res.status(500).json({
+        success: false,
+        message: 'Cleanup completed with errors',
+        data: result
+      });
+    }
+
+  } catch (error) {
+    console.error('Manual cleanup error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Server error during cleanup'
+    });
   }
 });
 

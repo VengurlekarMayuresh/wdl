@@ -43,12 +43,14 @@ const DoctorAppointmentsPage = () => {
       const allAppointments = await appointmentsAPI.getDoctorAppointments();
       console.log('Loaded doctor appointments:', allAppointments);
       
-      // Categorize appointments using appointmentDate (slot may be null for custom requests)
+      // Categorize appointments using appointmentDate and reschedule proposals
       const now = new Date();
+      const isPatientReschedulePending = (apt) => !!(apt?.pendingReschedule?.active && apt?.pendingReschedule?.proposedBy === 'patient');
       const categorized = {
-        pending: allAppointments.filter(apt => apt.status === 'pending'),
-        // Treat 'rescheduled' like an active upcoming appointment
-        upcoming: allAppointments.filter(apt => (apt.status === 'confirmed' || apt.status === 'rescheduled') && new Date(apt.appointmentDate) > now),
+        // Include normal pending plus reschedule proposals from patient
+        pending: allAppointments.filter(apt => apt.status === 'pending' || isPatientReschedulePending(apt)),
+        // Upcoming excludes items currently in reschedule-pending to avoid duplication
+        upcoming: allAppointments.filter(apt => (apt.status === 'confirmed' || apt.status === 'rescheduled') && new Date(apt.appointmentDate) > now && !isPatientReschedulePending(apt)),
         completed: allAppointments.filter(apt => apt.status === 'completed'),
         cancelled: allAppointments.filter(apt => apt.status === 'cancelled' || apt.status === 'rejected')
       };
@@ -62,15 +64,22 @@ const DoctorAppointmentsPage = () => {
     }
   };
 
-  const handleApproveAppointment = async (appointmentId) => {
+  const handleApproveAppointment = async (appointmentOrId) => {
+    const apt = typeof appointmentOrId === 'object' ? appointmentOrId : (Object.values(appointments).flat().find(a => a._id === appointmentOrId));
+    const appointmentId = apt?._id || appointmentOrId;
     try {
       setActionLoading(prev => ({ ...prev, [appointmentId]: 'approving' }));
-      await appointmentsAPI.approveAppointment(appointmentId);
+      if (apt?.pendingReschedule?.active) {
+        await appointmentsAPI.decideReschedule(appointmentId, 'approved');
+        toast.success('Reschedule approved');
+      } else {
+        await appointmentsAPI.approveAppointment(appointmentId);
+        toast.success('Appointment approved');
+      }
       await loadAppointments(); // Refresh appointments
-      toast.success('Appointment approved');
       emitNotificationsRefresh();
     } catch (e) {
-      toast.error('Failed to approve appointment: ' + e.message);
+      toast.error('Failed to approve: ' + e.message);
     } finally {
       setActionLoading(prev => {
         const newState = { ...prev };
@@ -80,19 +89,26 @@ const DoctorAppointmentsPage = () => {
     }
   };
 
-  const handleRejectAppointment = async (appointmentId, reason = '') => {
-    if (!reason) {
+  const handleRejectAppointment = async (appointmentOrId, reason = '') => {
+    const apt = typeof appointmentOrId === 'object' ? appointmentOrId : (Object.values(appointments).flat().find(a => a._id === appointmentOrId));
+    const appointmentId = apt?._id || appointmentOrId;
+    if (!reason && !(apt?.pendingReschedule?.active)) {
       setPrompt({ open: true, mode: 'reject', appointmentId, title: 'Reject appointment', label: 'Reason (optional)', placeholder: 'Add a reason for rejection' });
       return;
     }
     try {
       setActionLoading(prev => ({ ...prev, [appointmentId]: 'rejecting' }));
-      await appointmentsAPI.rejectAppointment(appointmentId, reason);
+      if (apt?.pendingReschedule?.active) {
+        await appointmentsAPI.decideReschedule(appointmentId, 'rejected', reason || 'Doctor rejected reschedule');
+        toast.success('Reschedule rejected');
+      } else {
+        await appointmentsAPI.rejectAppointment(appointmentId, reason || '');
+        toast.success('Appointment rejected');
+      }
       await loadAppointments(); // Refresh appointments
-      toast.success('Appointment rejected');
       emitNotificationsRefresh();
     } catch (e) {
-      toast.error('Failed to reject appointment: ' + e.message);
+      toast.error('Failed to reject: ' + e.message);
     } finally {
       setActionLoading(prev => {
         const newState = { ...prev };
@@ -204,11 +220,17 @@ const DoctorAppointmentsPage = () => {
     };
     
     const StatusIcon = getStatusIcon(appointment.status);
+    const isPatientReschedule = !!(appointment?.pendingReschedule?.active && appointment?.pendingReschedule?.proposedBy === 'patient');
+    const proposedDate = appointment?.pendingReschedule?.proposedDateTime ? new Date(appointment.pendingReschedule.proposedDateTime) : null;
+    const proposedReason = appointment?.pendingReschedule?.reason || '';
     
     return (
       <Card onClick={onClick} className={`cursor-pointer border shadow-sm hover:shadow-md transition-all duration-200 bg-white overflow-hidden group`}>
         <CardHeader className="pb-3 relative">
-          <div className="absolute top-4 right-4">
+          <div className="absolute top-4 right-4 flex items-center gap-2">
+            {isPatientReschedule && (
+              <Badge variant="warning" className="text-xs">Reschedule requested</Badge>
+            )}
             <div className={`p-2 rounded-full ${appointment.status === 'pending' ? 'bg-yellow-100' : appointment.status === 'confirmed' ? 'bg-blue-100' : appointment.status === 'completed' ? 'bg-green-100' : 'bg-red-100'}`}>
               <StatusIcon className={`h-5 w-5 ${appointment.status === 'pending' ? 'text-yellow-600' : appointment.status === 'confirmed' ? 'text-blue-600' : appointment.status === 'completed' ? 'text-green-600' : 'text-red-600'}`} />
             </div>
@@ -274,6 +296,30 @@ const DoctorAppointmentsPage = () => {
               </div>
             </div>
           </div>
+
+          {/* Reschedule proposal details (patient-initiated) */}
+          {isPatientReschedule && (
+            <div className="mb-4 p-4 bg-amber-50 border border-amber-200 rounded-lg">
+              <div className="text-sm font-semibold text-amber-800 mb-2">Patient requested a new time</div>
+              {proposedDate && (
+                <div className="grid grid-cols-2 gap-3 text-sm">
+                  <div className="flex items-center gap-2">
+                    <Calendar className="h-4 w-4 text-amber-700" />
+                    <span>{proposedDate.toLocaleDateString()}</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Clock className="h-4 w-4 text-amber-700" />
+                    <span>{proposedDate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
+                  </div>
+                </div>
+              )}
+              {proposedReason && (
+                <div className="mt-2 text-xs text-amber-700">
+                  <span className="font-medium">Reason:</span> {proposedReason}
+                </div>
+              )}
+            </div>
+          )}
           
           {/* Appointment Type */}
           {(appointment.appointmentType || slot?.type) && (

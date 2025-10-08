@@ -12,6 +12,7 @@ const Row = ({ icon: Icon, label, value }) => (
   </div>
 );
 
+
 const AppointmentQuickDialog = ({
   open,
   onClose,
@@ -32,6 +33,7 @@ const AppointmentQuickDialog = ({
     : `Dr. ${who?.userId?.firstName || who?.firstName || ''} ${who?.userId?.lastName || who?.lastName || ''}`;
   const status = appointment.status;
   const isDoctorReschedule = !!(appointment?.pendingReschedule?.active && appointment?.pendingReschedule?.proposedBy === 'doctor');
+  const isPatientReschedule = !!(appointment?.pendingReschedule?.active && appointment?.pendingReschedule?.proposedBy === 'patient');
   const isPatientCancelProposal = typeof appointment?.reasonForVisit === 'string' && appointment.reasonForVisit.toLowerCase().includes('cancellation request');
   const proposedDate = appointment?.pendingReschedule?.proposedDateTime ? new Date(appointment.pendingReschedule.proposedDateTime) : null;
   const proposedReason = appointment?.pendingReschedule?.reason || '';
@@ -43,9 +45,23 @@ const AppointmentQuickDialog = ({
 
   const actions = [];
   if (userType === 'doctor') {
-    if (status === 'pending') {
-      actions.push({ label: 'Approve', onClick: () => { onApprove?.(appointment._id); onClose?.(); }, icon: CheckCircle, variant: 'default' });
-      actions.push({ label: 'Reject', onClick: () => { onReject?.(appointment._id); onClose?.(); }, icon: XCircle, variant: 'outline' });
+    if (isPatientReschedule) {
+      // Doctor deciding on patient's reschedule proposal
+      actions.push({ 
+        label: 'Approve', 
+        onClick: () => { onApprove?.(appointment); onClose?.(); }, 
+        icon: CheckCircle, 
+        variant: 'default' 
+      });
+      actions.push({ 
+        label: 'Reject', 
+        onClick: () => { onReject?.(appointment); onClose?.(); }, 
+        icon: XCircle, 
+        variant: 'outline' 
+      });
+    } else if (status === 'pending') {
+      actions.push({ label: 'Approve', onClick: () => { onApprove?.(appointment); onClose?.(); }, icon: CheckCircle, variant: 'default' });
+      actions.push({ label: 'Reject', onClick: () => { onReject?.(appointment); onClose?.(); }, icon: XCircle, variant: 'outline' });
     }
     if (status === 'confirmed' || status === 'rescheduled') {
       actions.push({ label: 'Reschedule', onClick: () => { onReschedule?.(appointment); onClose?.(); }, icon: Edit, variant: 'outline' });
@@ -64,8 +80,8 @@ const AppointmentQuickDialog = ({
     }
     if (isDoctorReschedule) {
       // Only show Approve/Reject when doctor has proposed a reschedule
-      actions.push({ label: 'Approve', onClick: () => { onApprove?.(appointment._id); onClose?.(); }, icon: CheckCircle, variant: 'default' });
-      actions.push({ label: 'Reject', onClick: () => { onReject?.(appointment._id); onClose?.(); }, icon: XCircle, variant: 'outline' });
+      actions.push({ label: 'Approve', onClick: () => { onApprove?.(appointment); onClose?.(); }, icon: CheckCircle, variant: 'default' });
+      actions.push({ label: 'Reject', onClick: () => { onReject?.(appointment); onClose?.(); }, icon: XCircle, variant: 'outline' });
     }
   }
 

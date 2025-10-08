@@ -72,86 +72,58 @@ const RescheduleModal = ({
       setError('');
 
       if (userType === 'patient') {
+        // For patients: use direct reschedule if selecting an existing slot
+        if (selectedSlot) {
+          // Patient proposes a new slot; doctor must approve
+          await appointmentsAPI.proposeReschedule(appointment._id, {
+            proposedSlotId: selectedSlot._id,
+            reason: reason || 'Patient requested reschedule'
+          });
+          toast.success('Reschedule request sent to doctor for approval.');
+        } else if (newDateTime) {
+          // Propose a custom datetime (requires doctor approval)
+          const iso = new Date(newDateTime).toISOString();
+          await appointmentsAPI.proposeReschedule(appointment._id, {
+            proposedDateTime: iso,
+            reason: reason || 'Patient requested custom reschedule time'
+          });
+          toast.success('Custom time reschedule request sent to doctor for approval.');
+        } else {
+          setError('Please select an available slot or specify a custom time.');
+          return;
+        }
+      } else {
+        // For doctors: always use proposal system (requires patient approval)
         if (!reason || !reason.trim()) {
           setError('Please provide a reason for rescheduling.');
           return;
         }
-        // For patients: propose a reschedule on the existing appointment
-        if (!selectedSlot && !newDateTime) {
-          setError('Please select a slot or request a specific time');
+        
+        if (selectedSlot) {
+          await appointmentsAPI.proposeReschedule(appointment._id, {
+            proposedSlotId: selectedSlot._id,
+            reason,
+          });
+          toast.success('Reschedule proposal sent to patient for approval.');
+        } else if (newDateTime) {
+          const iso = new Date(newDateTime).toISOString();
+          await appointmentsAPI.proposeReschedule(appointment._id, {
+            proposedDateTime: iso,
+            reason,
+          });
+          toast.success('Custom time reschedule proposal sent to patient for approval.');
+        } else {
+          setError('Please select a slot or specify a custom time.');
           return;
         }
-        if (selectedSlot) {
-          await appointmentsAPI.proposeReschedule(appointment._id, {
-            proposedSlotId: selectedSlot._id,
-            reason,
-          });
-        } else if (newDateTime) {
-          const iso = new Date(newDateTime).toISOString();
-          await appointmentsAPI.proposeReschedule(appointment._id, {
-            proposedDateTime: iso,
-            reason,
-          });
-        }
-        toast.success('Reschedule request sent. The doctor will approve or reject.');
-        emitNotificationsRefresh();
-        onReschedule?.();
-        handleClose();
-        return;
       }
-
-      // For doctors: propose reschedule (requires patient approval)
-      if (!reason || !reason.trim()) {
-        setError('Please provide a reason for rescheduling.');
-        return;
-      }
-      if (!selectedSlot && !newDateTime) {
-        setError('Please select a slot or specify a time');
-        return;
-      }
-      try {
-        if (selectedSlot) {
-          await appointmentsAPI.proposeReschedule(appointment._id, {
-            proposedSlotId: selectedSlot._id,
-            reason,
-          });
-        } else if (newDateTime) {
-          const iso = new Date(newDateTime).toISOString();
-          await appointmentsAPI.proposeReschedule(appointment._id, {
-            proposedDateTime: iso,
-            reason,
-          });
-        }
-      } catch (e) {
-        // Backend route not available: fall back to creating a pending request via bookAppointment
-        if (selectedSlot) {
-          await appointmentsAPI.bookAppointment({
-            slotId: selectedSlot._id,
-            forAppointmentId: appointment._id,
-            requestedBy: 'doctor',
-            patientId: appointment.patientId?._id || appointment.patientId,
-            reasonForVisit: `Doctor reschedule request for appointment ${appointment._id}${reason ? `: ${reason}` : ''}`,
-          });
-        } else if (newDateTime) {
-          const iso = new Date(newDateTime).toISOString();
-          await appointmentsAPI.bookAppointment({
-            doctorId: appointment.doctorId?._id || appointment.doctorId,
-            patientId: appointment.patientId?._id || appointment.patientId,
-            requestedDateTime: iso,
-            forAppointmentId: appointment._id,
-            requestedBy: 'doctor',
-            reasonForVisit: `Doctor reschedule request for appointment ${appointment._id}${reason ? `: ${reason}` : ''}`,
-            appointmentType: 'consultation',
-          });
-        }
-      }
-      toast.success('Reschedule proposal sent to patient for approval');
+      
       emitNotificationsRefresh();
       onReschedule?.();
       handleClose();
     } catch (e) {
       console.error('Error rescheduling appointment:', e);
-      setError(e.message);
+      setError(e.message || 'An error occurred while rescheduling the appointment.');
     } finally {
       setLoading(false);
     }
@@ -255,10 +227,18 @@ const RescheduleModal = ({
 
           {/* Reason for Reschedule */}
           <div className="space-y-2">
-            <Label htmlFor="reason">Reason for rescheduling (optional)</Label>
+            <Label htmlFor="reason">
+              Reason for rescheduling 
+              {userType === 'doctor' && <span className="text-red-500">*</span>}
+              {userType === 'patient' && <span className="text-muted-foreground">(optional)</span>}
+            </Label>
             <Textarea
               id="reason"
-              placeholder="Please provide a reason for rescheduling this appointment..."
+              placeholder={
+                userType === 'doctor' 
+                  ? "Please provide a reason for rescheduling this appointment..." 
+                  : "Optionally provide a reason for rescheduling..."
+              }
               value={reason}
               onChange={(e) => setReason(e.target.value)}
               rows={3}
@@ -377,13 +357,11 @@ const RescheduleModal = ({
                           return;
                         }
                         const iso = new Date(newDateTime).toISOString();
-                        await appointmentsAPI.bookAppointment({
-                          doctorId: appointment.doctorId?._id || appointment.doctorId,
-                          requestedDateTime: iso,
-                          reasonForVisit: `Reschedule request for appointment ${appointment._id}${reason ? `: ${reason}` : ''}`,
-                          appointmentType: 'consultation'
+                        await appointmentsAPI.proposeReschedule(appointment._id, {
+                          proposedDateTime: iso,
+                          reason: reason || 'Patient requested custom reschedule time'
                         });
-                        toast.success('Reschedule request sent for your custom time');
+                        toast.success('Custom time reschedule request sent to doctor for approval.');
                         emitNotificationsRefresh();
                         onReschedule?.();
                         handleClose();

@@ -468,6 +468,8 @@ router.put('/profile/me', authMiddleware, async (req, res) => {
     const body = req.body || {};
     const set = {};
 
+    console.log('🏥 PUT /healthcare-facilities/profile/me incoming body:', JSON.stringify(body));
+
     // Safe shallow fields
     if (typeof body.name === 'string') set.name = body.name;
     if (typeof body.description === 'string') set.description = body.description;
@@ -508,15 +510,24 @@ router.put('/profile/me', authMiddleware, async (req, res) => {
     if (body.media && typeof body.media === 'object') set.media = body.media;
     if (Array.isArray(body.paymentMethods)) set.paymentMethods = body.paymentMethods;
 
+    console.log('🏥 Computed $set for update:', JSON.stringify(set));
+
     let updated = await HealthcareFacility.findOneAndUpdate(
       { userId: req.user._id },
       { $set: set },
       { new: true, runValidators: true }
     );
 
-    // Fallback: auto-link by email if missing
+    // Fallbacks: auto-link by email, then alias used on registration
     if (!updated) {
-      const byEmail = await HealthcareFacility.findOne({ email: req.user.email });
+      let byEmail = await HealthcareFacility.findOne({ email: req.user.email });
+      if (!byEmail) {
+        const parts = (req.user.email || '').split('@');
+        const local = (parts[0] || 'facility').replace(/[^a-zA-Z0-9+._-]/g, '');
+        const domain = parts[1] || 'example.com';
+        const alias = `${local}+facility-${String(req.user._id).slice(-6)}@${domain}`.toLowerCase();
+        byEmail = await HealthcareFacility.findOne({ email: alias });
+      }
       if (byEmail) {
         await HealthcareFacility.updateOne({ _id: byEmail._id }, { $set: { userId: req.user._id, ...set } });
         updated = await HealthcareFacility.findById(byEmail._id);
@@ -524,6 +535,9 @@ router.put('/profile/me', authMiddleware, async (req, res) => {
     }
 
     if (!updated) return res.status(404).json({ success: false, message: 'Facility profile not found' });
+
+    console.log('🏥 Updated facility document:', JSON.stringify({ id: updated._id, name: updated.name, address: updated.address }));
+
     res.json({ success: true, data: updated });
   } catch (error) {
     console.error('Facility update error:', error);
