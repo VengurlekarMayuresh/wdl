@@ -49,11 +49,12 @@ const PatientAppointmentsPage = () => {
       setRatingById(rb);
       setFeedbackById(fb);
       
-      // Categorize appointments (slot may be null for custom requests)
+      // Categorize appointments and include reschedule proposals
       const now = new Date();
+      const isMyReschedulePending = (apt) => !!(apt?.pendingReschedule?.active && apt?.pendingReschedule?.proposedBy === 'patient');
       const categorized = {
-        pending: allAppointments.filter(apt => apt.status === 'pending'),
-        upcoming: allAppointments.filter(apt => apt.status === 'confirmed' && new Date(apt.appointmentDate) > now),
+        pending: allAppointments.filter(apt => apt.status === 'pending' || isMyReschedulePending(apt)),
+        upcoming: allAppointments.filter(apt => apt.status === 'confirmed' && new Date(apt.appointmentDate) > now && !isMyReschedulePending(apt)),
         completed: allAppointments.filter(apt => apt.status === 'completed'),
         cancelled: allAppointments.filter(apt => apt.status === 'cancelled' || apt.status === 'rejected')
       };
@@ -157,6 +158,9 @@ const PatientAppointmentsPage = () => {
     const safeDate = dateTime ? formatDateTime(dateTime) : { date: 'TBD', time: '' };
     const { date, time } = safeDate;
     const hasDoctorProposal = !!(appointment?.pendingReschedule?.active && appointment?.pendingReschedule?.proposedBy === 'doctor');
+    const hasPatientProposal = !!(appointment?.pendingReschedule?.active && appointment?.pendingReschedule?.proposedBy === 'patient');
+    const proposedDate = appointment?.pendingReschedule?.proposedDateTime ? new Date(appointment.pendingReschedule.proposedDateTime) : null;
+    const proposedReason = appointment?.pendingReschedule?.reason || '';
     
     return (
       <Card onClick={onClick} className="cursor-pointer border shadow-sm hover:shadow-md transition-all duration-200">
@@ -193,7 +197,10 @@ const PatientAppointmentsPage = () => {
             <div className="flex items-center gap-2">
               {getStatusBadge(appointment.status)}
               {hasDoctorProposal && (
-                <Badge variant="warning" className="text-xs">Reschedule requested</Badge>
+                <Badge variant="warning" className="text-xs">Doctor requested new time</Badge>
+              )}
+              {hasPatientProposal && (
+                <Badge variant="warning" className="text-xs">Reschedule pending approval</Badge>
               )}
             </div>
           </div>
@@ -214,6 +221,30 @@ const PatientAppointmentsPage = () => {
               <p className="text-sm text-muted-foreground">
                 <span className="font-medium">Reason:</span> {appointment.reasonForVisit}
               </p>
+            </div>
+          )}
+
+          {/* My reschedule proposal details */}
+          {hasPatientProposal && (
+            <div className="mb-2 p-3 bg-amber-50 border border-amber-200 rounded-md">
+              <div className="text-sm font-medium text-amber-800">You requested a new time</div>
+              {proposedDate && (
+                <div className="grid grid-cols-2 gap-2 mt-2 text-sm">
+                  <div className="flex items-center gap-2">
+                    <Calendar className="h-4 w-4 text-amber-700" />
+                    <span>{proposedDate.toLocaleDateString()}</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Clock className="h-4 w-4 text-amber-700" />
+                    <span>{proposedDate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
+                  </div>
+                </div>
+              )}
+              {proposedReason && (
+                <div className="mt-2 text-xs text-amber-700">
+                  <span className="font-medium">Reason:</span> {proposedReason}
+                </div>
+              )}
             </div>
           )}
 
@@ -422,7 +453,8 @@ const PatientAppointmentsPage = () => {
           userType="patient"
           onReschedule={(apt) => setRescheduleModal({ isOpen: true, appointment: apt })}
           onCancel={(id) => handleCancelAppointment(id)}
-          onApprove={async (appointmentId) => {
+          onApprove={async (appointmentOrId) => {
+            const appointmentId = typeof appointmentOrId === 'object' ? appointmentOrId._id : appointmentOrId;
             try {
               await appointmentsAPI.decideReschedule(appointmentId, 'approved');
               toast.success('Reschedule approved');
@@ -442,7 +474,8 @@ const PatientAppointmentsPage = () => {
               }
             }
           }}
-          onReject={async (appointmentId) => {
+          onReject={async (appointmentOrId) => {
+            const appointmentId = typeof appointmentOrId === 'object' ? appointmentOrId._id : appointmentOrId;
             try {
               await appointmentsAPI.decideReschedule(appointmentId, 'rejected', 'Patient rejected reschedule');
               toast.success('Reschedule request rejected');

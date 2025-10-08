@@ -378,7 +378,7 @@ appointmentSchema.methods.reschedule = async function(newSlotId, newDate, resche
   // Update with new details
   this.slotId = newSlotId;
   this.appointmentDate = newDate;
-  this.status = 'rescheduled';
+  // Don't automatically set status to 'rescheduled' - let the caller decide the status
   
   return await this.save();
 };
