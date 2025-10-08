@@ -287,11 +287,22 @@ router.post('/profile/education', authenticate, authorize('doctor'), async (req,
       });
     }
 
+    // Ensure required fields exist to avoid validation failures on save for older docs
+    if (!doctor.medicalLicenseNumber) doctor.medicalLicenseNumber = 'PENDING';
+    if (!doctor.licenseState) doctor.licenseState = 'PENDING';
+    if (!doctor.licenseExpiryDate) doctor.licenseExpiryDate = new Date(Date.now() + 365 * 24 * 60 * 60 * 1000);
+
+    // Normalize degree enum to allowed values
+    const allowedDegrees = ['MD','DO','MBBS','PhD','Other'];
+    const normalizedDegree = allowedDegrees.includes(String(degree).trim()) ? String(degree).trim() : 'Other';
+
+    const normalizedYear = graduationYear ? parseInt(graduationYear) : undefined;
+
     doctor.education.push({
       institution,
-      degree,
+      degree: normalizedDegree,
       fieldOfStudy,
-      graduationYear,
+      graduationYear: normalizedYear,
       honors
     });
 

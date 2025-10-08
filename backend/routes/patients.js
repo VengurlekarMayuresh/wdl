@@ -75,8 +75,8 @@ router.put('/profile/me', authenticate, authorize('patient'), async (req, res) =
 
     const patient = await Patient.findOneAndUpdate(
       { userId: req.user._id },
-      updates,
-      { new: true, runValidators: true }
+      { $set: updates, $setOnInsert: { userId: req.user._id } },
+      { new: true, runValidators: true, upsert: true, setDefaultsOnInsert: true }
     ).populate({
       path: 'userId',
       select: 'firstName lastName email phone dateOfBirth gender address profilePicture profilePictureCloudinaryId bio'

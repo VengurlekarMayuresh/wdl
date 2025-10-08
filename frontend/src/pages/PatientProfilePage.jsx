@@ -26,6 +26,7 @@ import {
 import { useAuth } from "@/contexts/AuthContext";
 import ProfileImageUpload from "@/components/ui/ProfileImageUpload";
 import { patientAPI, authAPI, appointmentsAPI } from "@/services/api";
+import { toast } from "@/components/ui/sonner";
 
 const PatientProfilePage = () => {
   const { user, isAuthenticated, logout, refreshUser } = useAuth();
@@ -258,11 +259,11 @@ const PatientProfilePage = () => {
                       <Button 
                         variant={isEditing ? "default" : "outline"} 
                         size="sm"
-                        onClick={async () => {
+onClick={async () => {
                           if (isEditing) {
-                            // Save edits: currently only emergency contact via patient profile
+                            // Save edits: emergency contact + contact info
                             try {
-                              if (emergencyEdit) {
+                              if (emergencyEdit?.name || emergencyEdit?.phone) {
                                 await patientAPI.updateProfile({
                                   emergencyContacts: [{
                                     name: emergencyEdit.name,
@@ -285,8 +286,11 @@ const PatientProfilePage = () => {
                               // Re-fetch patient profile to reflect updates
                               const profile = await patientAPI.getProfile();
                               setPatient(profile);
+                              toast.success('Profile updated successfully');
                             } catch (e) {
                               console.error(e);
+                              toast.error(e?.message || 'Failed to update profile');
+                              return; // keep editing mode on failure
                             }
                           }
                           setIsEditing(!isEditing);
