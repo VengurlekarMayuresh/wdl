@@ -71,6 +71,11 @@ const corsOptions = {
       .map(s => s.trim())
       .filter(Boolean);
 
+    // Include Render-provided external URL automatically if available
+    if (process.env.RENDER_EXTERNAL_URL) {
+      configured.push(process.env.RENDER_EXTERNAL_URL);
+    }
+
     // If wildcard present, allow all
     if (configured.includes('*')) return callback(null, true);
 
