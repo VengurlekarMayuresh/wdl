@@ -759,9 +759,15 @@ const DoctorSelfProfilePage = () => {
     }
     
     try {
+      // Normalize degree to backend enum
+      const allowedDegrees = ['MD','DO','MBBS','PhD','Other'];
+      const degreeNormalized = allowedDegrees.includes(String(educationForm.degree).trim())
+        ? String(educationForm.degree).trim()
+        : 'Other';
+
       // Map UI form to backend schema keys
       const payload = {
-        degree: educationForm.degree,
+        degree: degreeNormalized,
         institution: educationForm.institution,
         graduationYear: educationForm.year ? parseInt(educationForm.year) : undefined,
       };
@@ -895,9 +901,9 @@ const DoctorSelfProfilePage = () => {
       </div>
 
       {/* Doctor Profile Header */}
-      <section className="py-8">
+      <section className="py-12 bg-gradient-to-b from-primary/5 to-transparent">
         <div className="max-w-6xl mx-auto px-4 sm:px-6">
-          <Card className="shadow-medium border-0">
+          <Card className="shadow-strong border-0 ring-1 ring-primary/10">
             <CardContent className="p-8">
               <div className="grid lg:grid-cols-4 gap-8">
                 
@@ -1020,9 +1026,10 @@ const DoctorSelfProfilePage = () => {
                 {/* Doctor Information */}
                 <div className="lg:col-span-3">
                   <div className="mb-6">
-<h1 className="text-3xl font-bold text-foreground mb-2">
+<h1 className="text-4xl font-extrabold text-foreground tracking-tight mb-2">
                       {user?.firstName ? `Dr. ${user.firstName} ${user.lastName || ''}`.trim() : doctorData.name}
                     </h1>
+                    <p className="text-muted-foreground mb-3">Trusted healthcare provider on MASSS</p>
                     <div className="flex flex-wrap items-center gap-4 mb-4">
                       <Badge variant="secondary" className="text-primary font-medium">
                         <Stethoscope className="h-3 w-3 mr-1" />
