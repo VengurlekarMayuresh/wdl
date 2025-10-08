@@ -14,7 +14,6 @@ import DoctorSelfProfilePage from "./pages/DoctorSelfProfilePage";
 import PatientProfilePage from "./pages/PatientProfilePage";
 import Profile from "./pages/Profile";
 import HealthyLivingPage from "./pages/HealthyLivingPage";
-import TestSlotsPage from "./pages/TestSlotsPage";
 import DoctorAppointmentsPage from "./pages/DoctorAppointmentsPage";
 import PatientAppointmentsPage from "./pages/PatientAppointmentsPage";
 import DoctorPatientsPage from "./pages/DoctorPatientsPage";
@@ -56,7 +55,6 @@ const App = () => (
             <Route path="/security-privacy" element={<SecurityPrivacyPage />} />
             <Route path="/healthy-living" element={<HealthyLivingPage />} />
             <Route path="/blog/:id" element={<BlogPostPage />} />
-            <Route path="/test-slots" element={<TestSlotsPage />} />
             <Route path="/about" element={<AboutUs />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />

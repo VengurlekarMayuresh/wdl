@@ -128,21 +128,16 @@ const createIndexes = async () => {
     );
     
     // Create indexes for Doctor model
-    await mongoose.connection.collection('doctors').createIndex(
-      { medicalLicenseNumber: 1 }, 
-      { background: true, unique: true }
-    );
-    
+    // Note: unique index on medicalLicenseNumber is already declared in schema via `{ unique: true }`.
+    // Avoid creating duplicate indexes here to prevent Mongoose warnings.
     await mongoose.connection.collection('doctors').createIndex(
       { primarySpecialty: 1 }, 
       { background: true }
     );
     
     // Create indexes for Patient model
-    await mongoose.connection.collection('patients').createIndex(
-      { patientId: 1 }, 
-      { background: true, unique: true }
-    );
+    // Note: unique index on patientId is already declared in schema via `{ unique: true }`.
+    // Avoid creating duplicate indexes here to prevent Mongoose warnings.
     
     // Create indexes for CareProvider model
     await mongoose.connection.collection('careproviders').createIndex(
