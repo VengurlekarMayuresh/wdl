@@ -21,9 +21,6 @@ const DoctorProfilePage = () => {
   const [showBookingModal, setShowBookingModal] = useState(false);
   const [selectedTab, setSelectedTab] = useState('overview');
   const [reviews, setReviews] = useState([]);
-  const [eligibleReview, setEligibleReview] = useState(null); // { appointmentId, rating, feedback }
-  const [myRating, setMyRating] = useState(0);
-  const [myFeedback, setMyFeedback] = useState('');
   const [doctorSlots, setDoctorSlots] = useState([]);
   const [slotsLoading, setSlotsLoading] = useState(false);
   const [selectedSlot, setSelectedSlot] = useState(null);
@@ -46,26 +43,6 @@ const DoctorProfilePage = () => {
           setReviews(r);
         } catch (re) {
           console.log('Reviews load error', re.message);
-        }
-        // If patient, check for completed appointment with this doctor
-        if (isAuthenticated && user?.userType === 'patient') {
-          try {
-            const myApts = await appointmentsAPI.getMyAppointments('all');
-            const withThisDoc = (myApts || []).filter(a => (a.doctorId?._id || a.doctorId) === id && a.status === 'completed')
-              .sort((a,b) => new Date(b.appointmentDate) - new Date(a.appointmentDate));
-            if (withThisDoc.length > 0) {
-              const latest = withThisDoc[0];
-              setEligibleReview({ appointmentId: latest._id, rating: latest.appointmentRating || 0, feedback: latest.patientFeedback || '' });
-              setMyRating(latest.appointmentRating || 0);
-              setMyFeedback(latest.patientFeedback || '');
-            } else {
-              setEligibleReview(null);
-              setMyRating(0);
-              setMyFeedback('');
-            }
-          } catch (re) {
-            console.log('Failed loading patient appointments for review', re.message);
-          }
         }
       } catch (e) {
         setError(e.message || 'Failed to load doctor');
@@ -329,49 +306,6 @@ const DoctorProfilePage = () => {
               </CardContent>
             </Card>
 
-            {/* If logged-in patient with completed appointment, show inline review box */}
-            {isAuthenticated && user?.userType === 'patient' && eligibleReview && (
-              <Card className="border-none shadow-soft">
-                <CardHeader>
-                  <CardTitle>Your Review</CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-3">
-                  <div className="flex items-center gap-2">
-                    <span className="text-sm">Rate:</span>
-                    {[1,2,3,4,5].map(star => (
-                      <button
-                        key={star}
-                        onClick={() => setMyRating(star)}
-                        className={`text-2xl ${star <= (myRating || 0) ? 'text-yellow-500' : 'text-muted-foreground'}`}
-                        aria-label={`Rate ${star}`}
-                      >
-                        {star <= (myRating || 0) ? '★' : '☆'}
-                      </button>
-                    ))}
-                  </div>
-                  <textarea
-                    rows={3}
-                    className="w-full px-3 py-2 border rounded-md text-sm"
-                    placeholder="Share your feedback (optional)"
-                    value={myFeedback}
-                    onChange={(e) => setMyFeedback(e.target.value)}
-                  />
-                  <div className="flex justify-end">
-                    <Button size="sm" onClick={async () => {
-                      try {
-                        if (!myRating) { toast.error('Please select a rating'); return; }
-                        await reviewsAPI.submitAppointmentReview(eligibleReview.appointmentId, myRating, myFeedback);
-                        toast.success('Review submitted');
-                        // Refresh reviews and doctor header stats
-                        try { const r = await doctorAPI.getReviews(id); setReviews(r); } catch {}
-                      } catch (e) {
-                        toast.error(e.message || 'Failed to submit review');
-                      }
-                    }}>Submit Review</Button>
-                  </div>
-                </CardContent>
-              </Card>
-            )}
 
             {/* Tabs */}
             <Tabs value={selectedTab} onValueChange={setSelectedTab} className="w-full">
