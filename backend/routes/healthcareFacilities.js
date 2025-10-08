@@ -24,8 +24,8 @@ router.get('/', async (req, res) => {
       sortBy = 'rating.overall'
     } = req.query;
 
-    // Build filter object
-    const filter = { status: 'active' };
+    // Build filter object (treat missing status as active)
+    const filter = { $or: [ { status: 'active' }, { status: { $exists: false } } ] };
 
     if (type) {
       if (Array.isArray(type)) {

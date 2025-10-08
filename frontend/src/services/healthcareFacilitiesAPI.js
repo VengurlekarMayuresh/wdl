@@ -1,6 +1,7 @@
 import axios from 'axios';
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000/api';
+// Align with the rest of the app: use VITE_API_URL and default to same-origin /api in production
+const API_BASE_URL = import.meta.env.VITE_API_URL || (import.meta.env.DEV ? 'http://localhost:5000/api' : '/api');
 
 const api = axios.create({
   baseURL: `${API_BASE_URL}/healthcare-facilities`,
@@ -23,7 +24,7 @@ api.interceptors.response.use(
   (response) => response,
   (error) => {
     if (error.response?.status === 401) {
-      localStorage.removeItem('authToken');
+      localStorage.removeItem('token');
       window.location.href = '/login';
     }
     return Promise.reject(error);
@@ -193,6 +194,26 @@ export const healthcareFacilitiesAPI = {
       const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
       return R * c; // Distance in km
     },
+
+    // Format a readable facility type string
+    formatType: (type, subCategory) => {
+      if (!type && !subCategory) return 'Facility';
+      const map = {
+        pharmacy: 'Pharmacy',
+        clinic: 'Clinic',
+        hospital: 'Hospital',
+        lab: 'Laboratory',
+        diagnostic_center: 'Diagnostic Center',
+        primary_care: 'Primary Care',
+      };
+      const base = map[type] || (type ? type.replace(/_/g, ' ') : 'Facility');
+      if (subCategory && typeof subCategory === 'string') {
+        const sc = subCategory.replace(/_/g, ' ');
+        return `${base} • ${sc}`;
+      }
+      return base;
+    },
+    
 
     // Format operating hours
     formatOperatingHours: (operatingHours, is24x7) => {
