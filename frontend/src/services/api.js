@@ -1,36 +1,21 @@
 // Robust API URL configuration
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+const API_BASE_URL = import.meta.env.VITE_API_URL || (import.meta.env.DEV ? 'http://localhost:5000/api' : '/api');
+const DEBUG = !!import.meta.env.DEV;
 
-console.log('🔗 API Base URL:', API_BASE_URL);
-console.log('🌐 Environment:', import.meta.env.MODE);
-console.log('📦 All env vars:', import.meta.env);
+if (DEBUG) {
+  console.log('🔗 API Base URL:', API_BASE_URL);
+  console.log('🌐 Environment:', import.meta.env.MODE);
+}
 
 // Helper function to make API requests with improved error handling
 async function apiRequest(endpoint, options = {}) {
   const token = localStorage.getItem('token');
   const fullUrl = `${API_BASE_URL}${endpoint}`;
-  
-  console.log(`🚀 Making API request to: ${fullUrl}`);
-  console.log(`📋 Request options:`, { 
-    method: options.method || 'GET',
-    headers: options.headers,
-    hasBody: !!options.body 
-  });
-  
-  // Log the actual request body for debugging
-  if (options.body) {
-    console.log(`📦 Request body (raw):`, options.body);
-    try {
-      const parsedBody = JSON.parse(options.body);
-      console.log(`📦 Request body (parsed):`, parsedBody);
-      console.log(`📧 Email being sent:`, parsedBody.email);
-      console.log(`🔑 Password being sent:`, parsedBody.password ? '[PRESENT]' : '[MISSING]');
-      console.log(`🔑 Password length:`, parsedBody.password ? parsedBody.password.length : 0);
-    } catch (e) {
-      console.log(`⚠️ Could not parse request body as JSON`);
-    }
+
+  if (DEBUG) {
+    console.log(`🚀 API request:`, { url: fullUrl, method: options.method || 'GET' });
   }
-  
+
   const config = {
     headers: {
       'Content-Type': 'application/json',
@@ -43,12 +28,12 @@ async function apiRequest(endpoint, options = {}) {
   };
 
   try {
-    console.log(`⏳ Fetching: ${fullUrl}`);
     const response = await fetch(fullUrl, config);
-    
-    console.log(`📡 Response status: ${response.status} ${response.statusText}`);
-    console.log(`📋 Response headers:`, Object.fromEntries(response.headers.entries()));
-    
+
+    if (DEBUG) {
+      console.log(`📡 Response: ${response.status} ${response.statusText}`);
+    }
+
     // Handle different content types
     let data;
     const contentType = response.headers.get('content-type');
@@ -58,9 +43,6 @@ async function apiRequest(endpoint, options = {}) {
     } else {
       data = { message: await response.text() };
     }
-    
-    console.log(`📦 Response data:`, data);
-    
     if (!response.ok) {
       const errorMessage = data.message || `HTTP ${response.status}: ${response.statusText}`;
       console.error(`❌ API Error: ${errorMessage}`);

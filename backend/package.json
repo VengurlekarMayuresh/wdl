@@ -7,13 +7,10 @@
   "scripts": {
     "start": "node server.js",
     "dev": "nodemon server.js",
-    "generate-data": "node scripts/generateData.js",
-    "load-static-data": "node loadStaticData.js",
-    "load-complete-data": "node loadCompleteData.js",
-    "seed-careproviders": "node scripts/seedCareProviders.js",
-    "seed:facilities": "node scripts/seedHealthcareFacilities.js",
-    "migrate:facilities:frontend-shape": "node scripts/migrateFacilitiesToFrontendShape.js",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start:prod": "set NODE_ENV=production&& node server.js",
+    "build:frontend": "npm --prefix ..\\frontend run build",
+    "build:all": "npm --prefix ..\\frontend ci && npm --prefix ..\\frontend run build && npm ci",
+    "serve:prod": "npm run build:frontend && npm run start:prod"
   },
   "keywords": [
     "healthcare",

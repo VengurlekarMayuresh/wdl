@@ -35,9 +35,6 @@ import {
 import { healthcareFacilitiesAPI } from '@/services/healthcareFacilitiesAPI';
 import FacilityDetailsModal from '@/components/facility/FacilityDetailsModal';
 import { doctorAPI } from '@/services/api';
-import mockPrimaryCareData from '@/data/mockPrimaryCareData';
-import mockHospitalsData from '@/data/mockHospitalsData';
-import mockClinicsData from '@/data/mockClinicsData';
 
 // Default specialty care categories structure
 const defaultSpecialtyCategories = [

@@ -8,6 +8,7 @@ import dotenv from 'dotenv';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import { connectDatabase, createIndexes, healthCheck } from './config/database.js';
+import crypto from 'crypto';
 
 // Resolve backend directory and load .env explicitly
 const __filename = fileURLToPath(import.meta.url);
@@ -41,55 +42,47 @@ app.use(helmet({
       imgSrc: ["'self'", "data:", "https:"],
     },
   },
-  crossOriginEmbedderPolicy: false
+  crossOriginEmbedderPolicy: false,
+  hsts: (process.env.NODE_ENV || 'development') === 'production'
 }));
 
-// CORS configuration - more permissive for development
+// Attach a request id for tracing
+app.use((req, res, next) => {
+  const id = req.headers['x-request-id'] || (crypto.randomUUID ? crypto.randomUUID() : Math.random().toString(36).slice(2));
+  res.setHeader('X-Request-Id', id);
+  req.id = id;
+  next();
+});
+
+// CORS configuration
 const corsOptions = {
   origin: function (origin, callback) {
-    console.log(`🌐 CORS request from origin: ${origin || 'no-origin'}`);
-    
+    const isProd = (process.env.NODE_ENV || 'development') === 'production';
+
     // Allow requests with no origin (mobile apps, curl, etc.)
     if (!origin) {
-      console.log('✅ Allowing request with no origin');
       return callback(null, true);
     }
 
-    // In development, be very permissive
-    if ((process.env.NODE_ENV || 'development') !== 'production') {
-      console.log('✅ Development mode: allowing all origins');
+    // In development, allow all origins for easier local testing
+    if (!isProd) {
       return callback(null, true);
     }
 
-    const allowedOrigins = [
-      process.env.CLIENT_URL || 'http://localhost:3000',
-      'http://localhost:3000',
-      'http://localhost:5173', // Vite default port
-      'http://localhost:8080', // Alternative Vite port  
-      'http://localhost:8081', // Alternative Vite port
-      'http://127.0.0.1:3000',
-      'http://127.0.0.1:5173',
-      'http://127.0.0.1:8080',
-      'http://127.0.0.1:8081',
-      // Add more permissive patterns
-      'http://localhost',
-      'http://127.0.0.1'
-    ];
+    // In production, restrict to env-configured origins (comma-separated)
+    const configured = (process.env.ALLOWED_ORIGINS || process.env.CLIENT_URL || '')
+      .split(',')
+      .map(s => s.trim())
+      .filter(Boolean);
 
-    // Check if origin matches any allowed origin or is a localhost variation
-    const isAllowed = allowedOrigins.some(allowed => 
-      origin === allowed || 
-      origin.startsWith('http://localhost:') || 
-      origin.startsWith('http://127.0.0.1:')
-    );
+    // Default: allow localhost in production only if explicitly configured
+    const allowedOrigins = configured;
 
+    const isAllowed = allowedOrigins.some((allowed) => origin === allowed);
     if (isAllowed) {
-      console.log(`✅ CORS allowing origin: ${origin}`);
       return callback(null, true);
-    } else {
-      console.warn(`❌ CORS blocked origin: ${origin}`);
-      return callback(new Error('Not allowed by CORS'));
     }
+    return callback(new Error('Not allowed by CORS'));
   },
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'HEAD', 'PATCH'],
@@ -102,7 +95,7 @@ const corsOptions = {
     'Access-Control-Allow-Credentials',
     'Access-Control-Allow-Origin'
   ],
-  exposedHeaders: ['X-New-Token'], // For token refresh
+  exposedHeaders: ['X-New-Token'],
   preflightContinue: false,
   optionsSuccessStatus: 204
 };
@@ -238,14 +231,28 @@ app.get('/api', (req, res) => {
   });
 });
 
-// Catch 404 and forward to error handler
-app.use('*', (req, res) => {
+// Catch 404s only for API routes; let frontend handle client routes
+app.use('/api/*', (req, res) => {
   res.status(404).json({
     success: false,
     message: `Route ${req.originalUrl} not found`,
     suggestion: 'Check the API documentation for available endpoints'
   });
 });
+
+// In production, serve frontend build and use SPA fallback
+if ((process.env.NODE_ENV || 'development') === 'production') {
+  const clientDist = path.join(__dirname, '..', 'frontend', 'dist');
+  // Cache static assets; index.html should not be aggressively cached
+  app.use(express.static(clientDist, { maxAge: '1d', index: false }));
+  app.get('*', (req, res) => {
+    if (req.path.startsWith('/api')) {
+      return res.status(404).json({ success: false, message: `Route ${req.originalUrl} not found` });
+    }
+    res.setHeader('Cache-Control', 'no-store');
+    res.sendFile(path.join(clientDist, 'index.html'));
+  });
+}
 
 // Global error handler
 app.use((err, req, res, next) => {
