@@ -44,9 +44,12 @@ router.get('/', async (req, res) => {
     const query = {};
 
     // In production, only show approved and verified doctors publicly
+    // Be more permissive if data is missing these flags (treat missing as approved/verified)
     if (isProd) {
-      query.status = 'approved';
-      query.isVerified = true;
+      query.$and = [
+        { $or: [ { status: 'approved' }, { status: { $exists: false } } ] },
+        { $or: [ { isVerified: true }, { isVerified: { $exists: false } } ] }
+      ];
     }
 
     if (specialty) {
@@ -113,9 +116,11 @@ router.get('/:id', async (req, res) => {
       });
     }
 
-    // Only restrict in production environments
+    // Only restrict in production environments, but treat missing flags as OK
     if (process.env.NODE_ENV === 'production') {
-      if (doctor.status !== 'approved' || !doctor.isVerified) {
+      const statusOk = (doctor.status === 'approved') || (doctor.status === undefined || doctor.status === null);
+      const verifiedOk = (doctor.isVerified === true) || (doctor.isVerified === undefined || doctor.isVerified === null);
+      if (!(statusOk && verifiedOk)) {
         return res.status(403).json({
           success: false,
           message: 'Doctor profile is not available for public viewing'

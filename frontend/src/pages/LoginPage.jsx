@@ -191,9 +191,9 @@ const LoginPage = () => {
         
         // Redirect based on user type
         if (currentUser?.userType === 'doctor') {
-          navigate('/doctor-dashboard');
+          navigate('/doctor-profile');
         } else if (currentUser?.userType === 'patient') {
-          navigate('/profile');
+          navigate('/patient-profile');
         } else if (currentUser?.userType === 'careprovider') {
           navigate('/careprovider-profile');
         } else if (currentUser?.userType === 'facility') {

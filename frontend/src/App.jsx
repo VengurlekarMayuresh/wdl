@@ -3,6 +3,7 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { ProtectedRoute } from "@/components/auth/ProtectedRoute";
 import { AuthProvider } from "./contexts/AuthContext";
 import HomePage from "./pages/HomePage";
 import LoginPage from "./pages/LoginPage";
@@ -41,17 +42,17 @@ const App = () => (
             <Route path="/find-care" element={<FindCarePage />} />
             <Route path="/doctor/:id" element={<DoctorProfilePage />} />
             <Route path="/doctors" element={<DoctorsPage />} />
-<Route path="/doctor-dashboard" element={<DoctorDashboard />} />
-            <Route path="/doctor-profile" element={<DoctorSelfProfilePage />} />
-            <Route path="/profile" element={<Profile />} />
-            <Route path="/patient-profile" element={<PatientProfilePage />} />
-            <Route path="/careprovider-profile" element={<CareProviderProfilePage />} />
-            <Route path="/facility-profile" element={<FacilityProfilePage />} />
+<Route path="/doctor-dashboard" element={<ProtectedRoute allow={['doctor']}><DoctorDashboard /></ProtectedRoute>} />
+            <Route path="/doctor-profile" element={<ProtectedRoute allow={['doctor']}><DoctorSelfProfilePage /></ProtectedRoute>} />
+            <Route path="/profile" element={<ProtectedRoute allow={['patient','doctor','careprovider','facility']}><Profile /></ProtectedRoute>} />
+            <Route path="/patient-profile" element={<ProtectedRoute allow={['patient']}><PatientProfilePage /></ProtectedRoute>} />
+            <Route path="/careprovider-profile" element={<ProtectedRoute allow={['careprovider']}><CareProviderProfilePage /></ProtectedRoute>} />
+            <Route path="/facility-profile" element={<ProtectedRoute allow={['facility']}><FacilityProfilePage /></ProtectedRoute>} />
             <Route path="/facility-login" element={<FacilityLoginPage />} />
-            <Route path="/doctor-appointments" element={<DoctorAppointmentsPage />} />
-            <Route path="/patient-appointments" element={<PatientAppointmentsPage />} />
-            <Route path="/doctor-patients" element={<DoctorPatientsPage />} />
-            <Route path="/doctor-patient/:patientId" element={<DoctorPatientProfilePage />} />
+            <Route path="/doctor-appointments" element={<ProtectedRoute allow={['doctor']}><DoctorAppointmentsPage /></ProtectedRoute>} />
+            <Route path="/patient-appointments" element={<ProtectedRoute allow={['patient']}><PatientAppointmentsPage /></ProtectedRoute>} />
+            <Route path="/doctor-patients" element={<ProtectedRoute allow={['doctor']}><DoctorPatientsPage /></ProtectedRoute>} />
+            <Route path="/doctor-patient/:patientId" element={<ProtectedRoute allow={['doctor']}><DoctorPatientProfilePage /></ProtectedRoute>} />
             <Route path="/security-privacy" element={<SecurityPrivacyPage />} />
             <Route path="/healthy-living" element={<HealthyLivingPage />} />
             <Route path="/blog/:id" element={<BlogPostPage />} />
