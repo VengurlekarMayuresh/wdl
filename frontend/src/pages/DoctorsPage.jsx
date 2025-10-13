@@ -25,7 +25,10 @@ import { doctorAPI } from '@/services/api';
 const DoctorCard = ({ doctor, onClick, navigate }) => {
   const doctorName = `Dr. ${doctor?.userId?.firstName || ''} ${doctor?.userId?.lastName || ''}`.trim();
   const doctorImage = doctor?.userId?.profilePicture;
-  const location = doctor?.userId?.address ? `${doctor.userId.address.city || ''}, ${doctor.userId.address.state || ''}`.trim() : 'Location not specified';
+  // Build dynamic address from available fields without stray commas
+  const addr = doctor?.userId?.address || {};
+  const addressParts = [addr.street, addr.city, addr.state, addr.zipCode].filter((p) => !!p && String(p).trim().length > 0);
+  const address = addressParts.length > 0 ? addressParts.join(', ') : 'Address not provided';
   const phone = doctor?.userId?.phone;
   return (
     <Card className="cursor-pointer hover:shadow-lg transition-shadow" onClick={onClick}>
@@ -72,7 +75,9 @@ const DoctorCard = ({ doctor, onClick, navigate }) => {
                   </span>
                 </div>
                 <div className="text-lg font-semibold text-green-600">
-                  ₹{doctor?.consultationFee || 500}
+                  {doctor?.consultationFee !== undefined && doctor?.consultationFee !== null 
+                    ? `₹${doctor.consultationFee}` 
+                    : 'Fee not set'}
                 </div>
               </div>
             </div>
@@ -84,11 +89,7 @@ const DoctorCard = ({ doctor, onClick, navigate }) => {
               </div>
               <div className="flex items-center gap-2 text-sm text-muted-foreground">
                 <MapPin className="h-4 w-4" />
-                <span>{location}</span>
-              </div>
-              <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                <Clock className="h-4 w-4" />
-                <span>{doctor?.isAcceptingNewPatients ? 'Accepting Patients' : 'Not Available'}</span>
+                <span>{address}</span>
               </div>
             </div>
 

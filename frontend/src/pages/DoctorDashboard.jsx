@@ -948,17 +948,6 @@ const DoctorDashboard = () => {
                 <div className="grid md:grid-cols-2 gap-6">
                   <div className="flex items-center justify-between">
                     <div>
-                      <Label className="text-sm font-medium">Accepting New Patients</Label>
-                      <p className="text-sm text-muted-foreground">
-                        Allow new patients to book appointments
-                      </p>
-                    </div>
-                    <Badge variant={profile.isAcceptingNewPatients ? "default" : "secondary"}>
-                      {profile.isAcceptingNewPatients ? "Yes" : "No"}
-                    </Badge>
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <div>
                       <Label className="text-sm font-medium">Telemedicine</Label>
                       <p className="text-sm text-muted-foreground">
                         Offer virtual consultations

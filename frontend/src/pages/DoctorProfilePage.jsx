@@ -275,11 +275,6 @@ const DoctorProfilePage = () => {
                           <span className="font-medium">{doctor.averageRating?.toFixed?.(1) ?? 'N/A'}</span>
                           <span className="text-xs text-muted-foreground">({doctor.totalReviews || 0})</span>
                         </Badge>
-                        {doctor.isAcceptingNewPatients && (
-                          <Badge variant="success" className="flex items-center">
-                            <CheckCircle className="h-4 w-4 mr-1" /> Accepting new patients
-                          </Badge>
-                        )}
                         <Button variant="medical" onClick={handleBookAppointment}>
                           <Calendar className="h-4 w-4 mr-2" /> Book Appointment
                         </Button>

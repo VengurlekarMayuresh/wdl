@@ -334,13 +334,6 @@ const CareProviderProfilePage = () => {
                             : 'No reviews yet'}
                         </span>
                       </div>
-                      <div>
-                        <Badge 
-                          variant={profile.preferences?.acceptsNewClients ? "default" : "secondary"}
-                        >
-                          {profile.preferences?.acceptsNewClients ? 'Accepting New Clients' : 'Not Accepting New Clients'}
-                        </Badge>
-                      </div>
                     </div>
                   </div>
                 </div>
@@ -646,27 +639,9 @@ const CareProviderProfilePage = () => {
                       })}
                     </div>
                   </div>
-                  <div className="flex items-center space-x-2">
-                  <input
-                    type="checkbox"
-                    id="acceptsNewClients"
-                    checked={formData.acceptsNewClients}
-                    onChange={(e) => handleInputChange('acceptsNewClients', e.target.checked)}
-                    className="rounded"
-                  />
-                  <label htmlFor="acceptsNewClients">
-                    Currently accepting new clients
-                  </label>
                 </div>
-              </div>
               ) : (
-                <Badge 
-                  variant={profile.preferences?.acceptsNewClients ? "default" : "secondary"}
-                >
-                  {profile.preferences?.acceptsNewClients 
-                    ? 'Accepting New Clients' 
-                    : 'Not Accepting New Clients'}
-                </Badge>
+                <div />
               )}
             </CardContent>
           </Card>

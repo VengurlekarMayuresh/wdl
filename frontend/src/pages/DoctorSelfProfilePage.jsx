@@ -297,7 +297,8 @@ const DoctorSelfProfilePage = () => {
     education: [],
     certifications: [],
     specializations: [],
-    workingHours: {}
+    workingHours: {},
+    consultationFee: 0
   });
 
 
@@ -358,6 +359,7 @@ const DoctorSelfProfilePage = () => {
             certifications: user.profile?.certificationsList || user.profile?.certifications || [],
             specializations: user.profile?.areasOfExpertise || user.profile?.specializations || [],
             workingHours: user.profile?.workingHours || {},
+            consultationFee: user.profile?.consultationFee ?? prev.consultationFee,
             // Map languagesSpoken -> simple string list for UI
             languages: Array.isArray(user.profile?.languagesSpoken)
               ? user.profile.languagesSpoken.map(ls => ls.language).filter(Boolean)
@@ -375,7 +377,6 @@ const DoctorSelfProfilePage = () => {
         phone: user.phone || "",
         specialty: user.profile?.primarySpecialty || user.primarySpecialty || "",
         subSpecialty: user.profile?.subSpecialty || user.profile?.secondarySpecialty || "",
-        bio: user.profile?.bio || user.bio || "",
         experience: user.profile?.yearsOfExperience || user.yearsOfExperience || "",
         location: user.profile?.hospitalName || user.profile?.clinicName || "",
         address: (() => {
@@ -388,7 +389,7 @@ const DoctorSelfProfilePage = () => {
         languages: Array.isArray(user.profile?.languagesSpoken)
           ? user.profile.languagesSpoken.map(ls => ls.language).filter(Boolean)
           : (user.profile?.languages || ["English"]),
-        acceptingNew: user.profile?.isAcceptingNewPatients ?? true
+        consultationFee: user.profile?.consultationFee ?? ''
       });
     } else {
       console.log('⏳ User not available yet - user:', !!user, 'isAuthenticated:', isAuthenticated);
@@ -628,25 +629,41 @@ const DoctorSelfProfilePage = () => {
       await authAPI.updateProfile(userUpdate);
       
       // Update doctor-specific profile with all the fields your backend expects
-      const doctorProfileUpdate = {
-        primarySpecialty: profileForm.specialty,
-        secondarySpecialty: profileForm.subSpecialty,
-        bio: profileForm.bio,
-        yearsOfExperience: parseInt(profileForm.experience) || 0,
-        hospitalName: profileForm.location,
-        clinicName: profileForm.location, // Also try clinicName
-        isAcceptingNewPatients: profileForm.acceptingNew,
-        // Persist languages to backend schema: languagesSpoken
-        languagesSpoken: Array.isArray(profileForm.languages)
-          ? profileForm.languages.map(l => ({ language: l, proficiency: 'conversational' }))
-          : [],
-        // Add current specializations from the form
-        areasOfExpertise: doctorData.specializations || [],
-        // Add current certifications
-        certificationsList: doctorData.certifications || [],
-        // Add working hours
-        workingHours: doctorData.workingHours || {}
-      };
+      // Build minimal, validated payload to avoid backend validation errors
+      const doctorProfileUpdateRaw = {};
+      if (profileForm.specialty && profileForm.specialty.trim()) {
+        doctorProfileUpdateRaw.primarySpecialty = profileForm.specialty.trim();
+      }
+      if (profileForm.subSpecialty && profileForm.subSpecialty.trim()) {
+        doctorProfileUpdateRaw.secondarySpecialties = [profileForm.subSpecialty.trim()];
+      }
+      const exp = parseInt(profileForm.experience);
+      if (!isNaN(exp) && exp >= 0) {
+        doctorProfileUpdateRaw.yearsOfExperience = exp;
+      }
+      if (profileForm.consultationFee !== '' && profileForm.consultationFee !== undefined) {
+        const cf = parseFloat(profileForm.consultationFee);
+        if (!isNaN(cf) && cf >= 0) doctorProfileUpdateRaw.consultationFee = cf;
+      }
+      const langs = Array.isArray(profileForm.languages)
+        ? profileForm.languages
+            .map(l => (typeof l === 'string' ? l.trim() : ''))
+            .filter(Boolean)
+        : [];
+      if (langs.length > 0) {
+        doctorProfileUpdateRaw.languagesSpoken = langs.map(l => ({ language: l, proficiency: 'conversational' }));
+      }
+      if (Array.isArray(doctorData.specializations) && doctorData.specializations.length > 0) {
+        doctorProfileUpdateRaw.areasOfExpertise = doctorData.specializations;
+      }
+      if (Array.isArray(doctorData.certifications) && doctorData.certifications.length > 0) {
+        doctorProfileUpdateRaw.certificationsList = doctorData.certifications;
+      }
+      if (doctorData.workingHours && typeof doctorData.workingHours === 'object') {
+        doctorProfileUpdateRaw.workingHours = doctorData.workingHours;
+      }
+
+      const doctorProfileUpdate = doctorProfileUpdateRaw;
       
       console.log('🏥 Updating doctor profile:', doctorProfileUpdate);
       
@@ -676,7 +693,9 @@ const DoctorSelfProfilePage = () => {
         location: profileForm.location,
         address: profileForm.address,
         languages: profileForm.languages,
-        acceptingNew: profileForm.acceptingNew
+        consultationFee: (profileForm.consultationFee !== '' && profileForm.consultationFee !== undefined)
+          ? parseFloat(profileForm.consultationFee)
+          : prev.consultationFee
       }));
       
       // Refresh user data
@@ -981,12 +1000,6 @@ const DoctorSelfProfilePage = () => {
                         />
                       </div>
                       
-                      {doctorData.acceptingNew && (
-                        <Badge className="absolute -bottom-2 left-1/2 -translate-x-1/2 bg-green-500 hover:bg-green-600">
-                          <CheckCircle className="h-3 w-3 mr-1" />
-                          Accepting New Patients
-                        </Badge>
-                      )}
                     </div>
                     
                     <div className="space-y-3 mt-6">
@@ -1003,12 +1016,11 @@ const DoctorSelfProfilePage = () => {
                             phone: user?.phone || "",
                             specialty: doctorData.specialty || "",
                             subSpecialty: doctorData.subSpecialty || "",
-                            bio: doctorData.about || "",
                             experience: doctorData.experience.replace(/\+?\s*years?/i, '') || "",
                             location: doctorData.location || "",
                             address: doctorData.address || "",
                             languages: doctorData.languages || ["English"],
-                            acceptingNew: doctorData.acceptingNew
+                            consultationFee: (doctorData.consultationFee ?? '').toString()
                           });
                           setEditingSection('profile');
                         }}
@@ -1039,6 +1051,14 @@ const DoctorSelfProfilePage = () => {
                         <Star className="h-4 w-4 fill-current" />
                         <span className="font-medium">{doctorData.rating}</span>
                         <span className="text-muted-foreground">({doctorData.reviews} reviews)</span>
+                      </div>
+                      <div className="ml-auto text-right">
+                        <div className="text-sm text-muted-foreground">Consultation Fee</div>
+                        <div className="text-lg font-semibold text-green-600">
+                          {doctorData.consultationFee !== undefined && doctorData.consultationFee !== null
+                            ? `₹${doctorData.consultationFee}`
+                            : 'Not set'}
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -1109,16 +1129,22 @@ const DoctorSelfProfilePage = () => {
                                 <Input type="number" min="0" value={profileForm.experience} onChange={(e) => setProfileForm(prev => ({ ...prev, experience: e.target.value }))} />
                               </div>
                               <div>
+                                <label className="text-sm font-medium">Consultation Fee (₹)</label>
+                                <Input 
+                                  type="number" 
+                                  min="0" 
+                                  step="1"
+                                  value={profileForm.consultationFee ?? ''}
+                                  onChange={(e) => setProfileForm(prev => ({ ...prev, consultationFee: e.target.value }))}
+                                />
+                              </div>
+                              <div>
                                 <label className="text-sm font-medium">Location (Clinic/Hospital)</label>
                                 <Input value={profileForm.location} onChange={(e) => setProfileForm(prev => ({ ...prev, location: e.target.value }))} />
                               </div>
                               <div className="md:col-span-2">
                                 <label className="text-sm font-medium">Address</label>
                                 <Input value={profileForm.address} onChange={(e) => setProfileForm(prev => ({ ...prev, address: e.target.value }))} placeholder="104 Main St, Phoenix, AZ 90004" />
-                              </div>
-                              <div className="md:col-span-2">
-                                <label className="text-sm font-medium">Bio</label>
-                                <Textarea rows={4} value={profileForm.bio} onChange={(e) => setProfileForm(prev => ({ ...prev, bio: e.target.value }))} />
                               </div>
                               <div className="md:col-span-2">
                                 <label className="text-sm font-medium">Languages</label>

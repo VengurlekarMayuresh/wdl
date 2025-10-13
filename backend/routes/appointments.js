@@ -775,6 +775,47 @@ router.put('/:appointmentId/status', authenticate, async (req, res) => {
     // Handle different status updates
     switch (status) {
       case 'confirmed':
+        // Ensure a slot exists and is booked when confirming a custom request without a slot
+        if (!appointment.slotId) {
+          // Validate appointmentDate
+          const targetDate = new Date(appointment.appointmentDate);
+          if (isNaN(targetDate.getTime()) || targetDate <= new Date()) {
+            return res.status(400).json({ success: false, message: 'Cannot confirm: appointment date/time is invalid or in the past' });
+          }
+
+          // Try to find an existing available slot at the same time for this doctor
+          let slot = await Slot.findOne({
+            doctorId: doctor._id,
+            dateTime: targetDate,
+            status: 'active',
+            isAvailable: true,
+            isBooked: false
+          });
+
+          if (!slot) {
+            // Create a fresh slot for this confirmation
+            const baseDuration = appointment.duration || 30;
+            const baseConsultationFee = doctor.consultationFee ?? 0;
+            slot = await Slot.create({
+              doctorId: doctor._id,
+              dateTime: targetDate,
+              duration: baseDuration,
+              consultationFee: baseConsultationFee,
+              consultationType: appointment.consultationType || 'in-person',
+              notes: 'Auto-created slot for confirming custom appointment',
+              isAvailable: true,
+              isBooked: false,
+              status: 'active'
+            });
+          }
+
+          // Book the slot and associate to appointment
+          await slot.book(appointment.patientId, appointment._id);
+          appointment.slotId = slot._id;
+          appointment.duration = slot.duration;
+          appointment.consultationFee = slot.consultationFee;
+        }
+
         await appointment.confirm();
         break;
       case 'cancelled':
@@ -1190,6 +1231,41 @@ router.post('/:appointmentId/reschedule/propose', authenticate, async (req, res)
         return res.status(400).json({ success: false, message: 'Proposed date/time must be a valid future date' });
       }
       normalizedDateTime = dt;
+
+      // If a DOCTOR proposes a raw datetime (no slot), auto-create a temporary slot so the patient can accept reliably
+      if (req.user.userType === 'doctor') {
+        // Check if an active slot already exists at that time for this doctor
+        let existingSlot = await Slot.findOne({
+          doctorId: appointment.doctorId._id,
+          dateTime: normalizedDateTime,
+          status: 'active'
+        });
+
+        if (existingSlot && !existingSlot.canBeBooked()) {
+          return res.status(400).json({ success: false, message: 'There is already a slot at the proposed time but it is not available' });
+        }
+
+        if (!existingSlot) {
+          // Create a new available slot for the proposed time
+          const baseDuration = appointment.slotId?.duration || appointment.duration || 30;
+          const baseConsultationFee = appointment.doctorId?.consultationFee ?? undefined;
+          existingSlot = await Slot.create({
+            doctorId: appointment.doctorId._id,
+            dateTime: normalizedDateTime,
+            duration: baseDuration,
+            consultationFee: baseConsultationFee !== undefined ? baseConsultationFee : 0,
+            consultationType: appointment.consultationType || 'in-person',
+            notes: 'Temporary slot created for reschedule proposal',
+            isAvailable: true,
+            isBooked: false,
+            status: 'active'
+          });
+        }
+
+        proposedSlot = existingSlot;
+        // Prefer storing a slot id to make patient approval path robust
+        proposedSlotId = existingSlot._id.toString();
+      }
     }
 
     // Store the reschedule proposal

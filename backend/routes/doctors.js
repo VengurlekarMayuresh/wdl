@@ -31,7 +31,6 @@ router.get('/', async (req, res) => {
     const {
       specialty,
       location,
-      acceptingNewPatients,
       page = 1,
       limit = 10,
       sortBy = 'averageRating',
@@ -57,9 +56,6 @@ router.get('/', async (req, res) => {
       ];
     }
 
-    if (acceptingNewPatients === 'true') {
-      query.isAcceptingNewPatients = true;
-    }
 
     // Calculate pagination
     const skip = (parseInt(page) - 1) * parseInt(limit);
@@ -172,6 +168,10 @@ router.get('/profile/me', authenticate, authorize('doctor'), async (req, res) =>
 // @access  Private (Doctor only)
 router.put('/profile/me', authenticate, authorize('doctor'), async (req, res) => {
   try {
+    const ALLOWED_SPECIALTIES = [
+      'Cardiology','Dermatology','Emergency Medicine','Endocrinology','Family Medicine','Gastroenterology','General Surgery','Gynecology','Hematology','Infectious Disease','Internal Medicine','Neurology','Neurosurgery','Obstetrics','Oncology','Ophthalmology','Orthopedics','Otolaryngology','Pediatrics','Psychiatry','Pulmonology','Radiology','Rheumatology','Urology','Other'
+    ];
+
     const allowedFields = [
       'medicalLicenseNumber',
       'licenseState',
@@ -197,8 +197,7 @@ router.put('/profile/me', authenticate, authorize('doctor'), async (req, res) =>
       'acceptsInsurance',
       'insurancesAccepted',
       'telemedicineEnabled',
-      'telemedicinePlatforms',
-      'isAcceptingNewPatients'
+      'telemedicinePlatforms'
     ];
 
     const updates = {};
@@ -208,16 +207,55 @@ router.put('/profile/me', authenticate, authorize('doctor'), async (req, res) =>
       }
     });
 
+    // Sanitize updates to avoid validation errors
+    if (typeof updates.primarySpecialty === 'string') {
+      updates.primarySpecialty = updates.primarySpecialty.trim();
+      if (!ALLOWED_SPECIALTIES.includes(updates.primarySpecialty)) {
+        updates.primarySpecialty = 'Other';
+      }
+    }
+
+    if (Array.isArray(updates.secondarySpecialties)) {
+      updates.secondarySpecialties = updates.secondarySpecialties
+        .map(s => String(s || '').trim())
+        .filter(s => ALLOWED_SPECIALTIES.includes(s));
+      if (updates.secondarySpecialties.length === 0) delete updates.secondarySpecialties;
+    }
+
+    if (Array.isArray(updates.languagesSpoken)) {
+      const PROF = ['native','fluent','conversational','basic'];
+      const cleaned = updates.languagesSpoken
+        .map(it => {
+          const lang = (typeof it === 'string') ? it : it?.language;
+          const prof = (typeof it === 'string') ? 'conversational' : (it?.proficiency || 'conversational');
+          const language = String(lang || '').trim();
+          const proficiency = PROF.includes(String(prof).trim()) ? String(prof).trim() : 'conversational';
+          return language ? { language, proficiency } : null;
+        })
+        .filter(Boolean);
+      if (cleaned.length > 0) updates.languagesSpoken = cleaned; else delete updates.languagesSpoken;
+    }
+
+    if (updates.consultationFee !== undefined) {
+      const cf = Number(updates.consultationFee);
+      if (isNaN(cf) || cf < 0) delete updates.consultationFee; else updates.consultationFee = cf;
+    }
+
+    if (updates.yearsOfExperience !== undefined) {
+      const y = parseInt(updates.yearsOfExperience);
+      if (isNaN(y) || y < 0 || y > 70) delete updates.yearsOfExperience; else updates.yearsOfExperience = y;
+    }
+
+    if (updates.licenseExpiryDate) {
+      const d = new Date(updates.licenseExpiryDate);
+      if (isNaN(d.getTime())) delete updates.licenseExpiryDate; else updates.licenseExpiryDate = d;
+    }
+
     if (Object.keys(updates).length === 0) {
       return res.status(400).json({
         success: false,
         message: 'No valid fields to update'
       });
-    }
-
-    // Parse dates if provided
-    if (updates.licenseExpiryDate) {
-      updates.licenseExpiryDate = new Date(updates.licenseExpiryDate);
     }
 
     const doctor = await Doctor.findOneAndUpdate(
