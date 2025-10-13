@@ -102,16 +102,14 @@ const FindCarePage = () => {
   const [activeTab, setActiveTab] = useState('primary-care');
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedPincode, setSelectedPincode] = useState('');
-  const [facilities, setFacilities] = useState([]);
+  const [allFacilities, setAllFacilities] = useState([]);
   const [filteredFacilities, setFilteredFacilities] = useState([]);
   const [loading, setLoading] = useState(false);
   const [selectedFacility, setSelectedFacility] = useState(null);
   const [showFacilityModal, setShowFacilityModal] = useState(false);
   const [specialtyCategories, setSpecialtyCategories] = useState(defaultSpecialtyCategories);
-  // Facilities pagination
+  // Client-side pagination
   const [page, setPage] = useState(1);
-  const [total, setTotal] = useState(0);
-  const [hasMore, setHasMore] = useState(false);
   const pageSize = 10;
   // Specialty care state
   const [selectedSpecialty, setSelectedSpecialty] = useState(null);
@@ -125,13 +123,15 @@ const FindCarePage = () => {
 
   // Load facilities on component mount and when activeTab or page changes
   useEffect(() => {
+    setPage(1); // reset to first page when tab changes
     if (activeTab === 'primary-care') {
       loadFacilitiesFromDB('primary_care');
     } else if (activeTab === 'specialty-care') {
-      // When opening specialty care, show categories and load counts; reset selection
       setSelectedSpecialty(null);
       setSpecialtyDoctors([]);
       loadSpecialtyDoctorCounts();
+      setAllFacilities([]);
+      setFilteredFacilities([]);
     } else if (activeTab === 'hospitals') {
       loadFacilitiesFromDB('hospital');
     } else if (activeTab === 'clinics') {
@@ -139,56 +139,62 @@ const FindCarePage = () => {
     } else if (activeTab === 'pharmacies') {
       loadFacilitiesFromDB('pharmacy');
     }
-  }, [activeTab, page, selectedPincode, searchQuery]);
+  }, [activeTab]);
 
-  // Filter facilities based on search and pincode
+  // Filter facilities based on search and pincode (client-side across ALL fetched pages)
   useEffect(() => {
-    let filtered = facilities;
+    let filtered = allFacilities;
 
     if (searchQuery) {
-      filtered = filtered.filter(facility =>
-        facility.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        healthcareFacilitiesAPI.utils.formatType(facility.type, facility.subCategory)
-          .toLowerCase().includes(searchQuery.toLowerCase()) ||
-        facility.services?.some(service => 
-          service.name.toLowerCase().includes(searchQuery.toLowerCase())
-        )
-      );
+      const q = searchQuery.toLowerCase();
+      filtered = filtered.filter(facility => {
+        const nameMatch = (facility.name || '').toLowerCase().includes(q);
+        const typeMatch = healthcareFacilitiesAPI.utils
+          .formatType(facility.type, facility.subCategory)
+          .toLowerCase()
+          .includes(q);
+        const servicesMatch = Array.isArray(facility.services) && facility.services.some(s => (s.name || '').toLowerCase().includes(q));
+        const addr = facility.address || {};
+        const cityMatch = (addr.city || '').toLowerCase().includes(q);
+        const stateMatch = (addr.state || '').toLowerCase().includes(q);
+        const areaMatch = (addr.area || '').toLowerCase().includes(q);
+        return nameMatch || typeMatch || servicesMatch || cityMatch || stateMatch || areaMatch;
+      });
     }
 
     if (selectedPincode) {
       filtered = filtered.filter(facility =>
-        facility.address?.pincode?.includes(selectedPincode)
+        (facility.address?.pincode || '').toString().includes(selectedPincode)
       );
     }
 
     setFilteredFacilities(filtered);
-  }, [searchQuery, selectedPincode, facilities]);
+    setPage(1); // reset to first page on any filter change
+  }, [searchQuery, selectedPincode, allFacilities]);
 
   const loadFacilitiesFromDB = async (type) => {
     try {
       setLoading(true);
-      const params = {
-        type,
-        limit: pageSize,
-        skip: (page - 1) * pageSize,
-      };
-      // Apply server-side filters where supported
-      if (selectedPincode) params.pincode = selectedPincode;
-      if (searchQuery) params.search = searchQuery;
-
-      const resp = await healthcareFacilitiesAPI.getAll(params);
-      const list = resp.data || resp; // service may return wrapped
-      setFacilities(list);
-      setFilteredFacilities(list);
-      setTotal(resp.total ?? list.length);
-      setHasMore(resp.hasMore ?? list.length === pageSize);
+      const batch = 100;
+      let skip = 0;
+      let all = [];
+      while (true) {
+        const params = { type, limit: batch, skip };
+        const resp = await healthcareFacilitiesAPI.getAll(params);
+        const list = resp.data || resp || [];
+        all = all.concat(Array.isArray(list) ? list : []);
+        if (!list || list.length < batch) break;
+        skip += batch;
+      }
+      setAllFacilities(all);
+      // Initialize filtered to all items for the current tab
+      setFilteredFacilities(all);
+      setPage(1);
     } catch (error) {
       console.error('Error loading facilities:', error);
-      setFacilities([]);
+      setAllFacilities([]);
       setFilteredFacilities([]);
-      setTotal(0);
-      setHasMore(false);
+      setPage(1);
     } finally {
       setLoading(false);
     }
@@ -348,10 +354,7 @@ const FindCarePage = () => {
             {loading ? 'Loading...' : `${filteredFacilities.length} medical facilities found`}
           </span>
         </div>
-        <Button variant="outline" size="sm">
-          <Navigation className="h-4 w-4 mr-2" />
-          Sort by distance
-        </Button>
+        <div />
       </div>
 
       {/* Loading State */}
@@ -364,7 +367,9 @@ const FindCarePage = () => {
       {/* Medical Facilities List */}
       {!loading && (
         <div className="grid gap-6">
-          {filteredFacilities.length > 0 ? filteredFacilities.map((facility) => (
+          {filteredFacilities.length > 0 ? filteredFacilities
+            .slice((page - 1) * pageSize, (page - 1) * pageSize + pageSize)
+            .map((facility) => (
             <Card 
               key={facility._id} 
               className="cursor-pointer hover:shadow-lg transition-shadow"
@@ -456,8 +461,8 @@ const FindCarePage = () => {
           {/* Pagination */}
           <div className="flex items-center justify-between pt-2">
             <Button variant="outline" size="sm" disabled={page === 1} onClick={() => setPage(p => Math.max(1, p - 1))}>Prev</Button>
-            <div className="text-sm text-muted-foreground">Page {page}{total ? ` of ${Math.max(1, Math.ceil(total / pageSize))}` : ''}</div>
-            <Button variant="outline" size="sm" disabled={!hasMore} onClick={() => setPage(p => p + 1)}>Next</Button>
+            <div className="text-sm text-muted-foreground">Page {page} of {Math.max(1, Math.ceil(filteredFacilities.length / pageSize))}</div>
+            <Button variant="outline" size="sm" disabled={(page * pageSize) >= filteredFacilities.length} onClick={() => setPage(p => p + 1)}>Next</Button>
           </div>
         </div>
       )}

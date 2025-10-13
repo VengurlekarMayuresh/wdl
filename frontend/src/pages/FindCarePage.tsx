@@ -59,8 +59,9 @@ const FindCarePage: React.FC = () => {
         setSpecialties(specs);
 
         // Fetch doctors list
-        const ds = await doctorAPI.list({ limit: 20 }).catch(() => []);
-        setDoctors(Array.isArray(ds) ? ds : []);
+        const ds = await doctorAPI.list({ limit: 50 }).catch(() => ({ doctors: [] } as any));
+        const list = (ds as any)?.doctors || (ds as any)?.data?.doctors || [];
+        setDoctors(Array.isArray(list) ? list : []);
       } catch (e: any) {
         setError(e.message || 'Failed to load care providers');
       } finally {
@@ -71,12 +72,28 @@ const FindCarePage: React.FC = () => {
   }, []);
 
   const filteredDoctors = useMemo(() => {
-    const q = searchTerm.toLowerCase();
-    return (doctors || []).filter((d: any) => {
-      const name = `${d.firstName || ''} ${d.lastName || ''}`.trim();
-      const specialty = d.primarySpecialty || d.specialty || '';
-      return name.toLowerCase().includes(q) || specialty.toLowerCase().includes(q);
-    }).map((d: any) => {
+    const q = (searchTerm || '').toLowerCase().trim();
+    const lq = (selectedLocation || '').toLowerCase().trim();
+
+    return (doctors || [])
+      .filter((d: any) => {
+        const user = d.userId || {};
+        const name = `${d.firstName || user.firstName || ''} ${d.lastName || user.lastName || ''}`.trim().toLowerCase();
+        const specialty = (d.primarySpecialty || d.specialty || '').toLowerCase();
+        const city = String(user?.address?.city || '').toLowerCase();
+        const state = String(user?.address?.state || '').toLowerCase();
+
+        const matchesSearch = q
+          ? name.includes(q) || specialty.includes(q)
+          : true;
+
+        const matchesLocation = lq
+          ? city.includes(lq) || state.includes(lq)
+          : true;
+
+        return matchesSearch && matchesLocation;
+      })
+      .map((d: any) => {
       const rawId = d._id || d.id || d?.userId?._id || d?.userId?.id;
       const id = rawId ? String(rawId) : '';
       const user = d.userId || {};
@@ -94,7 +111,6 @@ const FindCarePage: React.FC = () => {
         image: finalImage,
         nextAvailable: d.nextAvailable || '',
         languages: d.languages || user.languages || ['English'],
-        acceptingNew: d.isAcceptingNewPatients ?? true,
       });
     });
   }, [doctors, searchTerm]);
@@ -198,9 +214,6 @@ const FindCarePage: React.FC = () => {
                       className={`${viewMode === 'list' ? 'h-full w-48' : 'h-48 w-full'} object-cover bg-muted`}
                       onError={(e) => { (e.currentTarget as HTMLImageElement).src = pickFallbackImage(doctor.id); }}
                     />
-                    {doctor.acceptingNew && (
-                      <Badge className="absolute top-3 left-3 bg-green-500 hover:bg-green-600">Accepting New Patients</Badge>
-                    )}
                   </div>
 
                   {/* Doctor Info */}

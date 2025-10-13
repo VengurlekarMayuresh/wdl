@@ -185,11 +185,12 @@ router.post('/register', rateLimitAuth(10, 60 * 60 * 1000), async (req, res) => 
         }
         case 'doctor':
           // Doctor requires additional information, so we create a basic profile
+          // IMPORTANT: use a unique temporary license number to avoid unique index conflicts
           profile = await Doctor.create({
             userId: user._id,
-            // These will need to be updated later by the doctor
-            medicalLicenseNumber: 'PENDING',
-            licenseState: 'PENDING', 
+            // Temporary unique license placeholder; doctor must update later
+            medicalLicenseNumber: `TEMP-${String(user._id).slice(-8)}-${Date.now()}`,
+            licenseState: 'UNSET', 
             licenseExpiryDate: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000), // 1 year from now
             primarySpecialty: 'Other',
             status: 'pending'
