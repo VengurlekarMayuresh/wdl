@@ -4,6 +4,7 @@ import Slot from '../models/Slot.js';
 import Appointment from '../models/Appointment.js';
 import Doctor from '../models/Doctor.js';
 import Patient from '../models/Patient.js';
+import emailService from '../services/email.js';
 
 const router = express.Router();
 
@@ -496,6 +497,9 @@ router.post('/', authenticate, authorize('patient'), async (req, res) => {
 
       // Auto-confirm the appointment since it's a doctor-created slot
       await appointment.confirm();
+
+      // Notify both parties
+      try { await emailService.notifyAppointmentConfirmed(appointment); } catch {}
       
       const populatedAppointment = await Appointment.findById(appointment._id)
         .populate('doctorId', 'primarySpecialty')
@@ -551,6 +555,9 @@ router.post('/', authenticate, authorize('patient'), async (req, res) => {
       });
 
       await appointment.save();
+
+      // Notify doctor of new request
+      try { await emailService.notifyAppointmentRequested(appointment); } catch {}
 
       const populatedAppointment = await Appointment.findById(appointment._id)
         .populate('doctorId', 'primarySpecialty');
@@ -817,6 +824,7 @@ router.put('/:appointmentId/status', authenticate, async (req, res) => {
         }
 
         await appointment.confirm();
+        try { await emailService.notifyAppointmentConfirmed(appointment); } catch {}
         break;
       case 'cancelled':
       case 'rejected':
@@ -834,9 +842,11 @@ router.put('/:appointmentId/status', authenticate, async (req, res) => {
         if (slot) {
           await slot.cancelBooking('doctor', reason || 'Appointment cancelled/rejected');
         }
+        try { await emailService.notifyAppointmentStatus(appointment, status, { reason }); } catch {}
         break;
       case 'completed':
         await appointment.complete(notes, diagnosis, treatmentPlan);
+        try { await emailService.notifyAppointmentStatus(appointment, 'completed'); } catch {}
         break;
       default:
         appointment.status = status;
@@ -988,6 +998,8 @@ router.put('/:appointmentId/reschedule', authenticate, async (req, res) => {
     
     await appointment.save();
     console.log(`✅ Updated appointment ${appointment._id.toString().substr(-8)} with new timing`);
+
+    try { await emailService.notifyAppointmentStatus(appointment, 'rescheduled'); } catch {}
 
     // Comprehensive cleanup of any duplicate/orphaned appointments
     await cleanupDuplicateRescheduleAppointments(appointment);
@@ -1285,6 +1297,9 @@ router.post('/:appointmentId/reschedule/propose', authenticate, async (req, res)
     await appointment.save();
     console.log(`✅ ${req.user.userType} proposed reschedule for appointment ${appointment._id.toString().substr(-8)}`);
 
+    // Email notify counterparty
+    try { await emailService.notifyRescheduleProposed(appointment, normalizedDateTime, req.user.userType); } catch {}
+
     // Populate appointment data for response
     const populatedAppointment = await Appointment.findById(appointment._id)
       .populate('doctorId', 'primarySpecialty consultationFee')
@@ -1364,6 +1379,8 @@ router.put('/:appointmentId/reschedule/decision', authenticate, async (req, res)
       appointment.lastModifiedBy = req.user.userType;
       
       await appointment.save();
+
+      try { await emailService.notifyRescheduleDecision(appointment, 'rejected', reason); } catch {}
       
       const updatedAppointment = await Appointment.findById(appointment._id)
         .populate('doctorId', 'primarySpecialty consultationFee')
@@ -1464,6 +1481,8 @@ router.put('/:appointmentId/reschedule/decision', authenticate, async (req, res)
     
     await appointment.save();
     console.log(`✅ Updated appointment ${appointment._id.toString().substr(-8)} with approved timing`);
+
+    try { await emailService.notifyRescheduleDecision(appointment, 'approved'); } catch {}
 
     // Comprehensive cleanup of any duplicate/orphaned appointments
     await cleanupDuplicateRescheduleAppointments(appointment);

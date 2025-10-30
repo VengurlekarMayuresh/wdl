@@ -200,6 +200,10 @@ router.put('/profile/me', authenticate, authorize('doctor'), async (req, res) =>
       'telemedicinePlatforms'
     ];
 
+    // Optional: email update for the linked User document
+    const requestedEmailRaw = typeof req.body.email === 'string' ? req.body.email : undefined;
+    const requestedEmail = requestedEmailRaw ? String(requestedEmailRaw).toLowerCase().trim() : undefined;
+
     const updates = {};
     Object.keys(req.body).forEach(key => {
       if (allowedFields.includes(key) && req.body[key] !== undefined) {
@@ -251,13 +255,15 @@ router.put('/profile/me', authenticate, authorize('doctor'), async (req, res) =>
       if (isNaN(d.getTime())) delete updates.licenseExpiryDate; else updates.licenseExpiryDate = d;
     }
 
-    if (Object.keys(updates).length === 0) {
+    // If no doctor fields provided AND no email requested, bail
+    if (Object.keys(updates).length === 0 && !requestedEmail) {
       return res.status(400).json({
         success: false,
         message: 'No valid fields to update'
       });
     }
 
+    // Process doctor profile updates first
     const doctor = await Doctor.findOneAndUpdate(
       { userId: req.user._id },
       updates,
@@ -271,10 +277,45 @@ router.put('/profile/me', authenticate, authorize('doctor'), async (req, res) =>
       });
     }
 
+    // If email change requested, validate and apply on linked User
+    if (requestedEmail) {
+      // Basic email format
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(requestedEmail)) {
+        return res.status(400).json({ success: false, message: 'Please provide a valid email address' });
+      }
+
+      const currentEmail = doctor.userId?.email?.toLowerCase();
+      if (requestedEmail !== currentEmail) {
+        // Uniqueness across Users
+        const existingUser = await User.findOne({ email: requestedEmail, _id: { $ne: doctor.userId._id } });
+        if (existingUser) {
+          return res.status(400).json({ success: false, message: 'Email is already in use by another user' });
+        }
+        // Prevent collision with facilities
+        try {
+          const HealthcareFacility = (await import('../models/HealthcareFacility.js')).default;
+          const existingFacility = await HealthcareFacility.findOne({ email: requestedEmail });
+          if (existingFacility) {
+            return res.status(400).json({ success: false, message: 'Email is already in use by a facility account' });
+          }
+        } catch {}
+
+        await User.findByIdAndUpdate(
+          doctor.userId._id,
+          { email: requestedEmail, isEmailVerified: false },
+          { new: true, runValidators: true }
+        );
+      }
+    }
+
+    // Re-load with fresh user info
+    const updatedDoctor = await Doctor.findOne({ userId: req.user._id }).populate('userId');
+
     res.json({
       success: true,
       message: 'Doctor profile updated successfully',
-      data: { doctor }
+      data: { doctor: updatedDoctor }
     });
 
   } catch (error) {

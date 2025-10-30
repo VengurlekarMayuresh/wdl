@@ -663,6 +663,11 @@ const DoctorSelfProfilePage = () => {
         doctorProfileUpdateRaw.workingHours = doctorData.workingHours;
       }
 
+      // Include email change for linked User via doctor profile API (backend handles uniqueness)
+      if (profileForm.email && profileForm.email.trim()) {
+        doctorProfileUpdateRaw.email = profileForm.email.trim();
+      }
+
       const doctorProfileUpdate = doctorProfileUpdateRaw;
       
       console.log('🏥 Updating doctor profile:', doctorProfileUpdate);
